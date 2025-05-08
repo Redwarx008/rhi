@@ -10,7 +10,7 @@
 
 namespace rhi::impl
 {
-	// Simple LinkedList type. (See the Q&A section to understand how this
+    // Simple LinkedList type. (See the Q&A section to understand how this
 // differs from std::list).
 //
 // To use, start by declaring the class which will be contained in the linked

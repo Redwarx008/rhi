@@ -11,8 +11,8 @@
 
 namespace rhi::impl
 {
-	enum class Command
-	{
+    enum class Command
+    {
         ClearBuffer,
         BeginRenderPass,
         BeginComputePass,
@@ -43,7 +43,7 @@ namespace rhi::impl
         EndComputePass,
         EndDebugLabel,
         MapBufferAsync
-	};
+    };
 
 
     struct RenderPassColorAttachment

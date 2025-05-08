@@ -7,30 +7,30 @@
 
 namespace rhi::impl::vulkan
 {
-	class Buffer;
+    class Buffer;
 
-	struct CommandPoolAndBuffer
-	{
-		VkCommandBuffer bufferHandle = VK_NULL_HANDLE;
-		VkCommandPool poolHandle = VK_NULL_HANDLE;
-	};
+    struct CommandPoolAndBuffer
+    {
+        VkCommandBuffer bufferHandle = VK_NULL_HANDLE;
+        VkCommandPool poolHandle = VK_NULL_HANDLE;
+    };
 
-	struct CommandRecordContext
-	{
-	public:
-		CommandPoolAndBuffer commandBufferAndPool;
+    struct CommandRecordContext
+    {
+    public:
+        CommandPoolAndBuffer commandBufferAndPool;
 
-		bool needsSubmit = false;
+        bool needsSubmit = false;
 
-		std::vector<VkSemaphoreSubmitInfo> waitSemaphoreSubmitInfos;
-		std::vector<VkSemaphoreSubmitInfo> signalSemaphoreSubmitInfos;
+        std::vector<VkSemaphoreSubmitInfo> waitSemaphoreSubmitInfos;
+        std::vector<VkSemaphoreSubmitInfo> signalSemaphoreSubmitInfos;
 
-		void AddBufferBarrier(VkBufferMemoryBarrier2 barrier);
-		void AddTextureBarrier(VkImageMemoryBarrier2 barrier);
-		void EmitBarriers();
-		void Reset();
-	private:
-		std::vector<VkImageMemoryBarrier2> mImageMemoryBarriers;
-		std::vector<VkBufferMemoryBarrier2> mBufferMemoryBarriers;
-	};
+        void AddBufferBarrier(VkBufferMemoryBarrier2 barrier);
+        void AddTextureBarrier(VkImageMemoryBarrier2 barrier);
+        void EmitBarriers();
+        void Reset();
+    private:
+        std::vector<VkImageMemoryBarrier2> mImageMemoryBarriers;
+        std::vector<VkBufferMemoryBarrier2> mBufferMemoryBarriers;
+    };
 }

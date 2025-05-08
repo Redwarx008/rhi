@@ -2,8 +2,8 @@
 
 namespace rhi::impl
 {
-	bool InstanceBase::IsDebugLayerEnabled() const
-	{
-		return mDebugLayerEnabled;
-	}
+    bool InstanceBase::IsDebugLayerEnabled() const
+    {
+        return mDebugLayerEnabled;
+    }
 }

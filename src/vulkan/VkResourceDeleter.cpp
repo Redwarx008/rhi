@@ -8,10 +8,10 @@
 
 namespace rhi::impl::vulkan
 {
-	VkResourceDeleter::VkResourceDeleter(Queue* queue) : mQueue(queue) {}
+    VkResourceDeleter::VkResourceDeleter(Queue* queue) : mQueue(queue) {}
 
-	VkResourceDeleter::~VkResourceDeleter()
-	{
+    VkResourceDeleter::~VkResourceDeleter()
+    {
         ASSERT(mBuffersToDelete.Empty());
         ASSERT(mDescriptorPoolsToDelete.Empty());
         ASSERT(mFencesToDelete.Empty());
@@ -26,7 +26,7 @@ namespace rhi::impl::vulkan
         ASSERT(mBufferAllocationToDelete.Empty());
         ASSERT(mImageAllocationToDelete.Empty());
         ASSERT(mSwapchainToDelete.Empty());
-	}
+    }
 
     void VkResourceDeleter::Tick(uint64_t completedSerial)
     {

@@ -4,21 +4,21 @@
 
 namespace rhi::impl
 {
-	SwapChainBase::SwapChainBase(DeviceBase* device, SurfaceBase* surface, const SurfaceConfiguration& config) :
-		mDevice(device),
-		mSurface(surface),
-		mWidth(config.width),
-		mHeight(config.height),
-		mFormat(config.format),
-		mPresentMode(config.presentMode)
-	{
+    SwapChainBase::SwapChainBase(DeviceBase* device, SurfaceBase* surface, const SurfaceConfiguration& config) :
+        mDevice(device),
+        mSurface(surface),
+        mWidth(config.width),
+        mHeight(config.height),
+        mFormat(config.format),
+        mPresentMode(config.presentMode)
+    {
 
-	}
+    }
 
-	SwapChainBase::~SwapChainBase() {}
+    SwapChainBase::~SwapChainBase() {}
 
-	TextureFormat SwapChainBase::GetFormat() const
-	{
-		return mFormat;
-	}
+    TextureFormat SwapChainBase::GetFormat() const
+    {
+        return mFormat;
+    }
 }

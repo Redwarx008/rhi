@@ -5,24 +5,24 @@
 
 namespace rhi::impl
 {
-	class BeginRenderPassCmd;
-	class BeginComputePassCmd;
+    class BeginRenderPassCmd;
+    class BeginComputePassCmd;
 }
 
 namespace rhi::impl::vulkan
 {
-	struct CommandRecordContext;
-	class Queue;
-	class Device;
+    struct CommandRecordContext;
+    class Queue;
+    class Device;
 
-	class CommandList final : public CommandListBase
-	{
-	public:
-		static Ref<CommandList> Create(Device* device, CommandEncoder* encoder);
-		void RecordCommands(Queue* queue);
-	private:
-		explicit CommandList(Device* device, CommandEncoder* encoder);
-		void RecordRenderPass(Queue* queue, BeginRenderPassCmd* renderPassCmd);
-		void RecordComputePass(Queue* queue, BeginComputePassCmd* computePassCmd);
-	};
+    class CommandList final : public CommandListBase
+    {
+    public:
+        static Ref<CommandList> Create(Device* device, CommandEncoder* encoder);
+        void RecordCommands(Queue* queue);
+    private:
+        explicit CommandList(Device* device, CommandEncoder* encoder);
+        void RecordRenderPass(Queue* queue, BeginRenderPassCmd* renderPassCmd);
+        void RecordComputePass(Queue* queue, BeginComputePassCmd* computePassCmd);
+    };
 }

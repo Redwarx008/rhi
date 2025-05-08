@@ -32,8 +32,8 @@ namespace rhi::impl
         return *this;
     }
 
-	char* CommandAllocator::Allocate(uint32_t commandId, size_t commandSize, size_t commandAlignment)
-	{
+    char* CommandAllocator::Allocate(uint32_t commandId, size_t commandSize, size_t commandAlignment)
+    {
         assert(mCurrentPtr != nullptr);
         assert(mEndPtr != nullptr);
         assert(commandId != cEndOfBlock);
@@ -105,7 +105,7 @@ namespace rhi::impl
         }
 
         return Allocate(commandId, commandSize, commandAlignment);
-	}
+    }
 
     bool CommandAllocator::GetNewBlock(size_t minimumSize)
     {

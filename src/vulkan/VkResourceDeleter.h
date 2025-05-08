@@ -8,13 +8,13 @@
 
 namespace rhi::impl::vulkan
 {
-	class Queue;
+    class Queue;
 
-	class VkResourceDeleter
-	{
-	public:
-		explicit VkResourceDeleter(Queue* queue);
-		~VkResourceDeleter();
+    class VkResourceDeleter
+    {
+    public:
+        explicit VkResourceDeleter(Queue* queue);
+        ~VkResourceDeleter();
 
         void Tick(uint64_t completedSerial);
 
@@ -50,5 +50,5 @@ namespace rhi::impl::vulkan
 
         SerialQueue<uint64_t, Ref<RefCountedHandle<ImageAllocation>>> mImageAllocationToDelete;
         SerialQueue<uint64_t, Ref<RefCountedHandle<BufferAllocation>>> mBufferAllocationToDelete;
-	};
+    };
 }

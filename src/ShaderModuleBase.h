@@ -7,15 +7,15 @@
 
 namespace rhi::impl
 {
-	class ShaderModuleBase : public ResourceBase
-	{
-	public:
-		ResourceType GetType() const override;
-		std::string_view GetEntry() const;
-	protected:
-		explicit ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc);
-		~ShaderModuleBase();
+    class ShaderModuleBase : public ResourceBase
+    {
+    public:
+        ResourceType GetType() const override;
+        std::string_view GetEntry() const;
+    protected:
+        explicit ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc);
+        ~ShaderModuleBase();
 
-		std::string mEntry;
-	};
+        std::string mEntry;
+    };
 }

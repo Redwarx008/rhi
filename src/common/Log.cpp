@@ -40,14 +40,14 @@ namespace rhi
     }
 #endif
 
-	LogMessage::LogMessage(LogSeverity severity) : mSeverity(severity) {}
+    LogMessage::LogMessage(LogSeverity severity) : mSeverity(severity) {}
 
-	LogMessage::LogMessage(LogMessage&& other) = default;
+    LogMessage::LogMessage(LogMessage&& other) = default;
 
-	LogMessage& LogMessage::operator=(LogMessage&& other) = default;
+    LogMessage& LogMessage::operator=(LogMessage&& other) = default;
 
-	LogMessage::~LogMessage()
-	{
+    LogMessage::~LogMessage()
+    {
         std::string fullMessage = mStream.str();
 
         // If this message has been moved, its stream is empty.
@@ -71,7 +71,7 @@ namespace rhi
         // Note: we use fprintf because <iostream> includes static initializers.
         fprintf(outputStream, "%s: %s\n", severityName, fullMessage.c_str());
         fflush(outputStream);
-	}
+    }
 
     LogMessage DebugLog()
     {

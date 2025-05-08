@@ -15,8 +15,8 @@ namespace rhi::impl
 
     }
 
-	SubresourceRange SubresourceRange::MakeSingle(Aspect aspect, uint32_t baseArrayLayer, uint32_t baseMipLevel)
-	{
+    SubresourceRange SubresourceRange::MakeSingle(Aspect aspect, uint32_t baseArrayLayer, uint32_t baseMipLevel)
+    {
         SubresourceRange res;
         res.aspects = aspect;
         res.baseMipLevel = baseMipLevel;
@@ -25,7 +25,7 @@ namespace rhi::impl
         res.layerCount = 1;
 
         return res;
-	}
+    }
 
     SubresourceRange SubresourceRange::MakeFull(Aspect aspects, uint32_t layerCount, uint32_t levelCount)
     {

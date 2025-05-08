@@ -4,36 +4,36 @@
 
 namespace rhi::impl
 {
-	AdapterBase::AdapterBase(InstanceBase* instance) :
-		mInstance(instance)
-	{ }
+    AdapterBase::AdapterBase(InstanceBase* instance) :
+        mInstance(instance)
+    { }
 
-	AdapterBase::~AdapterBase() {}
+    AdapterBase::~AdapterBase() {}
 
-	void AdapterBase::APIGetInfo(AdapterInfo* info) const
-	{
-		ASSERT(info != nullptr);
-		info->apiVersion = mApiVersion;
-		info->driverVersion = mDriverVersion;
-		info->deviceID = mDeviceID;
-		info->vendorID = mVendorID;
-		info->adapterType = mAdapterType;
-		info->deviceName = mDeviceName;
-	}
+    void AdapterBase::APIGetInfo(AdapterInfo* info) const
+    {
+        ASSERT(info != nullptr);
+        info->apiVersion = mApiVersion;
+        info->driverVersion = mDriverVersion;
+        info->deviceID = mDeviceID;
+        info->vendorID = mVendorID;
+        info->adapterType = mAdapterType;
+        info->deviceName = mDeviceName;
+    }
 
-	void AdapterBase::APIGetLimits(Limits* limits) const
-	{
-		*limits = mLimits;
-	}
+    void AdapterBase::APIGetLimits(Limits* limits) const
+    {
+        *limits = mLimits;
+    }
 
-	InstanceBase* AdapterBase::APIGetInstance() const
-	{
-		Ref<InstanceBase> instance = mInstance;
-		return instance.Detach();
-	}
+    InstanceBase* AdapterBase::APIGetInstance() const
+    {
+        Ref<InstanceBase> instance = mInstance;
+        return instance.Detach();
+    }
 
-	Ref<InstanceBase> AdapterBase::GetInstance() const
-	{
-		return mInstance;
-	}
+    Ref<InstanceBase> AdapterBase::GetInstance() const
+    {
+        return mInstance;
+    }
 }
