@@ -20,8 +20,8 @@ namespace rhi::impl
             mBindSetMask.set(i);
         }
     }
-    
-    PipelineLayoutBase::~PipelineLayoutBase() {}
+
+    PipelineLayoutBase::~PipelineLayoutBase() = default;
 
     ResourceType PipelineLayoutBase::GetType() const
     {

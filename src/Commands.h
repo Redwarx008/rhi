@@ -88,7 +88,7 @@ namespace rhi::impl
         ~BeginComputePassCmd();
     };
 
-    struct ClearBufferCmd 
+    struct ClearBufferCmd
     {
         ClearBufferCmd();
         ~ClearBufferCmd();
@@ -172,7 +172,7 @@ namespace rhi::impl
     {
         BeginDebugLabelCmd();
         ~BeginDebugLabelCmd();
-        
+
         uint32_t labelLength;
         Color color;
     };
@@ -260,7 +260,7 @@ namespace rhi::impl
     };
 
 
-    struct DrawCmd 
+    struct DrawCmd
     {
         uint32_t vertexCount;
         uint32_t instanceCount;
@@ -268,7 +268,7 @@ namespace rhi::impl
         uint32_t firstInstance;
     };
 
-    struct DrawIndexedCmd 
+    struct DrawIndexedCmd
     {
         uint32_t indexCount;
         uint32_t instanceCount;
@@ -277,7 +277,7 @@ namespace rhi::impl
         uint32_t firstInstance;
     };
 
-    struct DrawIndirectCmd 
+    struct DrawIndirectCmd
     {
         DrawIndirectCmd();
         ~DrawIndirectCmd();
@@ -287,8 +287,7 @@ namespace rhi::impl
     };
 
     struct DrawIndexedIndirectCmd : DrawIndirectCmd
-    {
-    };
+    {};
 
     struct MultiDrawIndirectCmd
     {
@@ -303,8 +302,7 @@ namespace rhi::impl
     };
 
     struct MultiDrawIndexedIndirectCmd : MultiDrawIndirectCmd
-    {
-    };
+    {};
 
     struct EndRenderPassCmd
     {

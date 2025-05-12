@@ -29,17 +29,22 @@ namespace rhi::impl::vulkan
 
         void TransitionOwnership(Queue* queue, const SubresourceRange& range, Queue* recevingQueue);
         void TransitionUsageAndGetResourceBarrier(Queue* queue,
-            TextureUsage usage,
-            ShaderStage shaderStages,
-            const SubresourceRange& range);
+                                                  TextureUsage usage,
+                                                  ShaderStage shaderStages,
+                                                  const SubresourceRange& range);
         void TransitionUsageForMultiRange(Queue* queue, const SubresourceStorage<TextureSyncInfo>& syncInfos);
 
-        void TransitionUsageNow(Queue* queue, TextureUsage usage, const SubresourceRange& range, ShaderStage shaderStages = ShaderStage::None);
+        void TransitionUsageNow(Queue* queue,
+                                TextureUsage usage,
+                                const SubresourceRange& range,
+                                ShaderStage shaderStages = ShaderStage::None);
+
     protected:
         explicit Texture(Device* device, const TextureDesc& desc);
         ~Texture();
         VkImage mHandle = VK_NULL_HANDLE;
         SubresourceStorage<TextureSyncInfo> mSubresourceLastSyncInfos;
+
     private:
         bool Initialize();
         void DestroyImpl() override;
@@ -54,6 +59,7 @@ namespace rhi::impl::vulkan
     {
     public:
         static Ref<SwapChainTexture> Create(Device* device, const TextureDesc& desc, VkImage nativeImage);
+
     private:
         explicit SwapChainTexture(Device* device, const TextureDesc& desc);
         ~SwapChainTexture();
@@ -67,6 +73,7 @@ namespace rhi::impl::vulkan
         static Ref<TextureView> Create(TextureBase* texture, const TextureViewDesc& desc);
         // internal 
         VkImageView GetHandle() const;
+
     private:
         explicit TextureView(TextureBase* texture, const TextureViewDesc& desc);
         bool Initialize();

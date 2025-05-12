@@ -14,7 +14,9 @@ namespace rhi::impl
     {
     }
 
-    BindSetLayoutBase::~BindSetLayoutBase() {}
+    BindSetLayoutBase::~BindSetLayoutBase()
+    {
+    }
 
     void BindSetLayoutBase::Initialize(const BindSetLayoutDesc& desc)
     {

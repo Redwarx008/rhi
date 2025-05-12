@@ -6,7 +6,6 @@
 #include "CommandListBase.h"
 #include "common/Ref.hpp"
 #include "common/RefCounted.h"
-#include <memory>
 
 namespace rhi::impl
 {
@@ -43,7 +42,7 @@ namespace rhi::impl
             InRenderPass,
             InComputePass
         };
-        DeviceBase* mDevice;
+        DeviceBase* mDevice = nullptr;
         EncodingContext mEncodingContext;
         uint64_t mDebugLabelCount = 0;
         State mState = State::OutsideOfPass;

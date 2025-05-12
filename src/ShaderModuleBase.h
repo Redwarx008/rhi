@@ -12,8 +12,9 @@ namespace rhi::impl
     public:
         ResourceType GetType() const override;
         std::string_view GetEntry() const;
+
     protected:
-        explicit ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc);
+        explicit ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc& desc);
         ~ShaderModuleBase();
 
         std::string mEntry;

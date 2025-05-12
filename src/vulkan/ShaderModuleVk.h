@@ -15,7 +15,8 @@ namespace rhi::impl::vulkan
     public:
         static Ref<ShaderModule> Create(Device* device, const ShaderModuleDesc& desc);
         VkShaderModule GetHandle() const;
-    private: 
+
+    private:
         explicit ShaderModule(Device* device, const ShaderModuleDesc& desc);
         ~ShaderModule();
         bool Initialize(const ShaderModuleDesc& desc);

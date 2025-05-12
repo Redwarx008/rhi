@@ -11,7 +11,7 @@ namespace rhi::impl::vulkan
 {
     class BindSet;
 
-    class BindSetLayout final: public BindSetLayoutBase
+    class BindSetLayout final : public BindSetLayoutBase
     {
     public:
         static Ref<BindSetLayout> Create(DeviceBase* device, const BindSetLayoutDesc& desc);
@@ -20,7 +20,8 @@ namespace rhi::impl::vulkan
         Ref<BindSet> AllocateBindSet(const BindSetDesc& desc);
 
         void DeallocateBindSet(BindSet* bindSet,
-            DescriptorSetAllocation* descriptorSetAllocation);
+                               DescriptorSetAllocation* descriptorSetAllocation);
+
     private:
         explicit BindSetLayout(DeviceBase* device, const BindSetLayoutDesc& desc);
         ~BindSetLayout();

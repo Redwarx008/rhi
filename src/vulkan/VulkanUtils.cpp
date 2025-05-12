@@ -7,7 +7,11 @@
 
 namespace rhi::impl::vulkan
 {
-    void SetDebugNameInternal(Device* device, VkObjectType objectType, uint64_t objectHandle, const char* prefix, std::string_view name)
+    void SetDebugNameInternal(Device* device,
+                              VkObjectType objectType,
+                              uint64_t objectHandle,
+                              const char* prefix,
+                              std::string_view name)
     {
         if (!objectHandle || !device)
         {
@@ -176,13 +180,19 @@ namespace rhi::impl::vulkan
         return flags;
     }
 
-    VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayout, const Extent3D& copySize, Texture* texture, uint32_t mipLevel, Origin3D origin, Aspect aspect)
+    VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayout,
+                                                   const Extent3D& copySize,
+                                                   Texture* texture,
+                                                   uint32_t mipLevel,
+                                                   Origin3D origin,
+                                                   Aspect aspect)
     {
         VkBufferImageCopy region{};
         region.bufferOffset = dataLayout.offset;
         // In Vulkan the row length is in texels
         ASSERT(dataLayout.bytesPerRow % GetFormatInfo(texture->APIGetFormat()).bytesPerBlock == 0);
-        region.bufferRowLength = dataLayout.bytesPerRow / GetFormatInfo(texture->APIGetFormat()).bytesPerBlock * GetFormatInfo(texture->APIGetFormat()).blockSize;
+        region.bufferRowLength = dataLayout.bytesPerRow / GetFormatInfo(texture->APIGetFormat()).bytesPerBlock *
+                GetFormatInfo(texture->APIGetFormat()).blockSize;
         region.bufferImageHeight = dataLayout.rowsPerImage * GetFormatInfo(texture->APIGetFormat()).blockSize;
         region.imageSubresource.aspectMask = ImageAspectFlagsConvert(aspect);
         region.imageSubresource.mipLevel = mipLevel;

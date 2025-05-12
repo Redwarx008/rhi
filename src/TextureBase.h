@@ -29,6 +29,7 @@ namespace rhi::impl
         TextureUsage GetInternalUsage() const;
         SubresourceRange GetAllSubresources() const;
         bool IsDestoryed() const;
+
     protected:
         explicit TextureBase(DeviceBase* device, const TextureDesc& desc);
         ~TextureBase();
@@ -42,11 +43,13 @@ namespace rhi::impl
         const TextureUsage mUsage;
         const TextureUsage mInternalUsage;
         TextureFormat mFormat;
+
         union
         {
             uint32_t mDepth;
             uint32_t mArraySize;
         };
+
         bool mDestoryed = false;
 
         ResourceList mTextureViews;
@@ -67,6 +70,7 @@ namespace rhi::impl
         const SubresourceRange& GetSubresourceRange() const;
         ResourceType GetType() const override;
         TextureUsage GetInternalUsage() const;
+
     protected:
         explicit TextureViewBase(TextureBase* texture, const TextureViewDesc& desc);
         ~TextureViewBase();
@@ -96,11 +100,13 @@ namespace rhi::impl
     {
         TextureFormat format;
         const char* name;
+
         union
         {
             uint8_t bytesPerTexel;
             uint8_t bytesPerBlock;
         };
+
         uint8_t blockSize;
         bool hasRed : 1;
         bool hasGreen : 1;
@@ -109,8 +115,16 @@ namespace rhi::impl
         bool hasDepth : 1;
         bool hasStencil : 1;
         FormatComponentType componentType;
-        bool IsCompressed() const { return blockSize != 1; }
-        bool IsDeepStencil() const { return hasDepth && hasStencil; }
+
+        bool IsCompressed() const
+        {
+            return blockSize != 1;
+        }
+
+        bool IsDeepStencil() const
+        {
+            return hasDepth && hasStencil;
+        }
     };
 
 

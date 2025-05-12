@@ -14,13 +14,14 @@ namespace rhi::impl
         using pointer = value_type*;
         using reference = value_type;
 
-        explicit BitSetIterator(const std::bitset<N>& bits, size_t pos = 0)
-            : mBits(bits), mPos(find_next(pos))
+        explicit BitSetIterator(const std::bitset<N>& bits, size_t pos = 0) :
+            mBits(bits), mPos(find_next(pos))
+        {}
+
+        value_type operator*() const
         {
-
+            return mPos;
         }
-
-        value_type operator*() const { return mPos; }
 
         BitSetIterator& operator++()
         {
@@ -35,20 +36,28 @@ namespace rhi::impl
             return tmp;
         }
 
-        bool operator==(const BitSetIterator& other) const { return mPos == other.mPos; }
-        bool operator!=(const BitSetIterator& other) const { return !(*this == other); }
+        bool operator==(const BitSetIterator& other) const
+        {
+            return mPos == other.mPos;
+        }
+
+        bool operator!=(const BitSetIterator& other) const
+        {
+            return !(*this == other);
+        }
 
     private:
         const std::bitset<N>& mBits;
         size_t mPos;
 
-        size_t find_next(size_t start) const 
+        size_t find_next(size_t start) const
         {
-            for (size_t i = start; i < N; ++i) 
+            for (size_t i = start; i < N; ++i)
             {
-                if (mBits.test(i)) return i;
+                if (mBits.test(i))
+                    return i;
             }
-            return N; 
+            return N;
         }
     };
 
@@ -56,10 +65,19 @@ namespace rhi::impl
     class BitSetView
     {
     public:
-        explicit BitSetView(const std::bitset<N>& bits) : mBits(bits) {}
+        explicit BitSetView(const std::bitset<N>& bits) :
+            mBits(bits)
+        {}
 
-        BitSetIterator<N> begin() const { return BitSetIterator<N>(mBits, 0); }
-        BitSetIterator<N> end() const { return BitSetIterator<N>(mBits, N); }
+        BitSetIterator<N> begin() const
+        {
+            return BitSetIterator<N>(mBits, 0);
+        }
+
+        BitSetIterator<N> end() const
+        {
+            return BitSetIterator<N>(mBits, N);
+        }
 
     private:
         const std::bitset<N>& mBits;

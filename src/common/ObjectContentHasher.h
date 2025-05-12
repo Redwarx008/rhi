@@ -52,7 +52,7 @@ namespace rhi::impl
 #else
 #error "Unsupported platform"
 #endif
-        * hash ^= Hash(value) + offset + (*hash << 6) + (*hash >> 2);
+        *hash ^= Hash(value) + offset + (*hash << 6) + (*hash >> 2);
     }
 
     template <typename T, typename... Args>
@@ -65,28 +65,28 @@ namespace rhi::impl
 
     // ObjectContentHasher records a hash that can be used as a key to lookup a cached object in a
     // cache.
-    class ObjectContentHasher 
+    class ObjectContentHasher
     {
     public:
         // Record calls the appropriate record function based on the type.
         template <typename T, typename... Args>
-        void Record(const T& value, const Args&... args) 
+        void Record(const T& value, const Args&... args)
         {
             RecordImpl<T, Args...>::Call(this, value, args...);
         }
 
-        size_t GetContentHash() const 
-        { 
+        size_t GetContentHash() const
+        {
             return mContentHash;
         }
 
     private:
         template <typename T, typename... Args>
-        struct RecordImpl 
+        struct RecordImpl
         {
             static constexpr void Call(ObjectContentHasher* recorder,
-                const T& value,
-                const Args&... args) 
+                                       const T& value,
+                                       const Args&... args)
             {
                 HashCombine(&recorder->mContentHash, value, args...);
             }
@@ -95,7 +95,7 @@ namespace rhi::impl
         template <typename T>
         struct RecordImpl<T*>
         {
-            static constexpr void Call(ObjectContentHasher* recorder, T* obj) 
+            static constexpr void Call(ObjectContentHasher* recorder, T* obj)
             {
                 // Calling Record(objPtr) is not allowed. This check exists to only prevent such
                 // mistakes.
@@ -104,9 +104,9 @@ namespace rhi::impl
         };
 
         template <typename T>
-        struct RecordImpl<std::vector<T>> 
+        struct RecordImpl<std::vector<T>>
         {
-            static constexpr void Call(ObjectContentHasher* recorder, const std::vector<T>& vec) 
+            static constexpr void Call(ObjectContentHasher* recorder, const std::vector<T>& vec)
             {
                 recorder->RecordIterable<std::vector<T>>(vec);
             }
@@ -115,7 +115,7 @@ namespace rhi::impl
         template <typename T, typename E>
         struct RecordImpl<std::map<T, E>>
         {
-            static constexpr void Call(ObjectContentHasher* recorder, const std::map<T, E>& map) 
+            static constexpr void Call(ObjectContentHasher* recorder, const std::map<T, E>& map)
             {
                 recorder->RecordIterable<std::map<T, E>>(map);
             }
@@ -131,9 +131,9 @@ namespace rhi::impl
         }
 
         template <typename T, typename E>
-        struct RecordImpl<std::pair<T, E>> 
+        struct RecordImpl<std::pair<T, E>>
         {
-            static constexpr void Call(ObjectContentHasher* recorder, const std::pair<T, E>& pair) 
+            static constexpr void Call(ObjectContentHasher* recorder, const std::pair<T, E>& pair)
             {
                 recorder->Record(pair.first);
                 recorder->Record(pair.second);

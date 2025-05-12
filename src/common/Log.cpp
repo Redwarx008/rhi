@@ -8,7 +8,8 @@ namespace rhi
 {
     const char* SeverityName(LogSeverity severity)
     {
-        switch (severity) {
+        switch (severity)
+        {
         case LogSeverity::Debug:
             return "Debug";
         case LogSeverity::Info:
@@ -40,7 +41,9 @@ namespace rhi
     }
 #endif
 
-    LogMessage::LogMessage(LogSeverity severity) : mSeverity(severity) {}
+    LogMessage::LogMessage(LogSeverity severity) :
+        mSeverity(severity)
+    {}
 
     LogMessage::LogMessage(LogMessage&& other) = default;
 
@@ -51,7 +54,8 @@ namespace rhi
         std::string fullMessage = mStream.str();
 
         // If this message has been moved, its stream is empty.
-        if (fullMessage.empty()) {
+        if (fullMessage.empty())
+        {
             return;
         }
 
@@ -62,7 +66,7 @@ namespace rhi
         __android_log_print(androidPriority, "Dawn", "%s: %s\n", severityName, fullMessage.c_str());
 #else
         FILE* outputStream = stdout;
-        if (mSeverity == LogSeverity::Warning || mSeverity == LogSeverity::Error) 
+        if (mSeverity == LogSeverity::Warning || mSeverity == LogSeverity::Error)
         {
             outputStream = stderr;
         }
@@ -88,7 +92,7 @@ namespace rhi
         return LogMessage(LogSeverity::Warning);
     }
 
-    LogMessage ErrorLog() 
+    LogMessage ErrorLog()
     {
         return LogMessage(LogSeverity::Error);
     }

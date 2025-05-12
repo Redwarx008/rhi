@@ -10,9 +10,11 @@
 
 namespace rhi::impl::vulkan
 {
-    constexpr TextureUsage cShaderTextureUsages = TextureUsage::SampledBinding | TextureUsage::StorageBinding | cReadOnlyStorageTexture;
+    constexpr TextureUsage cShaderTextureUsages = TextureUsage::SampledBinding | TextureUsage::StorageBinding |
+            cReadOnlyStorageTexture;
 
-    constexpr TextureUsage cReadOnlyTextureUsages = TextureUsage::CopySrc | TextureUsage::SampledBinding | cReadOnlyStorageTexture;
+    constexpr TextureUsage cReadOnlyTextureUsages = TextureUsage::CopySrc | TextureUsage::SampledBinding |
+            cReadOnlyStorageTexture;
 
     struct TexFmtToVkFmtMapping
     {
@@ -20,8 +22,9 @@ namespace rhi::impl::vulkan
         VkFormat vkFormat;
     };
 
+    //clang-format off
     static const std::array<TexFmtToVkFmtMapping, size_t(TextureFormat::COUNT)> _texFmtToVkFmtMap = { {
-        { TextureFormat::Undefined,           VK_FORMAT_UNDEFINED                },
+        { TextureFormat::Undefined,         VK_FORMAT_UNDEFINED                },
         { TextureFormat::R8_UINT,           VK_FORMAT_R8_UINT                  },
         { TextureFormat::R8_SINT,           VK_FORMAT_R8_SINT                  },
         { TextureFormat::R8_UNORM,          VK_FORMAT_R8_UNORM                 },
@@ -92,7 +95,7 @@ namespace rhi::impl::vulkan
 
     static const std::unordered_map<VkFormat, TextureFormat> _VkFmtToTexFmtMap =
     {
-        { VK_FORMAT_UNDEFINED                ,TextureFormat::Undefined          },
+        { VK_FORMAT_UNDEFINED                ,TextureFormat::Undefined        },
         { VK_FORMAT_R8_UINT                  ,TextureFormat::R8_UINT          },
         { VK_FORMAT_R8_SINT                  ,TextureFormat::R8_SINT          },
         { VK_FORMAT_R8_UNORM                 ,TextureFormat::R8_UNORM         },
@@ -160,7 +163,7 @@ namespace rhi::impl::vulkan
         { VK_FORMAT_BC7_SRGB_BLOCK           ,TextureFormat::BC7_UNORM_SRGB   },
 
     };
-
+    //clang-format on
     VkImageUsageFlags GetVkImageUsageFlags(TextureUsage usage, TextureFormat format)
     {
         const FormatInfo& formatInfo = GetFormatInfo(format);
@@ -337,7 +340,7 @@ namespace rhi::impl::vulkan
     //{
     //    VkPhysicalDevice physicalDevice = device->GetVkPhysicalDevice();
     //    VkImageFormatProperties properties;
-    //    VkResult res = vkGetPhysicalDeviceImageFormatProperties(physicalDevice, imageCreateInfo.format, 
+    //    VkResult res = vkGetPhysicalDeviceImageFormatProperties(physicalDevice, imageCreateInfo.format,
     //        imageCreateInfo.imageType, imageCreateInfo.tiling,
     //        imageCreateInfo.usage, imageCreateInfo.flags,
     //        &properties);
@@ -532,10 +535,10 @@ namespace rhi::impl::vulkan
         TextureBase(device, desc),
         mVkFormat(ToVkFormat(mFormat)),
         mSubresourceLastSyncInfos(GetAspectFromFormat(mFormat), mArraySize, mMipLevelCount)
-    {
-    }
+    {}
 
-    Texture::~Texture() {}
+    Texture::~Texture()
+    {}
 
     bool Texture::Initialize()
     {
@@ -550,7 +553,7 @@ namespace rhi::impl::vulkan
         VkImageCreateInfo imageCreateInfo{};
         imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageCreateInfo.imageType = GetVkImageType(mDimension);
-        imageCreateInfo.extent = { mWidth, mHeight, mDepth };
+        imageCreateInfo.extent = {mWidth, mHeight, mDepth};
         imageCreateInfo.mipLevels = mMipLevelCount;
         imageCreateInfo.arrayLayers = mArraySize;
         imageCreateInfo.format = mVkFormat;
@@ -577,7 +580,12 @@ namespace rhi::impl::vulkan
         allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
         allocCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
         allocCreateInfo.priority = 1.0f;
-        VkResult err = vmaCreateImage(device->GetMemoryAllocator(), &imageCreateInfo, &allocCreateInfo, &mHandle, &mAllocation, nullptr);
+        VkResult err = vmaCreateImage(device->GetMemoryAllocator(),
+                                      &imageCreateInfo,
+                                      &allocCreateInfo,
+                                      &mHandle,
+                                      &mAllocation,
+                                      nullptr);
         CHECK_VK_RESULT_FALSE(err, "Could not to create vkImage");
 
         SetDebugName(device, mHandle, "Texture", GetName());
@@ -585,16 +593,19 @@ namespace rhi::impl::vulkan
         return true;
     }
 
-    inline bool CanReuseWithoutBarrier(TextureUsage lastUsage, TextureUsage usage, ShaderStage lastShaderStage, ShaderStage shaderStage)
+    inline bool CanReuseWithoutBarrier(TextureUsage lastUsage,
+                                       TextureUsage usage,
+                                       ShaderStage lastShaderStage,
+                                       ShaderStage shaderStage)
     {
         bool isLastReadOnly = IsSubset(lastUsage, cReadOnlyTextureUsages);
         return isLastReadOnly && lastUsage == usage && IsSubset(shaderStage, lastShaderStage);
     }
 
     void Texture::TransitionUsageAndGetResourceBarrier(Queue* queue,
-                                                    TextureUsage usage,
-                                                    ShaderStage shaderStages,
-                                                    const SubresourceRange& range)
+                                                       TextureUsage usage,
+                                                       ShaderStage shaderStages,
+                                                       const SubresourceRange& range)
     {
         if (shaderStages == ShaderStage::None)
         {
@@ -603,140 +614,189 @@ namespace rhi::impl::vulkan
             usage &= ~cShaderTextureUsages;
         }
 
-        mSubresourceLastSyncInfos.Update(range, [&](const SubresourceRange& range, TextureSyncInfo& lastSyncInfo)
-            {
+        mSubresourceLastSyncInfos.Update(range,
+                                         [&](const SubresourceRange& range, TextureSyncInfo& lastSyncInfo)
+                                         {
 
-                bool needTransferOwnership = lastSyncInfo.queue != QueueType::Undefined && lastSyncInfo.queue != queue->GetType();
+                                             bool needTransferOwnership = lastSyncInfo.queue != QueueType::Undefined &&
+                                                     lastSyncInfo.queue != queue->GetType();
 
-                if (!needTransferOwnership && CanReuseWithoutBarrier(lastSyncInfo.usage, usage, lastSyncInfo.shaderStages, shaderStages))
-                {
-                    return;
-                }
+                                             if (!needTransferOwnership && CanReuseWithoutBarrier(
+                                                     lastSyncInfo.usage,
+                                                     usage,
+                                                     lastSyncInfo.shaderStages,
+                                                     shaderStages))
+                                             {
+                                                 return;
+                                             }
 
-                VkImageMemoryBarrier2 barrier{};
-                barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-                barrier.pNext = nullptr;
-                barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat); //todo: use 0 when we need transfer ownership.
-                barrier.srcStageMask = PiplineStageConvert(lastSyncInfo.usage, lastSyncInfo.shaderStages, mFormat);
-                barrier.dstAccessMask = AccessFlagsConvert(usage, mFormat);
-                barrier.dstStageMask = PiplineStageConvert(usage, shaderStages, mFormat);
-                barrier.oldLayout = ImageLayoutConvert(lastSyncInfo.usage, mFormat);
-                barrier.newLayout = ImageLayoutConvert(usage, mFormat);
-                barrier.image = mHandle;
-                barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(range.aspects);
-                barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
-                barrier.subresourceRange.levelCount = range.levelCount;
-                barrier.subresourceRange.baseArrayLayer = range.baseArrayLayer;
-                barrier.subresourceRange.layerCount = range.layerCount;
+                                             VkImageMemoryBarrier2 barrier{};
+                                             barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+                                             barrier.pNext = nullptr;
+                                             barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat);
+                                             //todo: use 0 when we need transfer ownership.
+                                             barrier.srcStageMask = PiplineStageConvert(
+                                                     lastSyncInfo.usage,
+                                                     lastSyncInfo.shaderStages,
+                                                     mFormat);
+                                             barrier.dstAccessMask = AccessFlagsConvert(usage, mFormat);
+                                             barrier.dstStageMask = PiplineStageConvert(usage, shaderStages, mFormat);
+                                             barrier.oldLayout = ImageLayoutConvert(lastSyncInfo.usage, mFormat);
+                                             barrier.newLayout = ImageLayoutConvert(usage, mFormat);
+                                             barrier.image = mHandle;
+                                             barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(
+                                                     range.aspects);
+                                             barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
+                                             barrier.subresourceRange.levelCount = range.levelCount;
+                                             barrier.subresourceRange.baseArrayLayer = range.baseArrayLayer;
+                                             barrier.subresourceRange.layerCount = range.layerCount;
 
-                if (needTransferOwnership)
-                {
-                    barrier.srcQueueFamilyIndex = checked_cast<Queue>(checked_cast<Device>(mDevice.Get())->GetQueue(lastSyncInfo.queue))->GetQueueFamilyIndex();
-                    barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();;
-                }
+                                             if (needTransferOwnership)
+                                             {
+                                                 barrier.srcQueueFamilyIndex = checked_cast<Queue>(
+                                                         checked_cast<Device>(mDevice.Get())->GetQueue(
+                                                                 lastSyncInfo.queue))->GetQueueFamilyIndex();
+                                                 barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();;
+                                             }
 
-                queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
+                                             queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
 
-                if (lastSyncInfo.usage == usage && IsSubset(usage, cReadOnlyTextureUsages)) {
-                    // Read only usage and no layout transition. We can keep previous shader stages so
-                    // future uses in those stages don't insert barriers.
-                    lastSyncInfo.shaderStages |= shaderStages;
-                }
-                else {
-                    // Image was altered by write or layout transition. We need to clear previous shader
-                    // stages so future uses in those stages will insert barriers.
-                    lastSyncInfo.shaderStages = shaderStages;
-                }
-                lastSyncInfo.usage = usage;
-                lastSyncInfo.queue = queue->GetType();
-            });
+                                             if (lastSyncInfo.usage == usage && IsSubset(usage, cReadOnlyTextureUsages))
+                                             {
+                                                 // Read only usage and no layout transition. We can keep previous shader stages so
+                                                 // future uses in those stages don't insert barriers.
+                                                 lastSyncInfo.shaderStages |= shaderStages;
+                                             }
+                                             else
+                                             {
+                                                 // Image was altered by write or layout transition. We need to clear previous shader
+                                                 // stages so future uses in those stages will insert barriers.
+                                                 lastSyncInfo.shaderStages = shaderStages;
+                                             }
+                                             lastSyncInfo.usage = usage;
+                                             lastSyncInfo.queue = queue->GetType();
+                                         });
 
     }
 
     void Texture::TransitionUsageForMultiRange(Queue* queue, const SubresourceStorage<TextureSyncInfo>& syncInfos)
     {
-        mSubresourceLastSyncInfos.Merge(syncInfos, [&](const SubresourceRange& range, TextureSyncInfo& lastSyncInfo, const TextureSyncInfo& newSyncInfo)
-            {
-                TextureUsage newUsage = newSyncInfo.usage;
-                if (newSyncInfo.shaderStages == ShaderStage::None)
-                {
-                    // If the image isn't used in any shader stages, ignore shader usages. Eg. ignore a
-                    // texture binding that isn't actually sampled in any shader.
-                    newUsage &= ~cShaderTextureUsages;
-                }
+        mSubresourceLastSyncInfos.Merge(syncInfos,
+                                        [&](const SubresourceRange& range,
+                                            TextureSyncInfo& lastSyncInfo,
+                                            const TextureSyncInfo& newSyncInfo)
+                                        {
+                                            TextureUsage newUsage = newSyncInfo.usage;
+                                            if (newSyncInfo.shaderStages == ShaderStage::None)
+                                            {
+                                                // If the image isn't used in any shader stages, ignore shader usages. Eg. ignore a
+                                                // texture binding that isn't actually sampled in any shader.
+                                                newUsage &= ~cShaderTextureUsages;
+                                            }
 
-                bool needTransferOwnership = lastSyncInfo.queue != QueueType::Undefined && lastSyncInfo.queue != queue->GetType();
+                                            bool needTransferOwnership = lastSyncInfo.queue != QueueType::Undefined &&
+                                                    lastSyncInfo.queue != queue->GetType();
 
-                if (newUsage == TextureUsage::None || 
-                    (!needTransferOwnership && CanReuseWithoutBarrier(lastSyncInfo.usage, newUsage, lastSyncInfo.shaderStages, newSyncInfo.shaderStages)))
-                {
-                    return;
-                }
+                                            if (newUsage == TextureUsage::None ||
+                                                (!needTransferOwnership && CanReuseWithoutBarrier(
+                                                        lastSyncInfo.usage,
+                                                        newUsage,
+                                                        lastSyncInfo.shaderStages,
+                                                        newSyncInfo.shaderStages)))
+                                            {
+                                                return;
+                                            }
 
-                VkImageMemoryBarrier2 barrier{};
-                barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-                barrier.pNext = nullptr;
-                barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat); //todo: use 0 when we need transfer ownership.
-                barrier.srcStageMask = PiplineStageConvert(lastSyncInfo.usage, lastSyncInfo.shaderStages, mFormat);
-                barrier.dstAccessMask = AccessFlagsConvert(newUsage, mFormat);
-                barrier.dstStageMask = PiplineStageConvert(newUsage, newSyncInfo.shaderStages, mFormat);
-                barrier.oldLayout = ImageLayoutConvert(lastSyncInfo.usage, mFormat);
-                barrier.newLayout = ImageLayoutConvert(newUsage, mFormat);
-                barrier.image = mHandle;
-                barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(range.aspects);
-                barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
-                barrier.subresourceRange.levelCount = range.levelCount;
-                barrier.subresourceRange.baseArrayLayer = range.baseArrayLayer;
-                barrier.subresourceRange.layerCount = range.layerCount;
+                                            VkImageMemoryBarrier2 barrier{};
+                                            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+                                            barrier.pNext = nullptr;
+                                            barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat);
+                                            //todo: use 0 when we need transfer ownership.
+                                            barrier.srcStageMask = PiplineStageConvert(
+                                                    lastSyncInfo.usage,
+                                                    lastSyncInfo.shaderStages,
+                                                    mFormat);
+                                            barrier.dstAccessMask = AccessFlagsConvert(newUsage, mFormat);
+                                            barrier.dstStageMask = PiplineStageConvert(
+                                                    newUsage,
+                                                    newSyncInfo.shaderStages,
+                                                    mFormat);
+                                            barrier.oldLayout = ImageLayoutConvert(lastSyncInfo.usage, mFormat);
+                                            barrier.newLayout = ImageLayoutConvert(newUsage, mFormat);
+                                            barrier.image = mHandle;
+                                            barrier.subresourceRange.aspectMask =
+                                                    ImageAspectFlagsConvert(range.aspects);
+                                            barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
+                                            barrier.subresourceRange.levelCount = range.levelCount;
+                                            barrier.subresourceRange.baseArrayLayer = range.baseArrayLayer;
+                                            barrier.subresourceRange.layerCount = range.layerCount;
 
-                if (needTransferOwnership)
-                {
-                    barrier.srcQueueFamilyIndex = checked_cast<Queue>(checked_cast<Device>(mDevice.Get())->GetQueue(lastSyncInfo.queue))->GetQueueFamilyIndex();
-                    barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();;
-                }
+                                            if (needTransferOwnership)
+                                            {
+                                                barrier.srcQueueFamilyIndex = checked_cast<Queue>(
+                                                        checked_cast<Device>(mDevice.Get())->GetQueue(
+                                                                lastSyncInfo.queue))->GetQueueFamilyIndex();
+                                                barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();;
+                                            }
 
-                queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
+                                            queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
 
-                if (lastSyncInfo.usage == newUsage && IsSubset(newUsage, cReadOnlyTextureUsages)) {
-                    // Read only usage and no layout transition. We can keep previous shader stages so
-                    // future uses in those stages don't insert barriers.
-                    lastSyncInfo.shaderStages |= newSyncInfo.shaderStages;
-                }
-                else {
-                    // Image was altered by write or layout transition. We need to clear previous shader
-                    // stages so future uses in those stages will insert barriers.
-                    lastSyncInfo.shaderStages = newSyncInfo.shaderStages;
-                }
-                lastSyncInfo.usage = newUsage;
-                lastSyncInfo.queue = queue->GetType();
-            });
+                                            if (lastSyncInfo.usage == newUsage && IsSubset(
+                                                    newUsage,
+                                                    cReadOnlyTextureUsages))
+                                            {
+                                                // Read only usage and no layout transition. We can keep previous shader stages so
+                                                // future uses in those stages don't insert barriers.
+                                                lastSyncInfo.shaderStages |= newSyncInfo.shaderStages;
+                                            }
+                                            else
+                                            {
+                                                // Image was altered by write or layout transition. We need to clear previous shader
+                                                // stages so future uses in those stages will insert barriers.
+                                                lastSyncInfo.shaderStages = newSyncInfo.shaderStages;
+                                            }
+                                            lastSyncInfo.usage = newUsage;
+                                            lastSyncInfo.queue = queue->GetType();
+                                        });
     }
 
     void Texture::TransitionOwnership(Queue* queue, const SubresourceRange& range, Queue* recevingQueue)
     {
-        mSubresourceLastSyncInfos.Update(range, [&](const SubresourceRange& syncRange, const TextureSyncInfo& lastSyncInfo)
-            {
-                assert(lastSyncInfo.queue == queue->GetType());
+        mSubresourceLastSyncInfos.Update(range,
+                                         [&](const SubresourceRange& syncRange, const TextureSyncInfo& lastSyncInfo)
+                                         {
+                                             assert(lastSyncInfo.queue == queue->GetType());
 
-                VkImageMemoryBarrier2 barrier{};
-                barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-                barrier.pNext = nullptr;
-                barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat); //todo: use 0 when we need transfer ownership.
-                barrier.srcStageMask = PiplineStageConvert(lastSyncInfo.usage, lastSyncInfo.shaderStages, mFormat);
-                barrier.image = mHandle;
-                barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(syncRange.aspects);
-                barrier.subresourceRange.baseMipLevel = syncRange.baseMipLevel;
-                barrier.subresourceRange.levelCount = syncRange.levelCount;
-                barrier.subresourceRange.baseArrayLayer = syncRange.baseArrayLayer;
-                barrier.subresourceRange.layerCount = syncRange.layerCount;
-                barrier.srcQueueFamilyIndex = checked_cast<Queue>(checked_cast<Device>(mDevice.Get())->GetQueue(lastSyncInfo.queue))->GetQueueFamilyIndex();
-                barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();;
+                                             VkImageMemoryBarrier2 barrier{};
+                                             barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+                                             barrier.pNext = nullptr;
+                                             barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat);
+                                             //todo: use 0 when we need transfer ownership.
+                                             barrier.srcStageMask = PiplineStageConvert(
+                                                     lastSyncInfo.usage,
+                                                     lastSyncInfo.shaderStages,
+                                                     mFormat);
+                                             barrier.image = mHandle;
+                                             barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(
+                                                     syncRange.aspects);
+                                             barrier.subresourceRange.baseMipLevel = syncRange.baseMipLevel;
+                                             barrier.subresourceRange.levelCount = syncRange.levelCount;
+                                             barrier.subresourceRange.baseArrayLayer = syncRange.baseArrayLayer;
+                                             barrier.subresourceRange.layerCount = syncRange.layerCount;
+                                             barrier.srcQueueFamilyIndex = checked_cast<Queue>(
+                                                             checked_cast<Device>(mDevice.Get())->GetQueue(
+                                                                     lastSyncInfo.queue))
+                                                     ->GetQueueFamilyIndex();
+                                             barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();;
 
-                queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
-            });
+                                             queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
+                                         });
     }
 
-    void Texture::TransitionUsageNow(Queue* queue, TextureUsage usage, const SubresourceRange& range, ShaderStage shaderStages)
+    void Texture::TransitionUsageNow(Queue* queue,
+                                     TextureUsage usage,
+                                     const SubresourceRange& range,
+                                     ShaderStage shaderStages)
     {
         TransitionUsageAndGetResourceBarrier(queue, usage, shaderStages, range);
         queue->GetPendingRecordingContext()->EmitBarriers();
@@ -752,11 +812,12 @@ namespace rhi::impl::vulkan
         mTextureViews.Destroy();
 
         std::array<bool, 3> isUsedInQueue{};
-        
-        mSubresourceLastSyncInfos.Iterate([&isUsedInQueue](const SubresourceRange& syncRange, const TextureSyncInfo& lastSyncInfo)
-            {
-                isUsedInQueue[static_cast<uint32_t>(lastSyncInfo.queue)] = true;
-            });
+
+        mSubresourceLastSyncInfos.Iterate(
+                [&isUsedInQueue](const SubresourceRange& syncRange, const TextureSyncInfo& lastSyncInfo)
+                {
+                    isUsedInQueue[static_cast<uint32_t>(lastSyncInfo.queue)] = true;
+                });
 
         Device* device = checked_cast<Device>(mDevice.Get());
 
@@ -789,18 +850,17 @@ namespace rhi::impl::vulkan
 
     SwapChainTexture::SwapChainTexture(Device* device, const TextureDesc& desc) :
         Texture(device, desc)
-    {
+    {}
 
-    }
-
-    SwapChainTexture::~SwapChainTexture() {}
+    SwapChainTexture::~SwapChainTexture()
+    {}
 
     void SwapChainTexture::Initialize(VkImage nativeImage)
     {
         TextureBase::Initialize();
 
         mHandle = nativeImage;
-        mSubresourceLastSyncInfos.Fill({ cSwapChainImageAcquireUsage, ShaderStage::None });
+        mSubresourceLastSyncInfos.Fill({cSwapChainImageAcquireUsage, ShaderStage::None});
 
         Device* device = checked_cast<Device>(mDevice.Get());
 
@@ -827,14 +887,12 @@ namespace rhi::impl::vulkan
 
     TextureView::TextureView(TextureBase* texture, const TextureViewDesc& desc) :
         TextureViewBase(texture, desc)
-    {
-
-    }
+    {}
 
     bool TextureView::Initialize()
     {
         TextureViewBase::Initialize();
-        
+
         if ((mInternalUsage & ~(TextureUsage::CopySrc | TextureUsage::CopyDst)) == 0)
         {
             // If the texture view has no other usage than CopySrc and CopyDst, then it can't
@@ -855,8 +913,10 @@ namespace rhi::impl::vulkan
         createInfo.image = checked_cast<Texture>(mTexture)->GetHandle();
         createInfo.viewType = GetVkImageViewType(mDimension);
         createInfo.format = ToVkFormat(mFormat);
-        createInfo.components = VkComponentMapping{ VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
-                                           VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
+        createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R,
+                                                   VK_COMPONENT_SWIZZLE_G,
+                                                   VK_COMPONENT_SWIZZLE_B,
+                                                   VK_COMPONENT_SWIZZLE_A};
         createInfo.subresourceRange.aspectMask = ImageAspectFlagsConvert(mRange.aspects);
         createInfo.subresourceRange.baseArrayLayer = mRange.baseArrayLayer;
         createInfo.subresourceRange.layerCount = mRange.layerCount;
@@ -889,7 +949,10 @@ namespace rhi::impl::vulkan
         // SubresourceStorage<T>::Get does not accept combined enum, separate it.
         for (Aspect aspect : IterateEnumFlags(mRange.aspects))
         {
-            QueueType lastQueue = checked_cast<Texture>(mTexture.Get())->mSubresourceLastSyncInfos.Get(aspect, mRange.baseArrayLayer, mRange.baseMipLevel).queue;
+            QueueType lastQueue = checked_cast<Texture>(mTexture.Get())->mSubresourceLastSyncInfos.Get(
+                    aspect,
+                    mRange.baseArrayLayer,
+                    mRange.baseMipLevel).queue;
             assert(lastQueue != QueueType::Undefined);
 
             checked_cast<Queue>(device->GetQueue(lastQueue))->GetDeleter()->DeleteWhenUnused(mHandle);

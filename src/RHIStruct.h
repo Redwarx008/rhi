@@ -32,11 +32,11 @@ namespace rhi::impl
     class DeviceBase;
     class SurfaceBase;
 
-constexpr uint32_t CMaxColorAttachments = 8;
-constexpr uint64_t CWholeSize = ~0ull;
-constexpr uint32_t CAutoCompute = uint32_t(-1);
-constexpr uint32_t CArraySizeUndefined = uint32_t(-1);
-constexpr uint32_t CMipLevelCountUndefined = uint32_t(-1);
+    constexpr uint32_t CMaxColorAttachments = 8;
+    constexpr uint64_t CWholeSize = ~0ull;
+    constexpr uint32_t CAutoCompute = uint32_t(-1);
+    constexpr uint32_t CArraySizeUndefined = uint32_t(-1);
+    constexpr uint32_t CMipLevelCountUndefined = uint32_t(-1);
 
 
 #define ENUM_CLASS_FLAG_OPERATORS(EnumName) \
@@ -69,7 +69,7 @@ inline constexpr bool operator==(EnumName a, uint32_t b) { \
 } \
 inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     return !(a == b); \
-}\
+}
 
     enum class MapMode : uint32_t
     {
@@ -100,6 +100,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         CopyDst = 1 << 8,
         QueryResolve = 1 << 9
     };
+
     ENUM_CLASS_FLAG_OPERATORS(BufferUsage);
 
     enum class TextureDimension : uint32_t
@@ -248,6 +249,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         StorageBinding = 1 << 3,
         RenderAttachment = 1 << 4
     };
+
     ENUM_CLASS_FLAG_OPERATORS(TextureUsage);
 
     enum class TextureAspect : uint32_t
@@ -260,6 +262,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         Plane1 = 1 << 4,
         Plane2 = 1 << 5
     };
+
     ENUM_CLASS_FLAG_OPERATORS(TextureAspect);
 
     enum class BlendFactor : uint32_t
@@ -303,6 +306,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         Alpha = 8,
         All = 0xF
     };
+
     ENUM_CLASS_FLAG_OPERATORS(ColorMask);
 
     enum class SamplerAddressMode : uint32_t
@@ -357,6 +361,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         AllGraphics = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment,
         All = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment | Task | Mesh | Compute
     };
+
     ENUM_CLASS_FLAG_OPERATORS(ShaderStage);
 
     enum class FillMode : uint32_t
@@ -509,7 +514,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     };
 
     using BufferMapCallback = void (*)(BufferMapAsyncStatus status, void* mappedAdress, void* userdata);
-    typedef void(_stdcall* LoggingCallback) (LoggingSeverity severity, const char* msg, void* userData);
+    typedef void (_stdcall*LoggingCallback)(LoggingSeverity severity, const char* msg, void* userData);
     //using DebugMessageCallbackFunc = std::function<void(MessageSeverity severity, const char* msg)>;
 
     struct Region3D
@@ -520,10 +525,26 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         uint32_t maxY = 0;
         uint32_t minZ = 0;
         uint32_t maxZ = 1;
-        uint32_t getWidth() const { return maxX - minX; }
-        uint32_t getHeight() const { return maxY - minY; }
-        uint32_t getDepth() const { return maxZ - minZ; }
-        bool isValid() const { return maxX > minX && maxY > minY && maxZ > minZ; }
+
+        uint32_t getWidth() const
+        {
+            return maxX - minX;
+        }
+
+        uint32_t getHeight() const
+        {
+            return maxY - minY;
+        }
+
+        uint32_t getDepth() const
+        {
+            return maxZ - minZ;
+        }
+
+        bool isValid() const
+        {
+            return maxX > minX && maxY > minY && maxZ > minZ;
+        }
     };
 
     struct Origin3D
@@ -551,12 +572,12 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
 
     struct Viewport
     {
-        float    x;
-        float    y;
-        float    width;
-        float    height;
-        float    minDepth;
-        float    maxDepth;
+        float x;
+        float y;
+        float width;
+        float height;
+        float minDepth;
+        float maxDepth;
     };
 
     struct Rect
@@ -587,6 +608,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     struct SpecializationConstant
     {
         uint32_t constantID = 0;
+
         union
         {
             uint32_t u = 0;
@@ -594,21 +616,24 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
             float f;
         } value;
 
-        static SpecializationConstant UInt32(uint32_t constantID, uint32_t value) {
+        static SpecializationConstant UInt32(uint32_t constantID, uint32_t value)
+        {
             SpecializationConstant s;
             s.constantID = constantID;
             s.value.u = value;
             return s;
         }
 
-        static SpecializationConstant Int32(uint32_t constantID, int32_t value) {
+        static SpecializationConstant Int32(uint32_t constantID, int32_t value)
+        {
             SpecializationConstant s;
             s.constantID = constantID;
             s.value.i = value;
             return s;
         }
 
-        static SpecializationConstant Float(uint32_t constantID, float value) {
+        static SpecializationConstant Float(uint32_t constantID, float value)
+        {
             SpecializationConstant s;
             s.constantID = constantID;
             s.value.f = value;
@@ -650,14 +675,14 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
 
     struct ColorAttachmentBlendState
     {
-        bool        blendEnable = false;
+        bool blendEnable = false;
         BlendFactor srcColorBlend = BlendFactor::One;
         BlendFactor destColorBlend = BlendFactor::Zero;
-        BlendOp     colorBlendOp = BlendOp::Add;
+        BlendOp colorBlendOp = BlendOp::Add;
         BlendFactor srcAlphaBlend = BlendFactor::One;
         BlendFactor destAlphaBlend = BlendFactor::Zero;
-        BlendOp     alphaBlendOp = BlendOp::Add;
-        ColorMask   colorWriteMask = ColorMask::All;
+        BlendOp alphaBlendOp = BlendOp::Add;
+        ColorMask colorWriteMask = ColorMask::All;
     };
 
     struct BlendState
@@ -718,7 +743,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         TextureViewBase* resolveView = nullptr;
         LoadOp loadOp = LoadOp::Clear;
         StoreOp storeOp = StoreOp::Store;
-        Color clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
+        Color clearValue = {0.0f, 0.0f, 0.0f, 0.0f};
     };
 
     struct DepthStencilAattachment
@@ -750,6 +775,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
             entry.arrayElementCount = arrayElementCount;
             return entry;
         }
+
         static BindSetLayoutEntry StorageTexture(ShaderStage stage, uint32_t binding, uint32_t arrayElementCount = 1)
         {
             BindSetLayoutEntry entry{};
@@ -759,7 +785,11 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
             entry.arrayElementCount = arrayElementCount;
             return entry;
         }
-        static BindSetLayoutEntry UniformBuffer(ShaderStage stage, uint32_t binding, uint32_t arrayElementCount = 1, bool hasDynamicOffset = false)
+
+        static BindSetLayoutEntry UniformBuffer(ShaderStage stage,
+                                                uint32_t binding,
+                                                uint32_t arrayElementCount = 1,
+                                                bool hasDynamicOffset = false)
         {
             BindSetLayoutEntry entry{};
             entry.visibleStages = stage;
@@ -769,7 +799,11 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
             entry.hasDynamicOffset = hasDynamicOffset;
             return entry;
         }
-        static BindSetLayoutEntry StorageBuffer(ShaderStage stage, uint32_t binding, uint32_t arrayElementCount = 1, bool hasDynamicOffset = false)
+
+        static BindSetLayoutEntry StorageBuffer(ShaderStage stage,
+                                                uint32_t binding,
+                                                uint32_t arrayElementCount = 1,
+                                                bool hasDynamicOffset = false)
         {
             BindSetLayoutEntry entry{};
             entry.visibleStages = stage;
@@ -779,6 +813,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
             entry.hasDynamicOffset = hasDynamicOffset;
             return entry;
         }
+
         static BindSetLayoutEntry Sampler(ShaderStage stage, uint32_t binding, uint32_t arrayElementCount = 1)
         {
             BindSetLayoutEntry entry{};
@@ -788,7 +823,10 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
             entry.arrayElementCount = arrayElementCount;
             return entry;
         }
-        static BindSetLayoutEntry CombinedTextureSampler(ShaderStage stage, uint32_t binding, uint32_t arrayElementCount = 1)
+
+        static BindSetLayoutEntry CombinedTextureSampler(ShaderStage stage,
+                                                         uint32_t binding,
+                                                         uint32_t arrayElementCount = 1)
         {
             BindSetLayoutEntry entry{};
             entry.visibleStages = stage;
@@ -871,6 +909,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         TextureDimension dimension = TextureDimension::Texture2D;
         uint32_t width = 1;
         uint32_t height = 1;
+
         union
         {
             /// For a 1D array or 2D array, number of array slices
@@ -878,6 +917,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
             /// For a 3D texture, number of depth slices
             uint32_t depth;
         };
+
         uint32_t sampleCount = 1;
         uint32_t mipLevelCount = 1;
         TextureFormat format = TextureFormat::Undefined;
@@ -906,7 +946,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         std::string_view name;
         std::string_view entry;
         std::string_view code;
-        SpecializationConstant const * specializationConstants;
+        SpecializationConstant const* specializationConstants;
         uint32_t specializationConstantCount = 0;
     };
 
@@ -957,7 +997,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
 
         PipelineLayoutBase* pipelineLayout;
 
-        VertexInputAttribute const * vertexAttributes;
+        VertexInputAttribute const* vertexAttributes;
         uint32_t vertexAttributeCount = 0;
 
         BlendState blendState;
@@ -984,33 +1024,34 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     struct RenderPassDesc
     {
         uint32_t colorAttachmentCount = 0;
-        ColorAttachment const * colorAttachments;
-        DepthStencilAattachment const * depthStencilAttachment = nullptr;
+        ColorAttachment const* colorAttachments;
+        DepthStencilAattachment const* depthStencilAttachment = nullptr;
     };
+
     // command list
 
     struct DrawIndirectCommand
     {
-        uint32_t    vertexCount;
-        uint32_t    instanceCount;
-        uint32_t    firstVertex;
-        uint32_t    firstInstance;
+        uint32_t vertexCount;
+        uint32_t instanceCount;
+        uint32_t firstVertex;
+        uint32_t firstInstance;
     };
 
     struct DrawIndexedIndirectCommand
     {
-        uint32_t    indexCount;
-        uint32_t    instanceCount;
-        uint32_t    firstIndex;
-        int32_t     vertexOffset;
-        uint32_t    firstInstance;
+        uint32_t indexCount;
+        uint32_t instanceCount;
+        uint32_t firstIndex;
+        int32_t vertexOffset;
+        uint32_t firstInstance;
     };
 
     struct DispatchIndirectCommand
     {
-        uint32_t    x;
-        uint32_t    y;
-        uint32_t    z;
+        uint32_t x;
+        uint32_t y;
+        uint32_t z;
     };
 
     enum class ClearDepthStencilFlag : uint8_t
@@ -1018,6 +1059,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         Depth = 0 << 0,
         Stencil = 1 << 0
     };
+
     ENUM_CLASS_FLAG_OPERATORS(ClearDepthStencilFlag);
 
     struct AdapterInfo

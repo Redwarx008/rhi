@@ -24,7 +24,9 @@ namespace rhi::impl::vulkan
         static Ref<Device> Create(Adapter* adapter, const DeviceDesc& desc);
         // api implementation
         //void WaitIdle() override;
-        Ref<SwapChainBase> CreateSwapChain(SurfaceBase* surface, SwapChainBase* previous, const SurfaceConfiguration& config) override;
+        Ref<SwapChainBase> CreateSwapChain(SurfaceBase* surface,
+                                           SwapChainBase* previous,
+                                           const SurfaceConfiguration& config) override;
         Ref<PipelineLayoutBase> CreatePipelineLayout(const PipelineLayoutDesc& desc) override;
         Ref<RenderPipelineBase> CreateRenderPipeline(const RenderPipelineDesc& desc) override;
         Ref<ComputePipelineBase> CreateComputePipeline(const ComputePipelineDesc& desc) override;
@@ -44,12 +46,13 @@ namespace rhi::impl::vulkan
         uint32_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
         VulkanExtFunctions Fn{};
+
     private:
         explicit Device(Adapter* adapter, const DeviceDesc& desc);
         ~Device();
         bool Initialize(const DeviceDesc& desc);
         void LoadExtFunctions();
-            
+
         VkDevice mHandle = VK_NULL_HANDLE;
 
         VmaAllocator mMemoryAllocator = VK_NULL_HANDLE;
@@ -57,4 +60,3 @@ namespace rhi::impl::vulkan
         VkDeviceInfo mVkDeviceInfo{};
     };
 }
-

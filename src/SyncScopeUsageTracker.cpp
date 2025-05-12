@@ -9,8 +9,8 @@
 namespace rhi::impl
 {
     void SyncScopeUsageTracker::BufferUsedAs(BufferBase* buffer,
-        BufferUsage usage,
-        ShaderStage shaderStages)
+                                             BufferUsage usage,
+                                             ShaderStage shaderStages)
     {
         BufferSyncInfo& bufferSyncInfo = mBufferSyncInfos[buffer];
 
@@ -19,24 +19,28 @@ namespace rhi::impl
     }
 
     void SyncScopeUsageTracker::TextureRangeUsedAs(TextureBase* texture,
-        const SubresourceRange& range,
-        TextureUsage usage,
-        ShaderStage shaderStages)
+                                                   const SubresourceRange& range,
+                                                   TextureUsage usage,
+                                                   ShaderStage shaderStages)
     {
         Aspect formatAspects = GetAspectFromFormat(texture->APIGetFormat());
-        auto it = mTextureSyncInfos.try_emplace(texture, formatAspects, texture->APIGetDepthOrArrayLayers(), texture->APIGetMipLevelCount());
+        auto it = mTextureSyncInfos.try_emplace(texture,
+                                                formatAspects,
+                                                texture->APIGetDepthOrArrayLayers(),
+                                                texture->APIGetMipLevelCount());
 
         SubresourceStorage<TextureSyncInfo>& textureSyncInfo = it.first->second;
-        textureSyncInfo.Update(range, [usage, shaderStages](const SubresourceRange&, TextureSyncInfo& storedSyncInfo)
-            {
-                storedSyncInfo.usage |= usage;
-                storedSyncInfo.shaderStages |= shaderStages;
-            });
+        textureSyncInfo.Update(range,
+                               [usage, shaderStages](const SubresourceRange&, TextureSyncInfo& storedSyncInfo)
+                               {
+                                   storedSyncInfo.usage |= usage;
+                                   storedSyncInfo.shaderStages |= shaderStages;
+                               });
     }
-    
+
     void SyncScopeUsageTracker::TextureViewUsedAs(TextureViewBase* view,
-        TextureUsage usage,
-        ShaderStage shaderStages)
+                                                  TextureUsage usage,
+                                                  ShaderStage shaderStages)
     {
         TextureRangeUsedAs(view->GetTexture(), view->GetSubresourceRange(), usage, shaderStages);
     }

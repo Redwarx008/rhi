@@ -11,6 +11,7 @@ namespace rhi::impl
         explicit RenderPipelineBase(DeviceBase* device, const RenderPipelineDesc& desc);
         ~RenderPipelineBase();
         ResourceType GetType() const override;
+
     protected:
         void ResolveVertexInputOffsetAndStride();
 

@@ -5,7 +5,7 @@
 
 namespace rhi::impl
 {
-    enum class CallbackState 
+    enum class CallbackState
     {
         Normal,
         ShutDown,
@@ -19,10 +19,12 @@ namespace rhi::impl
         void Execute();
         void OnShutDown();
         void OnDeviceLoss();
+
     protected:
         virtual void FinishImpl() = 0;
         virtual void HandleShutDownImpl() = 0;
         virtual void HandleDeviceLossImpl() = 0;
+
     private:
         CallbackState mState = CallbackState::Normal;
     };
@@ -35,12 +37,14 @@ namespace rhi::impl
         void HandleDeviceLoss();
         void HandleShutDown();
         void Flush();
+
     private:
-        struct StateAndQueue 
+        struct StateAndQueue
         {
             CallbackState mState = CallbackState::Normal;
             std::vector<std::unique_ptr<CallbackTask>> mTaskQueue;
         };
+
         MutexProtected<StateAndQueue> mStateAndQueue;
     };
 }

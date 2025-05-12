@@ -13,28 +13,33 @@ namespace rhi::impl
     class MapAsyncCallbackTask : public CallbackTask
     {
     public:
-        MapAsyncCallbackTask(Ref<BufferBase> buffer, 
-            BufferMapCallback callback, void* userData) :
+        MapAsyncCallbackTask(Ref<BufferBase> buffer,
+                             BufferMapCallback callback, void* userData) :
             mBuffer(buffer),
             mMapCallback(callback),
             mMapUserdata(userData)
-        { }
+        {
+        }
+
     private:
-        void FinishImpl() override 
+        void FinishImpl() override
         {
             mMapCallback(BufferMapAsyncStatus::Success, mBuffer->APIGetMappedPointer(), mMapUserdata);
             mBuffer->OnMapCallbackCompleted(BufferMapAsyncStatus::Success);
         }
+
         void HandleDeviceLossImpl() override
         {
             mMapCallback(BufferMapAsyncStatus::DeviceLost, mBuffer->APIGetMappedPointer(), mMapUserdata);
             mBuffer->OnMapCallbackCompleted(BufferMapAsyncStatus::DeviceLost);
         }
+
         void HandleShutDownImpl() override
         {
             mMapCallback(BufferMapAsyncStatus::DestroyedBeforeCallback, mBuffer->APIGetMappedPointer(), mMapUserdata);
             mBuffer->OnMapCallbackCompleted(BufferMapAsyncStatus::DestroyedBeforeCallback);
         }
+
         Ref<BufferBase> mBuffer;
         BufferMapCallback mMapCallback;
         void* mMapUserdata;
@@ -59,7 +64,9 @@ namespace rhi::impl
 
     }
 
-    BufferBase::~BufferBase() {}
+    BufferBase::~BufferBase()
+    {
+    }
 
     void BufferBase::Initialize()
     {
@@ -107,8 +114,8 @@ namespace rhi::impl
         MapAsyncImpl(queue, usage);
 
         uint64_t lastUsageSerial = GetTrackedUsagae(queue->GetType()).lastUsageSerial;
-        std::unique_ptr<MapAsyncCallbackTask> task 
-            = std::make_unique<MapAsyncCallbackTask>(this, callback, userData);
+        std::unique_ptr<MapAsyncCallbackTask> task
+                = std::make_unique<MapAsyncCallbackTask>(this, callback, userData);
         queue->TrackTask(std::move(task), lastUsageSerial);
     }
 

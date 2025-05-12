@@ -29,7 +29,9 @@ namespace rhi::impl
         void APITick();
 
         Ref<QueueBase> GetQueue(QueueType queueType);
-        virtual Ref<SwapChainBase> CreateSwapChain(SurfaceBase* surface, SwapChainBase* previous, const SurfaceConfiguration& config) = 0;
+        virtual Ref<SwapChainBase> CreateSwapChain(SurfaceBase* surface,
+                                                   SwapChainBase* previous,
+                                                   const SurfaceConfiguration& config) = 0;
         virtual Ref<PipelineLayoutBase> CreatePipelineLayout(const PipelineLayoutDesc& desc) = 0;
         virtual Ref<RenderPipelineBase> CreateRenderPipeline(const RenderPipelineDesc& desc) = 0;
         virtual Ref<ComputePipelineBase> CreateComputePipeline(const ComputePipelineDesc& desc) = 0;
@@ -46,14 +48,16 @@ namespace rhi::impl
         bool IsDebugLayerEnabled() const;
         BindSetLayoutBase* GetEmptyBindSetLayout();
         CallbackTaskManager& GetCallbackTaskManager();
+
     protected:
         explicit DeviceBase(AdapterBase* adapter, const DeviceDesc& desc);
         ~DeviceBase();
         bool HasRequiredFeature(FeatureName feature);
         void CreateEmptyBindSetLayout();
         void DestroyObjects();
-        Ref<AdapterBase> mAdapter; 
+        Ref<AdapterBase> mAdapter;
         std::array<Ref<QueueBase>, 3> mQueues;
+
     private:
         void SetFeatures(const DeviceDesc& desc);
 

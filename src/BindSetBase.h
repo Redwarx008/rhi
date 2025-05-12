@@ -17,6 +17,7 @@ namespace rhi::impl
         ResourceType GetType() const override;
         BindSetLayoutBase* GetLayout();
         const std::vector<BindSetEntry>& GetBindingEntries() const;
+
     protected:
         explicit BindSetBase(DeviceBase* device, const BindSetDesc& desc);
         ~BindSetBase();

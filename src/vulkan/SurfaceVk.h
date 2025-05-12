@@ -12,6 +12,7 @@ namespace rhi::impl::vulkan
         //static Ref<Surface> CreateFromWaylandSurface(InstanceBase* instance, void* display, void* surface);
 
         VkSurfaceKHR GetHandle() const;
+
     private:
         explicit Surface(InstanceBase* instance);
         ~Surface();

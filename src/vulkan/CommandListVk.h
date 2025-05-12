@@ -20,6 +20,7 @@ namespace rhi::impl::vulkan
     public:
         static Ref<CommandList> Create(Device* device, CommandEncoder* encoder);
         void RecordCommands(Queue* queue);
+
     private:
         explicit CommandList(Device* device, CommandEncoder* encoder);
         void RecordRenderPass(Queue* queue, BeginRenderPassCmd* renderPassCmd);

@@ -31,12 +31,12 @@
 
 namespace rhi::impl::vulkan
 {
-    void CommandRecordContext::AddBufferBarrier(VkBufferMemoryBarrier2 barrier)
+    void CommandRecordContext::AddBufferBarrier(const VkBufferMemoryBarrier2& barrier)
     {
         mBufferMemoryBarriers.push_back(barrier);
     }
 
-    void CommandRecordContext::AddTextureBarrier(VkImageMemoryBarrier2 barrier)
+    void CommandRecordContext::AddTextureBarrier(const VkImageMemoryBarrier2& barrier)
     {
         mImageMemoryBarriers.push_back(barrier);
     }

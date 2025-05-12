@@ -6,7 +6,8 @@
 namespace rhi::impl::vulkan
 {
     class Device;
-    template<typename Handle>
+
+    template <typename Handle>
     class RefCountedHandle : public RefCounted
     {
     public:
@@ -14,9 +15,8 @@ namespace rhi::impl::vulkan
             mDevice(device),
             mHandle(handle),
             mDeleteMethod(deleteMethod)
-        {
+        {}
 
-        }
         ~RefCountedHandle()
         {
             mDeleteMethod(mDevice, mHandle);
@@ -26,6 +26,7 @@ namespace rhi::impl::vulkan
         {
             return mHandle;
         }
+
     private:
         Device* mDevice;
         Handle mHandle;

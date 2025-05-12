@@ -22,9 +22,7 @@ namespace rhi::impl::vulkan
 
     Surface::Surface(InstanceBase* instance) :
         SurfaceBase(instance)
-    {
-
-    }
+    {}
 
     Surface::~Surface()
     {

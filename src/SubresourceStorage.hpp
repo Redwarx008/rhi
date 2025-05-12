@@ -124,7 +124,8 @@ namespace rhi::impl
     // TODO(crbug.com/dawn/836): Make the recompression optional, the calling code should know
     // if recompression can happen or not in Update() and Merge()
     template <typename T>
-    class SubresourceStorage {
+    class SubresourceStorage
+    {
     public:
         static_assert(std::is_copy_assignable<T>::value, "T must be copyable");
         static_assert(HasEqualityOperator<T>::value, "T requires bool operator == (T, T)");
@@ -132,9 +133,9 @@ namespace rhi::impl
         // Creates the storage with the given "dimensions" and all subresources starting with the
         // initial value.
         SubresourceStorage(Aspect aspects,
-            uint32_t arrayLayerCount,
-            uint32_t mipLevelCount,
-            const T& initialValue = {});
+                           uint32_t arrayLayerCount,
+                           uint32_t mipLevelCount,
+                           const T& initialValue = {});
 
         // Returns the data for a single subresource. Note that the reference returned might be the
         // same for multiple subresources.
@@ -194,7 +195,8 @@ namespace rhi::impl
         // your code is likely to break when compression happens. Range should only be used for
         // side effects like using it to compute a Vulkan pipeline barrier.
         template <typename U>
-        void Merge(const SubresourceStorage<U>& other, std::function<void(const SubresourceRange&, T&, const T&)>&& mergeFunc);
+        void Merge(const SubresourceStorage<U>& other,
+                   std::function<void(const SubresourceRange&, T&, const T&)>&& mergeFunc);
 
         // Other operations to consider:
         //
@@ -252,10 +254,10 @@ namespace rhi::impl
 
     template <typename T>
     SubresourceStorage<T>::SubresourceStorage(Aspect aspects,
-        uint32_t arrayLayerCount,
-        uint32_t mipLevelCount,
-        const T& initialValue)
-        : mAspects(aspects), mMipLevelCount(mipLevelCount), mArrayLayerCount(arrayLayerCount)
+                                              uint32_t arrayLayerCount,
+                                              uint32_t mipLevelCount,
+                                              const T& initialValue) :
+        mAspects(aspects), mMipLevelCount(mipLevelCount), mArrayLayerCount(arrayLayerCount)
     {
         assert(arrayLayerCount <= std::numeric_limits<decltype(mArrayLayerCount)>::max());
         assert(mipLevelCount <= std::numeric_limits<decltype(mMipLevelCount)>::max());
@@ -264,28 +266,30 @@ namespace rhi::impl
     }
 
     template <typename T>
-    void SubresourceStorage<T>::Fill(const T& value) 
+    void SubresourceStorage<T>::Fill(const T& value)
     {
         uint32_t aspectCount = GetAspectCount(mAspects);
         assert(aspectCount <= kMaxAspects);
 
-        for (uint32_t aspectIndex = 0; aspectIndex < aspectCount; aspectIndex++) {
+        for (uint32_t aspectIndex = 0; aspectIndex < aspectCount; aspectIndex++)
+        {
             mAspectCompressed[aspectIndex] = true;
             DataInline(aspectIndex) = value;
         }
     }
 
     template <typename T>
-    void SubresourceStorage<T>::Update(const SubresourceRange& range, std::function<void(const SubresourceRange&, T&)>&& updateFunc)
+    void SubresourceStorage<T>::Update(const SubresourceRange& range,
+                                       std::function<void(const SubresourceRange&, T&)>&& updateFunc)
     {
         assert(range.baseArrayLayer < mArrayLayerCount &&
-            range.baseArrayLayer + range.layerCount <= mArrayLayerCount);
+                range.baseArrayLayer + range.layerCount <= mArrayLayerCount);
         assert(range.baseMipLevel < mMipLevelCount &&
-            range.baseMipLevel + range.levelCount <= mMipLevelCount);
+                range.baseMipLevel + range.levelCount <= mMipLevelCount);
 
         bool fullLayers = range.baseMipLevel == 0 && range.levelCount == mMipLevelCount;
         bool fullAspects =
-            range.baseArrayLayer == 0 && range.layerCount == mArrayLayerCount && fullLayers;
+                range.baseArrayLayer == 0 && range.layerCount == mArrayLayerCount && fullLayers;
 
         for (Aspect aspect : IterateEnumFlags(range.aspects))
         {
@@ -293,7 +297,7 @@ namespace rhi::impl
 
             // Call the updateFunc once for the whole aspect if possible or decompress and fallback
             // to per-layer handling.
-            if (mAspectCompressed[aspectIndex]) 
+            if (mAspectCompressed[aspectIndex])
             {
                 if (fullAspects)
                 {
@@ -311,7 +315,8 @@ namespace rhi::impl
                 // fallback to per-level handling.
                 if (LayerCompressed(aspectIndex, layer))
                 {
-                    if (fullLayers) {
+                    if (fullLayers)
+                    {
                         SubresourceRange updateRange = GetFullLayerRange(aspect, layer);
                         updateFunc(updateRange, Data(aspectIndex, layer));
                         continue;
@@ -321,7 +326,7 @@ namespace rhi::impl
 
                 // Worst case: call updateFunc per level.
                 uint32_t levelEnd = range.baseMipLevel + range.levelCount;
-                for (uint32_t level = range.baseMipLevel; level < levelEnd; level++) 
+                for (uint32_t level = range.baseMipLevel; level < levelEnd; level++)
                 {
                     SubresourceRange updateRange = SubresourceRange::MakeSingle(aspect, layer, level);
                     updateFunc(updateRange, Data(aspectIndex, layer, level));
@@ -330,7 +335,7 @@ namespace rhi::impl
                 // If the range has fullLayers then it is likely we can recompress after the calls
                 // to updateFunc (this branch is skipped if updateFunc was called for the whole
                 // layer).
-                if (fullLayers) 
+                if (fullLayers)
                 {
                     RecompressLayer(aspectIndex, layer);
                 }
@@ -347,7 +352,8 @@ namespace rhi::impl
 
     template <typename T>
     template <typename U>
-    void SubresourceStorage<T>::Merge(const SubresourceStorage<U>& other, std::function<void(const SubresourceRange&, T&, const T&)>&& mergeFunc)
+    void SubresourceStorage<T>::Merge(const SubresourceStorage<U>& other,
+                                      std::function<void(const SubresourceRange&, T&, const T&)>&& mergeFunc)
     {
         assert(mAspects == other.mAspects);
         assert(mArrayLayerCount == other.mArrayLayerCount);
@@ -360,34 +366,34 @@ namespace rhi::impl
             // If the other storage's aspect is compressed we don't need to decompress anything
             // in `this` and can just iterate through it, merging with `other`'s constant value for
             // the aspect. For code simplicity this can be done with a call to Update().
-            if (other.mAspectCompressed[aspectIndex]) 
+            if (other.mAspectCompressed[aspectIndex])
             {
                 const U& otherData = other.DataInline(aspectIndex);
                 Update(SubresourceRange::MakeFull(aspect, mArrayLayerCount, mMipLevelCount),
-                    [&](const SubresourceRange& subrange, T& data)
-                    {
-                        mergeFunc(subrange, data, otherData);
-                    });
+                       [&](const SubresourceRange& subrange, T& data)
+                       {
+                           mergeFunc(subrange, data, otherData);
+                       });
                 continue;
             }
 
             // Other doesn't have the aspect compressed so we must do at least per-layer merging.
-            if (mAspectCompressed[aspectIndex]) 
+            if (mAspectCompressed[aspectIndex])
             {
                 DecompressAspect(aspectIndex);
             }
 
-            for (uint32_t layer = 0; layer < mArrayLayerCount; layer++) 
+            for (uint32_t layer = 0; layer < mArrayLayerCount; layer++)
             {
                 // Similarly to above, use a fast path if other's layer is compressed.
-                if (other.LayerCompressed(aspectIndex, layer)) 
+                if (other.LayerCompressed(aspectIndex, layer))
                 {
                     const U& otherData = other.Data(aspectIndex, layer);
                     Update(GetFullLayerRange(aspect, layer),
-                        [&](const SubresourceRange& subrange, T& data) 
-                        {
-                            mergeFunc(subrange, data, otherData);
-                        });
+                           [&](const SubresourceRange& subrange, T& data)
+                           {
+                               mergeFunc(subrange, data, otherData);
+                           });
                     continue;
                 }
 
@@ -400,8 +406,9 @@ namespace rhi::impl
                 for (uint32_t level = 0; level < mMipLevelCount; level++)
                 {
                     SubresourceRange updateRange = SubresourceRange::MakeSingle(aspect, layer, level);
-                    mergeFunc(updateRange, Data(aspectIndex, layer, level),
-                        other.Data(aspectIndex, layer, level));
+                    mergeFunc(updateRange,
+                              Data(aspectIndex, layer, level),
+                              other.Data(aspectIndex, layer, level));
                 }
 
                 RecompressLayer(aspectIndex, layer);
@@ -419,7 +426,7 @@ namespace rhi::impl
             uint32_t aspectIndex = GetAspectIndex(aspect);
 
             // Fastest path, call iterateFunc on the whole aspect at once.
-            if (mAspectCompressed[aspectIndex]) 
+            if (mAspectCompressed[aspectIndex])
             {
                 SubresourceRange range = SubresourceRange::MakeFull(aspect, mArrayLayerCount, mMipLevelCount);
                 iterateFunc(range, DataInline(aspectIndex));
@@ -429,7 +436,8 @@ namespace rhi::impl
             for (uint32_t layer = 0; layer < mArrayLayerCount; layer++)
             {
                 // Fast path, call iterateFunc on the whole array layer at once.
-                if (LayerCompressed(aspectIndex, layer)) {
+                if (LayerCompressed(aspectIndex, layer))
+                {
                     SubresourceRange range = GetFullLayerRange(aspect, layer);
                     iterateFunc(range, Data(aspectIndex, layer));
                     continue;
@@ -469,29 +477,34 @@ namespace rhi::impl
     }
 
     template <typename T>
-    Aspect SubresourceStorage<T>::GetAspectsForTesting() const {
+    Aspect SubresourceStorage<T>::GetAspectsForTesting() const
+    {
         return mAspects;
     }
 
     template <typename T>
-    uint32_t SubresourceStorage<T>::GetArrayLayerCountForTesting() const {
+    uint32_t SubresourceStorage<T>::GetArrayLayerCountForTesting() const
+    {
         return mArrayLayerCount;
     }
 
     template <typename T>
-    uint32_t SubresourceStorage<T>::GetMipLevelCountForTesting() const {
+    uint32_t SubresourceStorage<T>::GetMipLevelCountForTesting() const
+    {
         return mMipLevelCount;
     }
 
     template <typename T>
-    bool SubresourceStorage<T>::IsAspectCompressedForTesting(Aspect aspect) const {
+    bool SubresourceStorage<T>::IsAspectCompressedForTesting(Aspect aspect) const
+    {
         return mAspectCompressed[GetAspectIndex(aspect)];
     }
 
     template <typename T>
-    bool SubresourceStorage<T>::IsLayerCompressedForTesting(Aspect aspect, uint32_t layer) const {
+    bool SubresourceStorage<T>::IsLayerCompressedForTesting(Aspect aspect, uint32_t layer) const
+    {
         return mAspectCompressed[GetAspectIndex(aspect)] ||
-            mLayerCompressed[GetAspectIndex(aspect) * mArrayLayerCount + layer];
+                mLayerCompressed[GetAspectIndex(aspect) * mArrayLayerCount + layer];
     }
 
     template <typename T>
@@ -531,7 +544,8 @@ namespace rhi::impl
         // All layers of the aspect must be compressed for the aspect to possibly recompress.
         for (uint32_t layer = 0; layer < mArrayLayerCount; layer++)
         {
-            if (!LayerCompressed(aspectIndex, layer)) {
+            if (!LayerCompressed(aspectIndex, layer))
+            {
                 return;
             }
         }
@@ -539,7 +553,8 @@ namespace rhi::impl
         T layer0Data = Data(aspectIndex, 0);
         for (uint32_t layer = 1; layer < mArrayLayerCount; layer++)
         {
-            if (!(Data(aspectIndex, layer) == layer0Data)) {
+            if (!(Data(aspectIndex, layer) == layer0Data))
+            {
                 return;
             }
         }
@@ -558,7 +573,7 @@ namespace rhi::impl
 
         // We assume that (aspect, layer, 0) is stored at the same place as (aspect, layer) which
         // allows starting the iteration at level 1.
-        for (uint32_t level = 1; level < mMipLevelCount; level++) 
+        for (uint32_t level = 1; level < mMipLevelCount; level++)
         {
             Data(aspectIndex, layer, level) = layerData;
         }
@@ -583,7 +598,7 @@ namespace rhi::impl
     }
 
     template <typename T>
-    SubresourceRange SubresourceStorage<T>::GetFullLayerRange(Aspect aspect, uint32_t layer) const 
+    SubresourceRange SubresourceStorage<T>::GetFullLayerRange(Aspect aspect, uint32_t layer) const
     {
         SubresourceRange range;
         range.aspects = aspect;
@@ -610,11 +625,12 @@ namespace rhi::impl
     }
 
     template <typename T>
-    T& SubresourceStorage<T>::DataInline(uint32_t aspectIndex) 
+    T& SubresourceStorage<T>::DataInline(uint32_t aspectIndex)
     {
         assert(mAspectCompressed[aspectIndex]);
         return mInlineAspectData[aspectIndex];
     }
+
     template <typename T>
     T& SubresourceStorage<T>::Data(uint32_t aspectIndex, uint32_t layer, uint32_t level)
     {
@@ -622,19 +638,20 @@ namespace rhi::impl
         assert(!mAspectCompressed[aspectIndex]);
         return mData[(aspectIndex * mArrayLayerCount + layer) * mMipLevelCount + level];
     }
+
     template <typename T>
     const T& SubresourceStorage<T>::DataInline(uint32_t aspectIndex) const
     {
         assert(mAspectCompressed[aspectIndex]);
         return mInlineAspectData[aspectIndex];
     }
+
     template <typename T>
-    const T& SubresourceStorage<T>::Data(uint32_t aspectIndex, uint32_t layer, uint32_t level) const 
+    const T& SubresourceStorage<T>::Data(uint32_t aspectIndex, uint32_t layer, uint32_t level) const
     {
         assert(level == 0 || !LayerCompressed(aspectIndex, layer));
         assert(!mAspectCompressed[aspectIndex]);
         return mData[(aspectIndex * mArrayLayerCount + layer) * mMipLevelCount + level];
     }
 
-}  
-
+}

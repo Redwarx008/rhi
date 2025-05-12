@@ -9,7 +9,8 @@
 
 namespace rhi::impl
 {
-    template<typename Serial, typename Value, typename Enable = std::enable_if_t<std::is_integral_v<Serial> || std::is_unsigned_v<Serial>>>
+    template <typename Serial, typename Value, typename Enable = std::enable_if_t<std::is_integral_v<Serial> ||
+                  std::is_unsigned_v<Serial>>>
     class SerialQueue
     {
         using ValueType = std::pair<Serial, Value>;
@@ -17,6 +18,7 @@ namespace rhi::impl
         using Storage = std::vector<ValueType>;
         using StorageIterator = typename Storage::iterator;
         using ConstStorageIterator = typename Storage::const_iterator;
+
     public:
         class Iterator
         {
@@ -26,6 +28,7 @@ namespace rhi::impl
             bool operator==(const Iterator& other) const;
             bool operator!=(const Iterator& other) const;
             Value& operator*() const;
+
         private:
             StorageIterator mStorageIterator;
         };
@@ -49,6 +52,7 @@ namespace rhi::impl
             IteratorRange(StorageIterator begin, StorageIterator end);
             Iterator begin() const;
             Iterator end() const;
+
         private:
             StorageIterator mBegin;
             StorageIterator mEnd;
@@ -60,6 +64,7 @@ namespace rhi::impl
             ConstIteratorRange(ConstStorageIterator begin, ConstStorageIterator end);
             ConstIterator begin() const;
             ConstIterator end() const;
+
         private:
             ConstStorageIterator mBegin;
             ConstStorageIterator mEnd;
@@ -88,9 +93,10 @@ namespace rhi::impl
 
     // Iterator
     template <typename Serial, typename Value, typename Enable>
-    SerialQueue<Serial, Value, Enable>::Iterator::Iterator(typename SerialQueue<Serial, Value, Enable>::StorageIterator iter)
-        :mStorageIterator(iter) {
-    }
+    SerialQueue<Serial, Value, Enable>::Iterator::Iterator(
+            typename SerialQueue<Serial, Value, Enable>::StorageIterator iter) :
+        mStorageIterator(iter)
+    {}
 
     template <typename Serial, typename Value, typename Enable>
     typename SerialQueue<Serial, Value, Enable>::Iterator& SerialQueue<Serial, Value, Enable>::Iterator::operator++()
@@ -100,13 +106,15 @@ namespace rhi::impl
     }
 
     template <typename Serial, typename Value, typename Enable>
-    bool SerialQueue<Serial, Value, Enable>::Iterator::operator==(const typename SerialQueue<Serial, Value, Enable>::Iterator& other) const
+    bool SerialQueue<Serial, Value, Enable>::Iterator::operator==(
+            const typename SerialQueue<Serial, Value, Enable>::Iterator& other) const
     {
         return other.mStorageIterator == mStorageIterator;
     }
 
     template <typename Serial, typename Value, typename Enable>
-    bool SerialQueue<Serial, Value, Enable>::Iterator::operator!=(const typename SerialQueue<Serial, Value, Enable>::Iterator& other) const
+    bool SerialQueue<Serial, Value, Enable>::Iterator::operator!=(
+            const typename SerialQueue<Serial, Value, Enable>::Iterator& other) const
     {
         return !(*this == other);
     }
@@ -120,25 +128,29 @@ namespace rhi::impl
 
     // ConstIterator
     template <typename Serial, typename Value, typename Enable>
-    SerialQueue<Serial, Value, Enable>::ConstIterator::ConstIterator(typename SerialQueue<Serial, Value, Enable>::ConstStorageIterator iter)
-        :mStorageIterator(iter) {
-    }
+    SerialQueue<Serial, Value, Enable>::ConstIterator::ConstIterator(
+            typename SerialQueue<Serial, Value, Enable>::ConstStorageIterator iter) :
+        mStorageIterator(iter)
+    {}
 
     template <typename Serial, typename Value, typename Enable>
-    typename SerialQueue<Serial, Value, Enable>::ConstIterator& SerialQueue<Serial, Value, Enable>::ConstIterator::operator++()
+    typename SerialQueue<Serial, Value, Enable>::ConstIterator& SerialQueue<
+        Serial, Value, Enable>::ConstIterator::operator++()
     {
         mStorageIterator++;
         return *this;
     }
 
     template <typename Serial, typename Value, typename Enable>
-    bool SerialQueue<Serial, Value, Enable>::ConstIterator::operator==(const typename SerialQueue<Serial, Value, Enable>::ConstIterator& other) const
+    bool SerialQueue<Serial, Value, Enable>::ConstIterator::operator==(
+            const typename SerialQueue<Serial, Value, Enable>::ConstIterator& other) const
     {
         return other.mStorageIterator == mStorageIterator;
     }
 
     template <typename Serial, typename Value, typename Enable>
-    bool SerialQueue<Serial, Value, Enable>::ConstIterator::operator!=(const typename SerialQueue<Serial, Value, Enable>::ConstIterator& other) const
+    bool SerialQueue<Serial, Value, Enable>::ConstIterator::operator!=(
+            const typename SerialQueue<Serial, Value, Enable>::ConstIterator& other) const
     {
         return !(*this == other);
     }
@@ -152,12 +164,14 @@ namespace rhi::impl
     // IteratorRange
     template <typename Serial, typename Value, typename Enable>
     SerialQueue<Serial, Value, Enable>::IteratorRange::IteratorRange(
-        typename SerialQueue<Serial, Value, Enable>::StorageIterator begin,
-        typename SerialQueue<Serial, Value, Enable>::StorageIterator end)
-        :mBegin(begin), mEnd(end) {}
+            typename SerialQueue<Serial, Value, Enable>::StorageIterator begin,
+            typename SerialQueue<Serial, Value, Enable>::StorageIterator end) :
+        mBegin(begin), mEnd(end)
+    {}
 
     template <typename Serial, typename Value, typename Enable>
-    typename SerialQueue<Serial, Value, Enable>::Iterator SerialQueue<Serial, Value, Enable>::IteratorRange::begin() const
+    typename SerialQueue<Serial, Value, Enable>::Iterator SerialQueue<
+        Serial, Value, Enable>::IteratorRange::begin() const
     {
         return SerialQueue<Serial, Value, Enable>::Iterator(mBegin);
     }
@@ -171,19 +185,21 @@ namespace rhi::impl
     // ConstIteratorRange
     template <typename Serial, typename Value, typename Enable>
     SerialQueue<Serial, Value, Enable>::ConstIteratorRange::ConstIteratorRange(
-        typename SerialQueue<Serial, Value, Enable>::ConstStorageIterator begin,
-        typename SerialQueue<Serial, Value, Enable>::ConstStorageIterator end)
-        :mBegin(begin), mEnd(end) {
-    }
+            typename SerialQueue<Serial, Value, Enable>::ConstStorageIterator begin,
+            typename SerialQueue<Serial, Value, Enable>::ConstStorageIterator end) :
+        mBegin(begin), mEnd(end)
+    {}
 
     template <typename Serial, typename Value, typename Enable>
-    typename SerialQueue<Serial, Value, Enable>::ConstIterator SerialQueue<Serial, Value, Enable>::ConstIteratorRange::begin() const
+    typename SerialQueue<Serial, Value, Enable>::ConstIterator SerialQueue<
+        Serial, Value, Enable>::ConstIteratorRange::begin() const
     {
         return SerialQueue<Serial, Value, Enable>::ConstIterator(mBegin);
     }
 
     template <typename Serial, typename Value, typename Enable>
-    typename SerialQueue<Serial, Value, Enable>::ConstIterator SerialQueue<Serial, Value, Enable>::ConstIteratorRange::end() const
+    typename SerialQueue<Serial, Value, Enable>::ConstIterator SerialQueue<
+        Serial, Value, Enable>::ConstIteratorRange::end() const
     {
         return SerialQueue<Serial, Value, Enable>::ConstIterator(mEnd);
     }
@@ -193,14 +209,14 @@ namespace rhi::impl
     void SerialQueue<Serial, Value, Enable>::Push(Serial serial, const Value& value)
     {
         assert(Empty() || serial >= LastSerial());
-        mStorage.push_back({ serial, value });
+        mStorage.push_back({serial, value});
     }
 
     template <typename Serial, typename Value, typename Enable>
     void SerialQueue<Serial, Value, Enable>::Push(Serial serial, Value&& value)
     {
         assert(Empty() || serial >= LastSerial());
-        mStorage.push_back({ serial, std::move(value)});
+        mStorage.push_back({serial, std::move(value)});
     }
 
     template <typename Serial, typename Value, typename Enable>
@@ -208,32 +224,46 @@ namespace rhi::impl
     {
         return mStorage.empty();
     }
+
     template <typename Serial, typename Value, typename Enable>
-    typename SerialQueue<Serial, Value, Enable>::IteratorRange  SerialQueue<Serial, Value, Enable>::IterateAll()
+    typename SerialQueue<Serial, Value, Enable>::IteratorRange SerialQueue<Serial, Value, Enable>::IterateAll()
     {
-        return { mStorage.begin(), mStorage.end() };
+        return {mStorage.begin(), mStorage.end()};
     }
 
     template <typename Serial, typename Value, typename Enable>
-    typename SerialQueue<Serial, Value, Enable>::IteratorRange  SerialQueue<Serial, Value, Enable>::IterateUpTo(Serial serial)
+    typename SerialQueue<Serial, Value, Enable>::IteratorRange SerialQueue<Serial, Value, Enable>::IterateUpTo(
+            Serial serial)
     {
-        auto it = std::upper_bound(mStorage.begin(), mStorage.end(), serial,
-            [](Serial s, const typename Storage::value_type& pair) { return s < pair.first; });
-        return { mStorage.begin(), it };
+        auto it = std::upper_bound(mStorage.begin(),
+                                   mStorage.end(),
+                                   serial,
+                                   [](Serial s, const typename Storage::value_type& pair)
+                                   {
+                                       return s < pair.first;
+                                   });
+        return {mStorage.begin(), it};
     }
 
     template <typename Serial, typename Value, typename Enable>
-    typename SerialQueue<Serial, Value, Enable>::ConstIteratorRange  SerialQueue<Serial, Value, Enable>::CIterateAll() const
+    typename SerialQueue<Serial, Value, Enable>::ConstIteratorRange SerialQueue<
+        Serial, Value, Enable>::CIterateAll() const
     {
-        return { mStorage.cbegin(), mStorage.cend() };
+        return {mStorage.cbegin(), mStorage.cend()};
     }
 
     template <typename Serial, typename Value, typename Enable>
-    typename SerialQueue<Serial, Value, Enable>::ConstIteratorRange  SerialQueue<Serial, Value, Enable>::CIterateUpTo(Serial serial) const
+    typename SerialQueue<Serial, Value, Enable>::ConstIteratorRange SerialQueue<Serial, Value, Enable>::CIterateUpTo(
+            Serial serial) const
     {
-        auto it = std::upper_bound(mStorage.cbegin(), mStorage.cend(), serial,
-            [](Serial s, const typename Storage::value_type& pair) { return s < pair.first; });
-        return { mStorage.cbegin(), it };
+        auto it = std::upper_bound(mStorage.cbegin(),
+                                   mStorage.cend(),
+                                   serial,
+                                   [](Serial s, const typename Storage::value_type& pair)
+                                   {
+                                       return s < pair.first;
+                                   });
+        return {mStorage.cbegin(), it};
     }
 
     template <typename Serial, typename Value, typename Enable>
@@ -245,28 +275,33 @@ namespace rhi::impl
     template <typename Serial, typename Value, typename Enable>
     void SerialQueue<Serial, Value, Enable>::ClearUpTo(Serial serial)
     {
-        auto it = std::upper_bound(mStorage.begin(), mStorage.end(), serial,
-            [](Serial s, const ValueType& pair) { return s < pair.first; });
+        auto it = std::upper_bound(mStorage.begin(),
+                                   mStorage.end(),
+                                   serial,
+                                   [](Serial s, const ValueType& pair)
+                                   {
+                                       return s < pair.first;
+                                   });
         mStorage.erase(mStorage.begin(), it);
     }
 
-    template<typename Serial, typename Value, typename Enable>
-    Serial SerialQueue<Serial, Value, Enable>::FirstSerial() const {
-        if (mStorage.empty()) {
+    template <typename Serial, typename Value, typename Enable>
+    Serial SerialQueue<Serial, Value, Enable>::FirstSerial() const
+    {
+        if (mStorage.empty())
+        {
             throw std::out_of_range("SerialQueue is empty");
         }
         return mStorage.front().first;
     }
 
-    template<typename Serial, typename Value, typename Enable>
-    Serial SerialQueue<Serial, Value, Enable>::LastSerial() const {
-        if (mStorage.empty()) {
+    template <typename Serial, typename Value, typename Enable>
+    Serial SerialQueue<Serial, Value, Enable>::LastSerial() const
+    {
+        if (mStorage.empty())
+        {
             throw std::out_of_range("SerialQueue is empty");
         }
         return mStorage.back().first;
     }
 }
-
-
-
-

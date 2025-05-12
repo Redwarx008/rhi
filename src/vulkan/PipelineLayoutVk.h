@@ -15,6 +15,7 @@ namespace rhi::impl::vulkan
         static Ref<PipelineLayout> Create(Device* device, const PipelineLayoutDesc& desc);
         VkPipelineLayout GetHandle() const;
         VkShaderStageFlags GetPushConstantVisibility() const;
+
     private:
         explicit PipelineLayout(Device* device, const PipelineLayoutDesc& desc);
         ~PipelineLayout();

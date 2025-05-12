@@ -11,7 +11,7 @@ namespace rhi::impl
     extern LoggingCallback gDebugMessageCallback;
     extern void* gDebugMessageCallbackUserData;
 
-    template<typename... ArgsType>
+    template <typename... ArgsType>
     void LogMsg(LoggingSeverity severity, const char* file, const char* functionName, int line, const ArgsType&... args)
     {
         std::string prefix;
@@ -54,23 +54,19 @@ namespace rhi::impl
             LogMsg(LoggingSeverity::Error, file, func, line, #condition);    \
             abort();                            \
         }                                    \
-    } while(false)                            \
-
+    } while(false)
 #define LOG_ERROR(...)                                                                             \
     do                                                                                             \
     {                                                                                             \
          LogMsg(LoggingSeverity::Error, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__);                \
-    } while (false)                                                                                 \
-
+    } while (false)
 
 
 #define LOG_WARNING(...)                                                                             \
     do                                                                                             \
     {                                                                                             \
          LogMsg(LoggingSeverity::Warning, __FILE__, __FUNCTION__, __LINE__, absl::StrFormat(##__VA_ARGS__));                \
-    } while (false)                                                                                 \
-
-
+    } while (false)
 
 
 #ifdef NDEBUG
@@ -84,7 +80,7 @@ namespace rhi::impl
                     LogMsg(LoggingSeverity::Error, __FILE__,  __FUNCTION__, __LINE__, absl::StrFormat(__VA_ARGS__));    \
                     abort();\
                 }            \
-            } while (false)        
+            } while (false)
 #endif // NDEBUG
 
 
@@ -106,7 +102,7 @@ namespace rhi::impl
                     LogMsg(LoggingSeverity::Error, __FILE__, __FUNCTION__, __LINE__, absl::StrFormat(__VA_ARGS__));    \
                     abort();\
                 }            \
-            } while (false)        
+            } while (false)
 #endif // NDEBUG
 
 

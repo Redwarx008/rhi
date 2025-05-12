@@ -8,9 +8,7 @@ namespace rhi::impl
 {
     ComputePassEncoder::ComputePassEncoder(CommandEncoder* encoder, EncodingContext& encodingContext) :
         PassEncoder(encoder, encodingContext)
-    {
-
-    }
+    {}
 
     ComputePassEncoder::~ComputePassEncoder()
     {
@@ -56,7 +54,8 @@ namespace rhi::impl
         cmd->indirectOffset = indirectOffset;
     }
 
-    void ComputePassEncoder::APISetBindSet(BindSetBase* set, uint32_t setIndex, uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets)
+    void ComputePassEncoder::APISetBindSet(BindSetBase* set, uint32_t setIndex, uint32_t dynamicOffsetCount,
+                                           const uint32_t* dynamicOffsets)
     {
         ASSERT(set != nullptr);
         RecordSetBindSet(set, setIndex, dynamicOffsetCount, dynamicOffsets);

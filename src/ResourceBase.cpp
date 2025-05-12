@@ -10,7 +10,7 @@ namespace rhi::impl
         mName(name)
     {}
 
-    ResourceBase::~ResourceBase() {}
+    ResourceBase::~ResourceBase() = default;
 
     DeviceBase* ResourceBase::GetDevice() const
     {
@@ -68,11 +68,17 @@ namespace rhi::impl
 
     void ResourceList::Track(ResourceBase* object)
     {
-        mObjects.Use([&object](auto lockedObjects) { lockedObjects->Prepend(object); });
+        mObjects.Use([&object](auto lockedObjects)
+        {
+            lockedObjects->Prepend(object);
+        });
     }
 
     bool ResourceList::Untrack(ResourceBase* object)
     {
-        return mObjects.Use([&object](auto lockedObjects) { return object->RemoveFromList(); });
+        return mObjects.Use([&object](auto lockedObjects)
+        {
+            return object->RemoveFromList();
+        });
     }
 }

@@ -121,7 +121,7 @@ namespace rhi::impl
 
     void RenderPipelineBase::ResolveVertexInputOffsetAndStride()
     {
-                uint32_t bufferSlotUsed = 0;
+        uint32_t bufferSlotUsed = 0;
         for (uint32_t i = 0; i < mVertexInputAttributes.size(); ++i)
         {
             bufferSlotUsed = (std::max)(bufferSlotUsed, mVertexInputAttributes[i].bindingBufferSlot + 1);
@@ -151,7 +151,8 @@ namespace rhi::impl
                 originStrides[bufferSlot] = mVertexInputAttributes[i].elementStride;
             }
 
-            currentAutoSetStride = (std::max)(currentAutoSetStride, mVertexInputAttributes[i].offsetInElement + formatInfo.bytesPerTexel);
+            currentAutoSetStride = (std::max)(currentAutoSetStride,
+                                              mVertexInputAttributes[i].offsetInElement + formatInfo.bytesPerTexel);
         }
 
         for (uint32_t i = 0; i < mVertexInputAttributes.size(); ++i)
@@ -174,5 +175,5 @@ namespace rhi::impl
         return ResourceType::RenderPipeline;
     }
 
-    RenderPipelineBase::~RenderPipelineBase() {}
+    RenderPipelineBase::~RenderPipelineBase() = default;
 }

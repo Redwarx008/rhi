@@ -19,8 +19,7 @@ namespace rhi::impl::vulkan
         }
     }
 
-    Adapter::Adapter(InstanceBase* instance, VkPhysicalDevice vulkanPhysicalDevice)
-        :
+    Adapter::Adapter(InstanceBase* instance, VkPhysicalDevice vulkanPhysicalDevice) :
         AdapterBase(instance),
         mVulkanPhysicalDevice(vulkanPhysicalDevice)
     {
@@ -72,11 +71,11 @@ namespace rhi::impl::vulkan
         mLimits.maxComputeWorkgroupSizeY = properties.limits.maxComputeWorkGroupSize[1];
         mLimits.maxComputeWorkgroupSizeZ = properties.limits.maxComputeWorkGroupSize[2];
         mLimits.maxComputeWorkgroupsPerDimension = (std::min)(
-            {
+        {
                 properties.limits.maxComputeWorkGroupCount[0],
                 properties.limits.maxComputeWorkGroupCount[1],
                 properties.limits.maxComputeWorkGroupCount[2],
-            });
+        });
         mLimits.maxStorageBuffersPerShaderStage = properties.limits.maxPerStageDescriptorStorageBuffers;
         mLimits.maxStorageTexturesPerShaderStage = properties.limits.maxPerStageDescriptorStorageImages;
         mLimits.maxPushConstantsSize = properties.limits.maxPushConstantsSize;
@@ -85,7 +84,6 @@ namespace rhi::impl::vulkan
         mLimits.maxSamplerLodBias = properties.limits.maxSamplerLodBias;
         mLimits.maxSamplerAnisotropy = properties.limits.maxSamplerAnisotropy;
     }
-
 
 
     DeviceBase* Adapter::APICreateDevice(const DeviceDesc& desc)

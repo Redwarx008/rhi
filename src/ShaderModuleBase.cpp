@@ -2,14 +2,12 @@
 
 namespace rhi::impl
 {
-    ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc desc) :
+    ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc& desc) :
         ResourceBase(device, desc.name),
         mEntry(desc.entry)
-    {
+    {}
 
-    }
-
-    ShaderModuleBase::~ShaderModuleBase() {}
+    ShaderModuleBase::~ShaderModuleBase() = default;
 
     ResourceType ShaderModuleBase::GetType() const
     {

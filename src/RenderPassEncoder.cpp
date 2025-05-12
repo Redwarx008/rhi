@@ -7,19 +7,21 @@
 
 namespace rhi::impl
 {
-    RenderPassEncoder::RenderPassEncoder(CommandEncoder* encoder, EncodingContext& encodingContext, SyncScopeUsageTracker&& usageTracker) :
+    RenderPassEncoder::RenderPassEncoder(CommandEncoder* encoder,
+                                         EncodingContext& encodingContext,
+                                         SyncScopeUsageTracker&& usageTracker) :
         PassEncoder(encoder, encodingContext),
         mUsageTracker(std::move(usageTracker))
-    {
+    {}
 
-    }
-
-    Ref<RenderPassEncoder> RenderPassEncoder::Create(CommandEncoder* encoder, EncodingContext& encodingContext, SyncScopeUsageTracker&& usageTracker)
+    Ref<RenderPassEncoder> RenderPassEncoder::Create(CommandEncoder* encoder,
+                                                     EncodingContext& encodingContext,
+                                                     SyncScopeUsageTracker&& usageTracker)
     {
-        Ref<RenderPassEncoder> renderPassEncoder = AcquireRef(new RenderPassEncoder(encoder, encodingContext, std::move(usageTracker)));
+        Ref<RenderPassEncoder> renderPassEncoder = AcquireRef(
+                new RenderPassEncoder(encoder, encodingContext, std::move(usageTracker)));
         return renderPassEncoder;
     }
-
 
 
     RenderPassEncoder::~RenderPassEncoder()
@@ -41,7 +43,10 @@ namespace rhi::impl
         mLastPipeline = pipeline;
     }
 
-    void RenderPassEncoder::APISetVertexBuffers(uint32_t firstSlot, uint32_t bufferCount, BufferBase* const * buffers, uint64_t* offsets)
+    void RenderPassEncoder::APISetVertexBuffers(uint32_t firstSlot,
+                                                uint32_t bufferCount,
+                                                BufferBase* const * buffers,
+                                                uint64_t* offsets)
     {
         ASSERT(bufferCount <= cMaxVertexBuffers);
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
@@ -60,7 +65,10 @@ namespace rhi::impl
         cmd->bufferCount = bufferCount;
     }
 
-    void RenderPassEncoder::APISetIndexBuffer(BufferBase* buffer, IndexFormat indexFormat, uint64_t offset, uint64_t size)
+    void RenderPassEncoder::APISetIndexBuffer(BufferBase* buffer,
+                                              IndexFormat indexFormat,
+                                              uint64_t offset,
+                                              uint64_t size)
     {
         ASSERT(buffer != nullptr);
         ASSERT(HasFlag(buffer->APIGetUsage(), BufferUsage::Index));
@@ -115,14 +123,20 @@ namespace rhi::impl
     }
 
 
-    void RenderPassEncoder::APISetBindSet(BindSetBase* set, uint32_t setIndex, uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets)
+    void RenderPassEncoder::APISetBindSet(BindSetBase* set,
+                                          uint32_t setIndex,
+                                          uint32_t dynamicOffsetCount,
+                                          const uint32_t* dynamicOffsets)
     {
         ASSERT(set != nullptr);
         RecordSetBindSet(set, setIndex, dynamicOffsetCount, dynamicOffsets);
         mUsageTracker.AddBindSet(set);
     }
 
-    void RenderPassEncoder::APIDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
+    void RenderPassEncoder::APIDraw(uint32_t vertexCount,
+                                    uint32_t instanceCount,
+                                    uint32_t firstVertex,
+                                    uint32_t firstInstance)
     {
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
         DrawCmd* draw = allocator.Allocate<DrawCmd>(Command::Draw);
@@ -132,7 +146,11 @@ namespace rhi::impl
         draw->firstInstance = firstInstance;
     }
 
-    void RenderPassEncoder::APIDrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t baseVertex, uint32_t firstInstance)
+    void RenderPassEncoder::APIDrawIndexed(uint32_t indexCount,
+                                           uint32_t instanceCount,
+                                           uint32_t firstIndex,
+                                           int32_t baseVertex,
+                                           uint32_t firstInstance)
     {
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
         DrawIndexedCmd* draw = allocator.Allocate<DrawIndexedCmd>(Command::DrawIndexed);
@@ -167,11 +185,16 @@ namespace rhi::impl
         mUsageTracker.BufferUsedAs(indirectBuffer, BufferUsage::Indirect);
     }
 
-    void RenderPassEncoder::APIMultiDrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset, uint32_t maxDrawCount, BufferBase* drawCountBuffer, uint64_t drawCountBufferOffset)
+    void RenderPassEncoder::APIMultiDrawIndirect(BufferBase* indirectBuffer,
+                                                 uint64_t indirectOffset,
+                                                 uint32_t maxDrawCount,
+                                                 BufferBase* drawCountBuffer,
+                                                 uint64_t drawCountBufferOffset)
     {
         ASSERT(indirectBuffer != nullptr);
         ASSERT(HasFlag(indirectBuffer->APIGetUsage(), BufferUsage::Indirect));
-        INVALID_IF(drawCountBuffer && !HasFlag(drawCountBuffer->APIGetUsage(), BufferUsage::Indirect), "drawCountBuffer must has Indirect usage.");
+        INVALID_IF(drawCountBuffer && !HasFlag(drawCountBuffer->APIGetUsage(), BufferUsage::Indirect),
+                   "drawCountBuffer must has Indirect usage.");
 
 
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
@@ -188,11 +211,16 @@ namespace rhi::impl
         }
     }
 
-    void RenderPassEncoder::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset, uint32_t maxDrawCount, BufferBase* drawCountBuffer, uint64_t drawCountBufferOffset)
+    void RenderPassEncoder::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
+                                                        uint64_t indirectOffset,
+                                                        uint32_t maxDrawCount,
+                                                        BufferBase* drawCountBuffer,
+                                                        uint64_t drawCountBufferOffset)
     {
         ASSERT(indirectBuffer != nullptr);
         ASSERT(HasFlag(indirectBuffer->APIGetUsage(), BufferUsage::Indirect));
-        INVALID_IF(drawCountBuffer && !HasFlag(drawCountBuffer->APIGetUsage(), BufferUsage::Indirect), "drawCountBuffer must has Indirect usage.");
+        INVALID_IF(drawCountBuffer && !HasFlag(drawCountBuffer->APIGetUsage(), BufferUsage::Indirect),
+                   "drawCountBuffer must has Indirect usage.");
 
 
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();

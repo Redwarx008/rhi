@@ -28,6 +28,7 @@ namespace rhi::impl
         ShaderStage GetShaderStageMask() const;
         bool HasShaderStage(ShaderStage stage) const;
         const ShaderStageState& GetShaderStageState(ShaderStage stage) const;
+
     protected:
         explicit PipelineBase(DeviceBase* device, const RenderPipelineDesc& desc);
         explicit PipelineBase(DeviceBase* device, const ComputePipelineDesc& desc);

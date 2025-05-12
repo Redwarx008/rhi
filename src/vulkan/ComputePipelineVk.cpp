@@ -9,11 +9,10 @@ namespace rhi::impl::vulkan
 {
     ComputePipeline::ComputePipeline(Device* device, const ComputePipelineDesc& desc) :
         ComputePipelineBase(device, desc)
-    {
+    {}
 
-    }
-
-    ComputePipeline::~ComputePipeline() {}
+    ComputePipeline::~ComputePipeline()
+    {}
 
     Ref<ComputePipeline> ComputePipeline::Create(Device* device, const ComputePipelineDesc& desc)
     {

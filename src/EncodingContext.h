@@ -18,6 +18,7 @@ namespace rhi::impl
         std::vector<SyncScopeResourceUsage> AcquireComputePassUsages();
         void ExitRenderPass(SyncScopeUsageTracker& usageTracker);
         void ExitComputePass(SyncScopeUsageTracker& usageTracker);
+
     private:
         std::vector<SyncScopeResourceUsage> mRenderPassUsages;
         std::vector<SyncScopeResourceUsage> mComputePassUsages;

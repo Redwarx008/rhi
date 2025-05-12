@@ -6,9 +6,12 @@
 
 namespace rhi::impl
 {
-    UploadAllocator::RingBuffer::RingBuffer(uint64_t maxSize) :mMaxBlockSize(maxSize) {}
+    UploadAllocator::RingBuffer::RingBuffer(uint64_t maxSize) :
+        mMaxBlockSize(maxSize)
+    {}
 
-    UploadAllocator::RingBuffer::~RingBuffer() {};
+    UploadAllocator::RingBuffer::~RingBuffer()
+    {};
 
     uint64_t UploadAllocator::RingBuffer::Allocate(uint64_t allocationSize, uint64_t serial, uint64_t offsetAlignment)
     {
@@ -77,7 +80,8 @@ namespace rhi::impl
 
     void UploadAllocator::RingBuffer::Deallocate(uint64_t lastCompletedSerial)
     {
-        for (Request& request : mInflightRequests.IterateUpTo(lastCompletedSerial)) {
+        for (Request& request : mInflightRequests.IterateUpTo(lastCompletedSerial))
+        {
             mUsedStartOffset = request.endOffset;
             mUsedSize -= request.size;
         }
@@ -101,9 +105,12 @@ namespace rhi::impl
         return mInflightRequests.Empty();
     }
 
-    UploadAllocator::UploadAllocator(DeviceBase* device) : mDevice(device) {}
+    UploadAllocator::UploadAllocator(DeviceBase* device) :
+        mDevice(device)
+    {}
 
-    UploadAllocator::~UploadAllocator() {}
+    UploadAllocator::~UploadAllocator()
+    {}
 
     UploadAllocation UploadAllocator::Allocate(uint64_t allocationSize, uint64_t serial, uint64_t offsetAlignment)
     {
@@ -118,7 +125,7 @@ namespace rhi::impl
             UploadAllocation allocation{};
             allocation.buffer = buffer.Get();
             allocation.mappedAddress = buffer->APIGetMappedPointer();
-            
+
             mLargeStageBuffersToDelete.Push(serial, std::move(buffer));
             return allocation;
         }
@@ -177,7 +184,7 @@ namespace rhi::impl
         for (auto ringBufferIter = mRingBuffers.begin(); ringBufferIter != mRingBuffers.end();)
         {
             (*ringBufferIter)->Deallocate(lastCompletedSerial);
-            if ((*ringBufferIter)->Empty() &&  mRingBuffers.size() > 1)
+            if ((*ringBufferIter)->Empty() && mRingBuffers.size() > 1)
             {
                 // Never erase the last buffer as to prevent re-creating smaller buffers.
                 ringBufferIter = mRingBuffers.erase(ringBufferIter);

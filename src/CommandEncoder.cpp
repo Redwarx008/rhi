@@ -192,7 +192,7 @@ namespace rhi::impl
         INVALID_IF(mState != State::OutsideOfPass, "The command must be outside of the compute pass and render pass.");
 
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
-        BeginComputePassCmd* cmd = allocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
+        allocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
         mState = State::InComputePass;
         Ref<ComputePassEncoder> computePassEncoder = ComputePassEncoder::Create(this, mEncodingContext);
         return computePassEncoder;

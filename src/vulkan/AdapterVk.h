@@ -15,8 +15,8 @@ namespace rhi::impl::vulkan
         DeviceBase* APICreateDevice(const DeviceDesc& desc) override;
         // internal
         VkPhysicalDevice GetHandle() const;
-    private:
 
+    private:
         VkPhysicalDevice mVulkanPhysicalDevice = VK_NULL_HANDLE;
     };
 }

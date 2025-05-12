@@ -20,6 +20,7 @@ namespace rhi::impl
         InstanceBase* GetInstance() const;
         void* GetHInstance() const;
         void* GetHWND() const;
+
     protected:
         explicit SurfaceBase(InstanceBase* instance);
         ~SurfaceBase();

@@ -12,6 +12,7 @@ namespace rhi::impl
         {
             mRefCount.fetch_add(1, std::memory_order_relaxed);
         }
+
         void Release()
         {
             // See the explanation in the Boost documentation:
@@ -24,16 +25,21 @@ namespace rhi::impl
                 DeleteThis();
             }
         }
+
     protected:
         uint64_t GetRefCount() const
         {
             return mRefCount;
         }
-        virtual ~RefCounted() {}
+
+        virtual ~RefCounted()
+        {}
+
         virtual void DeleteThis()
         {
             delete this;
         }
+
     private:
         std::atomic<uint64_t> mRefCount = 1;
     };

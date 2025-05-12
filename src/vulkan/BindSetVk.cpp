@@ -36,10 +36,11 @@ namespace rhi::impl::vulkan
             write.dstBinding = desc.entries[i].binding;
             write.dstArrayElement = desc.entries[i].arrayElementIndex;
             write.descriptorCount = 1;
-            
+
             BindingType bindingType = desc.layout->GetBindingType(desc.entries[i].binding);
 
-            write.descriptorType = ToVkDescriptorType(bindingType, desc.layout->HasDynamicOffset(desc.entries[i].binding));
+            write.descriptorType = ToVkDescriptorType(bindingType,
+                                                      desc.layout->HasDynamicOffset(desc.entries[i].binding));
 
             switch (bindingType)
             {
@@ -47,7 +48,8 @@ namespace rhi::impl::vulkan
             {
                 VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
                 imageInfo.imageView = checked_cast<TextureView>(desc.entries[i].textureView)->GetHandle();
-                imageInfo.imageLayout = ImageLayoutConvert(TextureUsage::SampledBinding, desc.entries[i].textureView->GetTexture()->APIGetFormat());
+                imageInfo.imageLayout = ImageLayoutConvert(TextureUsage::SampledBinding,
+                                                           desc.entries[i].textureView->GetTexture()->APIGetFormat());
                 write.pImageInfo = &imageInfo;
                 break;
             }
@@ -80,7 +82,8 @@ namespace rhi::impl::vulkan
             {
                 VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
                 imageInfo.imageView = checked_cast<TextureView>(desc.entries[i].textureView)->GetHandle();
-                imageInfo.imageLayout = ImageLayoutConvert(TextureUsage::StorageBinding, desc.entries[i].textureView->GetTexture()->APIGetFormat());
+                imageInfo.imageLayout = ImageLayoutConvert(TextureUsage::StorageBinding,
+                                                           desc.entries[i].textureView->GetTexture()->APIGetFormat());
                 imageInfo.sampler = checked_cast<Sampler>(desc.entries[i].sampler)->GetHandle();
                 write.pImageInfo = &imageInfo;
                 break;
@@ -93,7 +96,8 @@ namespace rhi::impl::vulkan
         vkUpdateDescriptorSets(device->GetHandle(), desc.entryCount, writes.data(), 0, nullptr);
     }
 
-    BindSet::~BindSet() {}
+    BindSet::~BindSet()
+    {}
 
     VkDescriptorSet BindSet::GetHandle() const
     {
@@ -102,7 +106,8 @@ namespace rhi::impl::vulkan
 
     void BindSet::MarkUsedInQueue(QueueType queueType)
     {
-        static_assert(static_cast<uint32_t>(QueueType::Graphics) == 0 && static_cast<uint32_t>(QueueType::Compute) == 1);
+        static_assert(static_cast<uint32_t>(QueueType::Graphics) == 0 && static_cast<uint32_t>(QueueType::Compute) == 1)
+                ;
         ASSERT(queueType != QueueType::Transfer);
         ASSERT(mDevice->GetQueue(queueType) != nullptr);
         mUsedInQueues[static_cast<uint32_t>(queueType)] = true;
@@ -110,7 +115,8 @@ namespace rhi::impl::vulkan
 
     bool BindSet::IsUsedInQueue(QueueType queueType)
     {
-        static_assert(static_cast<uint32_t>(QueueType::Graphics) == 0 && static_cast<uint32_t>(QueueType::Compute) == 1);
+        static_assert(static_cast<uint32_t>(QueueType::Graphics) == 0 && static_cast<uint32_t>(QueueType::Compute) == 1)
+                ;
         ASSERT(queueType != QueueType::Transfer);
 
         return mUsedInQueues[static_cast<uint32_t>(queueType)];

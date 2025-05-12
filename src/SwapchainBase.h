@@ -15,6 +15,7 @@ namespace rhi::impl
         virtual Ref<TextureBase> GetCurrentTexture() = 0;
         virtual void Present() = 0;
         TextureFormat GetFormat() const;
+
     protected:
         explicit SwapChainBase(DeviceBase* device, SurfaceBase* surface, const SurfaceConfiguration& config);
         ~SwapChainBase();

@@ -26,7 +26,6 @@
 #include <optional>
 
 
-
 namespace rhi::impl::vulkan
 {
     Ref<Device> Device::Create(Adapter* adapter, const DeviceDesc& desc)
@@ -59,7 +58,7 @@ namespace rhi::impl::vulkan
         {
             std::vector<VkExtensionProperties> extensions(extCount);
             if (vkEnumerateDeviceExtensionProperties(checked_cast<Adapter>(mAdapter)->GetHandle(),
-                nullptr, &extCount, &extensions.front()) == VK_SUCCESS)
+                                                     nullptr, &extCount, &extensions.front()) == VK_SUCCESS)
             {
                 for (auto& ext : extensions)
                 {
@@ -70,7 +69,8 @@ namespace rhi::impl::vulkan
 
         for (auto extension : deviceExtensions)
         {
-            if (std::find(supportedExtensions.begin(), supportedExtensions.end(), extension) == supportedExtensions.end())
+            if (std::find(supportedExtensions.begin(), supportedExtensions.end(), extension) == supportedExtensions.
+                end())
             {
                 LOG_ERROR(extension, "is not supported.");
                 return false;
@@ -110,9 +110,11 @@ namespace rhi::impl::vulkan
         feature12.pNext = &feature13;
 
         uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(checked_cast<Adapter>(mAdapter)->GetHandle(), &queueFamilyCount, nullptr);
+        vkGetPhysicalDeviceQueueFamilyProperties(checked_cast<Adapter>(mAdapter)->GetHandle(), &queueFamilyCount,
+                                                 nullptr);
         std::vector<VkQueueFamilyProperties> queueFamilyPropertieses(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(checked_cast<Adapter>(mAdapter)->GetHandle(), &queueFamilyCount, queueFamilyPropertieses.data());
+        vkGetPhysicalDeviceQueueFamilyProperties(checked_cast<Adapter>(mAdapter)->GetHandle(), &queueFamilyCount,
+                                                 queueFamilyPropertieses.data());
 
         std::array<std::optional<uint32_t>, 3> queueFamlies;
         for (uint32_t i = 0; i < queueFamilyPropertieses.size(); i++)
@@ -165,7 +167,8 @@ namespace rhi::impl::vulkan
         deviceCreateInfo.pQueueCreateInfos = queueCIs.data();
         deviceCreateInfo.pNext = &feature12;
 
-        VkResult err = vkCreateDevice(checked_cast<Adapter>(mAdapter)->GetHandle(), &deviceCreateInfo, nullptr, &mHandle);
+        VkResult err = vkCreateDevice(checked_cast<Adapter>(mAdapter)->GetHandle(), &deviceCreateInfo, nullptr,
+                                      &mHandle);
         CHECK_VK_RESULT_FALSE(err);
 
         VmaAllocatorCreateInfo allocatorCreateInfo{};
@@ -173,7 +176,8 @@ namespace rhi::impl::vulkan
         allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_3;
         allocatorCreateInfo.physicalDevice = checked_cast<Adapter>(mAdapter)->GetHandle();
         allocatorCreateInfo.device = mHandle;
-        allocatorCreateInfo.instance = checked_cast<Instance>(checked_cast<Adapter>(mAdapter)->APIGetInstance())->GetHandle();
+        allocatorCreateInfo.instance = checked_cast<Instance>(checked_cast<Adapter>(mAdapter)->APIGetInstance())->
+                GetHandle();
         err = vmaCreateAllocator(&allocatorCreateInfo, &mMemoryAllocator);
         CHECK_VK_RESULT_FALSE(err);
 
@@ -199,9 +203,12 @@ namespace rhi::impl::vulkan
         Instance* instance = checked_cast<Instance>(checked_cast<Adapter>(APIGetAdapter())->APIGetInstance());
         if (instance->IsDebugLayerEnabled())
         {
-            Fn.vkCmdBeginDebugUtilsLabelEXT = reinterpret_cast<PFN_vkCmdBeginDebugUtilsLabelEXT>(vkGetInstanceProcAddr(instance->GetHandle(), "vkCmdBeginDebugUtilsLabelEXT"));
-            Fn.vkCmdEndDebugUtilsLabelEXT = reinterpret_cast<PFN_vkCmdEndDebugUtilsLabelEXT>(vkGetInstanceProcAddr(instance->GetHandle(), "vkCmdBeginDebugUtilsLabelEXT"));
-            Fn.vkSetDebugUtilsObjectNameEXT = reinterpret_cast<PFN_vkSetDebugUtilsObjectNameEXT>(vkGetInstanceProcAddr(instance->GetHandle(), "vkSetDebugUtilsObjectNameEXT"));
+            Fn.vkCmdBeginDebugUtilsLabelEXT = reinterpret_cast<PFN_vkCmdBeginDebugUtilsLabelEXT>(vkGetInstanceProcAddr(
+                    instance->GetHandle(), "vkCmdBeginDebugUtilsLabelEXT"));
+            Fn.vkCmdEndDebugUtilsLabelEXT = reinterpret_cast<PFN_vkCmdEndDebugUtilsLabelEXT>(vkGetInstanceProcAddr(
+                    instance->GetHandle(), "vkCmdBeginDebugUtilsLabelEXT"));
+            Fn.vkSetDebugUtilsObjectNameEXT = reinterpret_cast<PFN_vkSetDebugUtilsObjectNameEXT>(vkGetInstanceProcAddr(
+                    instance->GetHandle(), "vkSetDebugUtilsObjectNameEXT"));
         }
     }
 
@@ -263,7 +270,8 @@ namespace rhi::impl::vulkan
         return mMemoryAllocator;
     }
 
-    Ref<SwapChainBase> Device::CreateSwapChain(SurfaceBase* surface, SwapChainBase* previous, const SurfaceConfiguration& config)
+    Ref<SwapChainBase> Device::CreateSwapChain(SurfaceBase* surface, SwapChainBase* previous,
+                                               const SurfaceConfiguration& config)
     {
         return SwapChain::Create(this, surface, previous, config);
     }
@@ -298,7 +306,7 @@ namespace rhi::impl::vulkan
         return Texture::Create(this, desc);
     }
 
-    
+
     Ref<BufferBase> Device::CreateBuffer(const BufferDesc& desc)
     {
         return Buffer::Create(this, desc);

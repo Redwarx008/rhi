@@ -13,11 +13,10 @@ namespace rhi::impl::vulkan
 {
     PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDesc& desc) :
         PipelineLayoutBase(device, desc)
-    {
+    {}
 
-    }
-
-    PipelineLayout::~PipelineLayout() {}
+    PipelineLayout::~PipelineLayout()
+    {}
 
     Ref<PipelineLayout> PipelineLayout::Create(Device* device, const PipelineLayoutDesc& desc)
     {
@@ -42,7 +41,8 @@ namespace rhi::impl::vulkan
             }
             else
             {
-                descriptorSetLayouts[index] = checked_cast<BindSetLayout>(mDevice->GetEmptyBindSetLayout())->GetHandle();
+                descriptorSetLayouts[index] = checked_cast<BindSetLayout>(mDevice->GetEmptyBindSetLayout())->
+                        GetHandle();
             }
         }
 

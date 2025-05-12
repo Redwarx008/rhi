@@ -8,6 +8,7 @@
 namespace rhi::impl
 {
     class DeviceBase;
+
     class BindSetLayoutBase : public ResourceBase
     {
     public:
@@ -15,6 +16,7 @@ namespace rhi::impl
         BindingType GetBindingType(uint32_t binding) const;
         bool HasDynamicOffset(uint32_t binding) const;
         ShaderStage GetVisibility(uint32_t binding) const;
+
     protected:
         explicit BindSetLayoutBase(DeviceBase* device, const BindSetLayoutDesc& desc);
         ~BindSetLayoutBase();
@@ -26,6 +28,7 @@ namespace rhi::impl
             ShaderStage visibility;
             bool hasDynamicOffset;
         };
+
         std::vector<BindingInfo> mBindingIndexToInfoMap;
     };
 }

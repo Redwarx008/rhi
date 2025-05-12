@@ -32,15 +32,25 @@ namespace rhi::impl::vulkan
         VkSemaphore GetTrackingSubmitSemaphore() const;
         void EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator);
         void SubmitPendingCommands();
+
     private:
         explicit Queue(Device* device, uint32_t family, QueueType type);
         void Initialize();
         void TickImpl(uint64_t completedSerial) override;
-        uint64_t SubmitImpl(CommandListBase* const* commands, uint32_t commandListCount, ResourceTransfer const* transfers, uint32_t transferCount) override;
+        uint64_t SubmitImpl(CommandListBase* const* commands,
+                            uint32_t commandListCount,
+                            ResourceTransfer const* transfers,
+                            uint32_t transferCount) override;
         uint64_t QueryCompletedSerial() override;
         void MarkRecordingContextIsUsed() override;
-        void CopyFromStagingToBufferImpl(BufferBase* src, uint64_t srcOffset, BufferBase* dst, uint64_t destOffset, uint64_t size) override;
-        void CopyFromStagingToTextureImpl(BufferBase* src, const TextureSlice& dst, const TextureDataLayout& dataLayout) override;
+        void CopyFromStagingToBufferImpl(BufferBase* src,
+                                         uint64_t srcOffset,
+                                         BufferBase* dst,
+                                         uint64_t destOffset,
+                                         uint64_t size) override;
+        void CopyFromStagingToTextureImpl(BufferBase* src,
+                                          const TextureSlice& dst,
+                                          const TextureDataLayout& dataLayout) override;
         void WaitForImpl(QueueBase* queue, uint64_t submitSerial) override;
         void RecycleCompletedCommandBuffer(uint64_t completedSerial);
         void SetTrackingSubmitSemaphore();
@@ -64,4 +74,3 @@ namespace rhi::impl::vulkan
         MutexProtected<SerialQueue<uint64_t, Ref<DescriptorSetAllocator>>> mDescriptorAllocatorsPendingDeallocation;
     };
 }
-

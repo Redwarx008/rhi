@@ -15,7 +15,9 @@ namespace rhi::impl
         }
     }
 
-    BindSetBase::~BindSetBase() {}
+    BindSetBase::~BindSetBase()
+    {
+    }
 
     void BindSetBase::APIDestroy()
     {

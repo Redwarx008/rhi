@@ -9,6 +9,7 @@
 namespace rhi::impl::vulkan
 {
     class Device;
+
     class BindSet final : public BindSetBase
     {
     public:
@@ -18,6 +19,7 @@ namespace rhi::impl::vulkan
         VkDescriptorSet GetHandle() const;
         void MarkUsedInQueue(QueueType queueType);
         bool IsUsedInQueue(QueueType queueType);
+
     private:
         ~BindSet();
         void DestroyImpl() override;

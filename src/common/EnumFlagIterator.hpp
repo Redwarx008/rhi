@@ -3,12 +3,13 @@
 namespace rhi::impl
 {
     template <typename Enum>
-    class EnumFlagIterator {
+    class EnumFlagIterator
+    {
     public:
         using UnderlyingType = std::underlying_type_t<Enum>;
 
-        EnumFlagIterator(Enum mCombination, UnderlyingType offset)
-            : mCombination(mCombination), mOffset(offset)
+        EnumFlagIterator(Enum mCombination, UnderlyingType offset) :
+            mCombination(mCombination), mOffset(offset)
         {
             moveToNextValidFlag();
         }
@@ -45,9 +46,12 @@ namespace rhi::impl
     };
 
     template <typename Enum>
-    class EnumFlagRange {
+    class EnumFlagRange
+    {
     public:
-        EnumFlagRange(Enum combination) : mCombination(combination) {}
+        EnumFlagRange(Enum combination) :
+            mCombination(combination)
+        {}
 
         EnumFlagIterator<Enum> begin() const
         {
@@ -64,7 +68,7 @@ namespace rhi::impl
     };
 
     // Usage: for(auto component : IterateEnumComponent(combination)).
-    template<typename Enum>
+    template <typename Enum>
     EnumFlagRange<Enum> IterateEnumFlags(Enum combination)
     {
         return EnumFlagRange<Enum>(combination);

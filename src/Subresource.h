@@ -5,7 +5,7 @@
 
 namespace rhi::impl
 {
-    enum class Aspect : uint8_t 
+    enum class Aspect : uint8_t
     {
         None = 0x0,
         Color = 0x1,
@@ -16,9 +16,10 @@ namespace rhi::impl
         Plane1 = 0x10,
         Plane2 = 0x20,
     };
+
     ENUM_CLASS_FLAG_OPERATORS(Aspect);
 
-    struct SubresourceRange 
+    struct SubresourceRange
     {
         Aspect aspects = Aspect::None;
         uint32_t baseArrayLayer = 0;
@@ -27,7 +28,11 @@ namespace rhi::impl
         uint32_t levelCount = 0;
 
         SubresourceRange() = default;
-        SubresourceRange(Aspect _aspects, uint32_t _baseArrayLayer, uint32_t _layerCount, uint32_t _baseMipLevel, uint32_t _levelCount);
+        SubresourceRange(Aspect _aspects,
+                         uint32_t _baseArrayLayer,
+                         uint32_t _layerCount,
+                         uint32_t _baseMipLevel,
+                         uint32_t _levelCount);
 
         static SubresourceRange MakeSingle(Aspect aspect, uint32_t baseArrayLayer, uint32_t baseMipLevel);
 

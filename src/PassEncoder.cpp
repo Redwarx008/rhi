@@ -14,9 +14,12 @@ namespace rhi::impl
 
     }
 
-    PassEncoder::~PassEncoder() {}
+    PassEncoder::~PassEncoder()
+    {
+    }
 
-    void PassEncoder::RecordSetBindSet(BindSetBase* set, uint32_t setIndex, uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets)
+    void PassEncoder::RecordSetBindSet(BindSetBase* set, uint32_t setIndex, uint32_t dynamicOffsetCount,
+                                       const uint32_t* dynamicOffsets)
     {
         INVALID_IF(mLastPipeline == nullptr, "Must set pipeline before set BindSet.");
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
@@ -41,7 +44,7 @@ namespace rhi::impl
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
         SetPushConstantCmd* cmd = allocator.Allocate<SetPushConstantCmd>(Command::SetPushConstant);
         cmd->size = mLastPipeline->GetLayout()->GetPushConstants().size;
-        
+
         uint8_t* pData = allocator.AllocateData<uint8_t>(size);
         memcpy(pData, data, size);
     }

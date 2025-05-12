@@ -18,17 +18,18 @@ namespace rhi::impl
         InstanceBase* APIGetInstance() const;
         //internal
         Ref<InstanceBase> GetInstance() const;
+
     protected:
         AdapterBase(InstanceBase* instance);
         ~AdapterBase();
 
         Ref<InstanceBase> mInstance;
 
-        uint32_t mApiVersion;
-        uint32_t mDriverVersion;
-        uint32_t mVendorID;
-        uint32_t mDeviceID;
-        AdapterType mAdapterType;
+        uint32_t mApiVersion = 0;
+        uint32_t mDriverVersion = 0;
+        uint32_t mVendorID = 0;
+        uint32_t mDeviceID = 0;
+        AdapterType mAdapterType = AdapterType::Unknown;
         std::string mDeviceName;
         Limits mLimits;
     };

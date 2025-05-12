@@ -7,9 +7,9 @@
 
 namespace rhi::impl
 {
-    ShaderStageState::ShaderStageState() {}
+    ShaderStageState::ShaderStageState() = default;
 
-    ShaderStageState::~ShaderStageState() {}
+    ShaderStageState::~ShaderStageState() = default;
 
     PipelineBase::PipelineBase(DeviceBase* device, const RenderPipelineDesc& desc) :
         ResourceBase(device, desc.name),
@@ -30,7 +30,7 @@ namespace rhi::impl
         AddShaderStageState(desc.computeShader, ShaderStage::Compute);
     }
 
-    PipelineBase::~PipelineBase() {}
+    PipelineBase::~PipelineBase() = default;
 
     void PipelineBase::AddShaderStageState(const ShaderState* shader, ShaderStage stage)
     {

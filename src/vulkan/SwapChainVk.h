@@ -10,10 +10,14 @@ namespace rhi::impl::vulkan
 {
     class Device;
     class SwapChainTexture;
+
     class SwapChain final : public SwapChainBase
     {
     public:
-        static Ref<SwapChain> Create(Device* device, SurfaceBase* surface, SwapChainBase* previous, const SurfaceConfiguration& config);
+        static Ref<SwapChain> Create(Device* device,
+                                     SurfaceBase* surface,
+                                     SwapChainBase* previous,
+                                     const SurfaceConfiguration& config);
         ~SwapChain();
         VkSwapchainKHR GetHandle() const;
         SurfaceAcquireNextTextureStatus AcquireNextTexture() override;
@@ -21,6 +25,7 @@ namespace rhi::impl::vulkan
         Ref<TextureBase> GetCurrentTexture() override;
         void Present() override;
         void DestroySwapChain();
+
     private:
         SwapChain(Device* device, SurfaceBase* surface, const SurfaceConfiguration& config);
         bool Initialize(SwapChainBase* previous);

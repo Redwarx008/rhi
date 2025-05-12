@@ -29,12 +29,16 @@ namespace rhi::impl
 
     bool CallbackTaskManager::IsEmpty()
     {
-        return mStateAndQueue.Use([](auto stateAndQueue) { return stateAndQueue->mTaskQueue.empty(); });
+        return mStateAndQueue.Use([](auto stateAndQueue)
+        {
+            return stateAndQueue->mTaskQueue.empty();
+        });
     }
 
     void CallbackTaskManager::AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask)
     {
-        mStateAndQueue.Use([&](auto stateAndQueue) {
+        mStateAndQueue.Use([&](auto stateAndQueue)
+        {
             switch (stateAndQueue->mState)
             {
             case CallbackState::ShutDown:
@@ -47,13 +51,14 @@ namespace rhi::impl
                 break;
             }
             stateAndQueue->mTaskQueue.push_back(std::move(callbackTask));
-            });
+        });
     }
 
 
     void CallbackTaskManager::HandleDeviceLoss()
     {
-        mStateAndQueue.Use([&](auto stateAndQueue) {
+        mStateAndQueue.Use([&](auto stateAndQueue)
+        {
             if (stateAndQueue->mState != CallbackState::Normal)
             {
                 return;
@@ -63,23 +68,23 @@ namespace rhi::impl
             {
                 task->OnDeviceLoss();
             }
-            });
+        });
     }
 
     void CallbackTaskManager::HandleShutDown()
     {
         mStateAndQueue.Use([&](auto stateAndQueue)
+        {
+            if (stateAndQueue->mState != CallbackState::Normal)
             {
-                if (stateAndQueue->mState != CallbackState::Normal)
-                {
-                    return;
-                }
-                stateAndQueue->mState = CallbackState::ShutDown;
-                for (auto& task : stateAndQueue->mTaskQueue)
-                {
-                    task->OnShutDown();
-                }
-            });
+                return;
+            }
+            stateAndQueue->mState = CallbackState::ShutDown;
+            for (auto& task : stateAndQueue->mTaskQueue)
+            {
+                task->OnShutDown();
+            }
+        });
     }
 
     void CallbackTaskManager::Flush()
@@ -94,7 +99,10 @@ namespace rhi::impl
         // such reentrant call, we remove all the callback tasks from mCallbackTaskManager,
         // update mCallbackTaskManager, then call all the callbacks.
         std::vector<std::unique_ptr<CallbackTask>> allTasks;
-        mStateAndQueue.Use([&](auto stateAndQueue) { allTasks.swap(stateAndQueue->mTaskQueue); });
+        mStateAndQueue.Use([&](auto stateAndQueue)
+        {
+            allTasks.swap(stateAndQueue->mTaskQueue);
+        });
 
         for (auto& callbackTask : allTasks)
         {

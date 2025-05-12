@@ -13,13 +13,15 @@ namespace rhi::impl::vulkan
     // Not a real GPU limit, but used to optimize parts of rhi which expect valid usage of the
     // API. There should never be more bindings than the max per stage, for each stage.
     static constexpr uint32_t cMaxBindingsPerPipelineLayout =
-        cNumStages * (cMaxSampledTexturesPerShaderStage + cMaxSamplersPerShaderStage +
-            cMaxStorageBuffersPerShaderStage + cMaxStorageTexturesPerShaderStage +
-            cMaxUniformBuffersPerShaderStage);
+            cNumStages * (cMaxSampledTexturesPerShaderStage + cMaxSamplersPerShaderStage +
+                cMaxStorageBuffersPerShaderStage + cMaxStorageTexturesPerShaderStage +
+                cMaxUniformBuffersPerShaderStage);
 
     static constexpr uint32_t cMaxDescriptorsPerPool = 512;
 
-    DescriptorSetAllocator::DescriptorSetAllocator(Device* device, std::unordered_map<VkDescriptorType, uint32_t>&& descriptorCountPerType) :
+    DescriptorSetAllocator::DescriptorSetAllocator(Device* device,
+                                                   std::unordered_map<VkDescriptorType, uint32_t>&&
+                                                   descriptorCountPerType) :
         mDevice(device)
     {
         // Compute the total number of descriptors for this layout.
@@ -30,7 +32,7 @@ namespace rhi::impl::vulkan
         {
             assert(count > 0);
             totalDescriptorCount += count;
-            mPoolSizes.push_back(VkDescriptorPoolSize{ type, count });
+            mPoolSizes.push_back(VkDescriptorPoolSize{type, count});
         }
 
         assert(totalDescriptorCount <= cMaxBindingsPerPipelineLayout);
@@ -39,15 +41,15 @@ namespace rhi::impl::vulkan
         assert(mMaxSets > 0);
 
         // Grow the number of desciptors in the pool to fit the computed |mMaxSets|.
-        for (auto& poolSize : mPoolSizes) 
+        for (auto& poolSize : mPoolSizes)
         {
             poolSize.descriptorCount *= mMaxSets;
         }
     }
 
-    DescriptorSetAllocator::~DescriptorSetAllocator() 
+    DescriptorSetAllocator::~DescriptorSetAllocator()
     {
-        for (auto& pool : mDescriptorPools) 
+        for (auto& pool : mDescriptorPools)
         {
             assert(pool.freeSetIndices.size() == mMaxSets);
             if (pool.vkPool != VK_NULL_HANDLE)
@@ -58,13 +60,16 @@ namespace rhi::impl::vulkan
         }
     }
 
-    Ref<DescriptorSetAllocator> DescriptorSetAllocator::Create(Device* device, std::unordered_map<VkDescriptorType, uint32_t>&& descriptorCountPerType)
+    Ref<DescriptorSetAllocator> DescriptorSetAllocator::Create(Device* device,
+                                                               std::unordered_map<VkDescriptorType, uint32_t>&&
+                                                               descriptorCountPerType)
     {
-        Ref<DescriptorSetAllocator> allocator = AcquireRef(new DescriptorSetAllocator(device, std::move(descriptorCountPerType)));
+        Ref<DescriptorSetAllocator> allocator = AcquireRef(
+                new DescriptorSetAllocator(device, std::move(descriptorCountPerType)));
         return allocator;
     }
 
-    DescriptorSetAllocation DescriptorSetAllocator::Allocate(BindSetLayout* layout) 
+    DescriptorSetAllocation DescriptorSetAllocator::Allocate(BindSetLayout* layout)
     {
         std::lock_guard<std::mutex> lock(mMutex);
 
@@ -83,12 +88,12 @@ namespace rhi::impl::vulkan
         uint32_t setIndex = pool->freeSetIndices.back();
         pool->freeSetIndices.pop_back();
 
-        if (pool->freeSetIndices.empty()) 
+        if (pool->freeSetIndices.empty())
         {
             mAvailableDescriptorPoolIndices.pop_back();
         }
 
-        return DescriptorSetAllocation{ pool->sets[setIndex], poolIndex, setIndex };
+        return DescriptorSetAllocation{pool->sets[setIndex], poolIndex, setIndex};
     }
 
 
@@ -138,10 +143,12 @@ namespace rhi::impl::vulkan
 
         mAvailableDescriptorPoolIndices.push_back(mDescriptorPools.size());
         mDescriptorPools.emplace_back(
-            DescriptorPool{ descriptorPool, std::move(sets), std::move(freeSetIndices) });
+                DescriptorPool{descriptorPool, std::move(sets), std::move(freeSetIndices)});
     }
 
-    void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo, bool usedInGraphicsQueue, bool usedInComputeQueue)
+    void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo,
+                                            bool usedInGraphicsQueue,
+                                            bool usedInComputeQueue)
     {
         std::lock_guard<std::mutex> lock(mMutex);
 
@@ -159,28 +166,28 @@ namespace rhi::impl::vulkan
 
 
         auto deferredDeallocationFunc = [&](QueueType queueType)
+        {
+            deallocation->refQueueCount += 1;
+
+            Queue* queue = checked_cast<Queue>(mDevice->GetQueue(queueType).Get());
+
+            const uint64_t serial = queue->GetPendingSubmitSerial();
+
+            assert(static_cast<uint32_t>(queueType) <= 1);
+
+            mDeallocationsInQueues[static_cast<uint32_t>(queueType)].pendingDeallocations.Push(serial, deallocation);
+            if (mDeallocationsInQueues[static_cast<uint32_t>(queueType)].lastDeallocationSerial != serial)
             {
-                deallocation->refQueueCount += 1;
-
-                Queue* queue = checked_cast<Queue>(mDevice->GetQueue(queueType).Get());
-
-                const uint64_t serial = queue->GetPendingSubmitSerial();
-
-                assert(static_cast<uint32_t>(queueType) <= 1);
-
-                mDeallocationsInQueues[static_cast<uint32_t>(queueType)].pendingDeallocations.Push(serial, deallocation);
-                if (mDeallocationsInQueues[static_cast<uint32_t>(queueType)].lastDeallocationSerial != serial)
-                {
-                    mDeallocationsInQueues[static_cast<uint32_t>(queueType)].lastDeallocationSerial = serial;
-                    queue->EnqueueDeferredDeallocation(this);
-                }
-            };
+                mDeallocationsInQueues[static_cast<uint32_t>(queueType)].lastDeallocationSerial = serial;
+                queue->EnqueueDeferredDeallocation(this);
+            }
+        };
 
         if (usedInGraphicsQueue)
         {
             deferredDeallocationFunc(QueueType::Graphics);
         }
-            
+
         if (usedInComputeQueue)
         {
             deferredDeallocationFunc(QueueType::Compute);
@@ -205,7 +212,8 @@ namespace rhi::impl::vulkan
     {
         std::lock_guard<std::mutex> lock(mMutex);
 
-        for (Deallocation* dealloc : mDeallocationsInQueues[static_cast<uint32_t>(queue->GetType())].pendingDeallocations.IterateUpTo(completedSerial))
+        for (Deallocation* dealloc : mDeallocationsInQueues[static_cast<uint32_t>(queue->GetType())].
+                                     pendingDeallocations.IterateUpTo(completedSerial))
         {
             assert(dealloc->poolIndex < mDescriptorPools.size());
             assert(dealloc->refQueueCount > 1);

@@ -13,16 +13,25 @@ namespace rhi::impl
     class PerShaderStage
     {
     public:
-        PerShaderStage() {};
-        explicit PerShaderStage(const T& initialValue) { mData.fill(initialValue); }
-        ~PerShaderStage() {}
+        PerShaderStage()
+        {};
+
+        explicit PerShaderStage(const T& initialValue)
+        {
+            mData.fill(initialValue);
+        }
+
+        ~PerShaderStage()
+        {}
+
         T& operator[](ShaderStage stageBit)
         {
             uint32_t bit = static_cast<uint32_t>(stageBit);
             ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << cNumStages));
             return mData[std::log2(bit)];
         }
-        const T& operator[](ShaderStage stageBit) const 
+
+        const T& operator[](ShaderStage stageBit) const
         {
             uint32_t bit = static_cast<uint32_t>(stageBit);
             ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << cNumStages));

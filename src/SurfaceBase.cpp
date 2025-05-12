@@ -7,14 +7,9 @@ namespace rhi::impl
 {
     SurfaceBase::SurfaceBase(InstanceBase* instance) :
         mInstance(instance)
-    {
+    {}
 
-    }
-
-    SurfaceBase::~SurfaceBase()
-    {
-
-    }
+    SurfaceBase::~SurfaceBase() = default;
 
     void SurfaceBase::APIConfigure(const SurfaceConfiguration& config)
     {

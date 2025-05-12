@@ -40,14 +40,15 @@ namespace rhi::impl
         void ForEach(F fn) const
         {
             mObjects.Use([&fn](const auto lockedObjects)
+            {
+                for (const auto* node = lockedObjects->head(); node != lockedObjects->end();
+                     node = node->next())
                 {
-                    for (const auto* node = lockedObjects->head(); node != lockedObjects->end();
-                        node = node->next())
-                    {
-                        fn(node->value());
-                    }
-                });
+                    fn(node->value());
+                }
+            });
         }
+
     private:
         MutexProtected<LinkedList<ResourceBase>> mObjects;
     };
@@ -64,6 +65,7 @@ namespace rhi::impl
         virtual ResourceType GetType() const = 0;
         std::string_view GetName() const;
         void Destroy();
+
     protected:
         // will be called by the derived class to track the object
         void Initialize();
@@ -72,6 +74,7 @@ namespace rhi::impl
         virtual ResourceList* GetList() const;
 
         Ref<DeviceBase> mDevice;
+
     private:
         friend class ResourceList;
         std::string mName;

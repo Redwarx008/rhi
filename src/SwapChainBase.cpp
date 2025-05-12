@@ -11,11 +11,9 @@ namespace rhi::impl
         mHeight(config.height),
         mFormat(config.format),
         mPresentMode(config.presentMode)
-    {
+    {}
 
-    }
-
-    SwapChainBase::~SwapChainBase() {}
+    SwapChainBase::~SwapChainBase() = default;
 
     TextureFormat SwapChainBase::GetFormat() const
     {

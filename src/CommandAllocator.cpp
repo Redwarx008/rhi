@@ -13,14 +13,15 @@ namespace rhi::impl
 
     CommandAllocator::~CommandAllocator() = default;
 
-    CommandAllocator::CommandAllocator(CommandAllocator&& other)
-        : mBlocks(std::move(other.mBlocks)), mLastAllocationSize(other.mLastAllocationSize)
+    CommandAllocator::CommandAllocator(CommandAllocator&& other) :
+        mBlocks(std::move(other.mBlocks)), mLastAllocationSize(other.mLastAllocationSize)
     {
         mCurrentPtr = other.mCurrentPtr;
         mEndPtr = other.mEndPtr;
         mCurrentBlockIndex = other.mCurrentBlockIndex;
         other.Clear();
     }
+
     CommandAllocator& CommandAllocator::operator=(CommandAllocator&& other)
     {
         Clear();
@@ -67,7 +68,7 @@ namespace rhi::impl
 
             return commandAlloc;
         }
-       
+
         // When there is not enough space, we signal the kEndOfBlock, so that the iterator knows
         // to move to the next one. kEndOfBlock on the last block means the end of the commands.
         uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
@@ -112,7 +113,7 @@ namespace rhi::impl
         // Allocate blocks doubling sizes each time, to a maximum of 16k (or at least minimumSize).
         mLastAllocationSize = std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
 
-        auto block = std::unique_ptr<char[]>(new (std::nothrow) char[mLastAllocationSize]);
+        auto block = std::unique_ptr<char[]>(new(std::nothrow) char[mLastAllocationSize]);
         if (block == nullptr)
         {
             return false;
@@ -120,7 +121,7 @@ namespace rhi::impl
 
         mCurrentPtr = AlignPtr(block.get(), alignof(uint32_t));
         mEndPtr = block.get() + mLastAllocationSize;
-        mBlocks.push_back({ mLastAllocationSize, std::move(block) });
+        mBlocks.push_back({mLastAllocationSize, std::move(block)});
         return true;
     }
 
@@ -170,8 +171,8 @@ namespace rhi::impl
     {
         char* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
         assert(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
-            idPtr + sizeof(uint32_t) <=
-            mBlocks[mCurrentBlockIndex].data.get() + mBlocks[mCurrentBlockIndex].size);
+                idPtr + sizeof(uint32_t) <=
+                mBlocks[mCurrentBlockIndex].data.get() + mBlocks[mCurrentBlockIndex].size);
 
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
 
@@ -229,7 +230,7 @@ namespace rhi::impl
     {
         char* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
         assert(commandPtr + sizeof(commandSize) <=
-            mBlocks[mCurrentBlockIndex].data.get() + mBlocks[mCurrentBlockIndex].size);
+                mBlocks[mCurrentBlockIndex].data.get() + mBlocks[mCurrentBlockIndex].size);
 
         mCurrentPtr = commandPtr + commandSize;
         return commandPtr;

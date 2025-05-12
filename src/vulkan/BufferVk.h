@@ -12,10 +12,10 @@
 namespace rhi::impl::vulkan
 {
     class Queue;
-    class Buffer final :  public BufferBase
+
+    class Buffer final : public BufferBase
     {
     public:
-
         static Ref<Buffer> Create(DeviceBase* device, const BufferDesc& desc);
         ~Buffer();
         // interface
@@ -27,6 +27,7 @@ namespace rhi::impl::vulkan
         void TrackUsageAndGetResourceBarrier(Queue* queue, BufferUsage usage, ShaderStage stage = ShaderStage::None);
         uint64_t GetAllocatedSize() const;
         ResourceType GetType() const override;
+
     private:
         explicit Buffer(DeviceBase* device, const BufferDesc& desc);
         bool Initialize();
@@ -38,4 +39,3 @@ namespace rhi::impl::vulkan
         VkBuffer mHandle = VK_NULL_HANDLE;
     };
 }
-

@@ -28,7 +28,7 @@ namespace rhi::impl::vulkan
         vkGetDeviceQueue(device->GetHandle(), mQueueFamilyIndex, 0, &mHandle);
     }
 
-    Queue::~Queue() 
+    Queue::~Queue()
     {
         Device* device = checked_cast<Device>(mDevice);
 
@@ -125,7 +125,7 @@ namespace rhi::impl::vulkan
     {
         ASSERT(mRecordContext.needsSubmit != true);
         ASSERT(mRecordContext.commandBufferAndPool.bufferHandle == VK_NULL_HANDLE &&
-            mRecordContext.commandBufferAndPool.poolHandle == VK_NULL_HANDLE);
+                mRecordContext.commandBufferAndPool.poolHandle == VK_NULL_HANDLE);
 
         CommandPoolAndBuffer poolAndBuffer = GetOrCreateCommandPoolAndBuffer();
 
@@ -183,7 +183,10 @@ namespace rhi::impl::vulkan
         NextRecordingContext();
     }
 
-    uint64_t Queue::SubmitImpl(CommandListBase* const* commands, uint32_t commandListCount, ResourceTransfer const* transfers, uint32_t transferCount)
+    uint64_t Queue::SubmitImpl(CommandListBase* const* commands,
+                               uint32_t commandListCount,
+                               ResourceTransfer const* transfers,
+                               uint32_t transferCount)
     {
         for (uint32_t i = 0; i < commandListCount; ++i)
         {
@@ -226,13 +229,13 @@ namespace rhi::impl::vulkan
         mDeleter->Tick(completedSerial);
 
         mDescriptorAllocatorsPendingDeallocation.Use([&](auto pending)
+        {
+            for (Ref<DescriptorSetAllocator>& allocator : pending->IterateUpTo(completedSerial))
             {
-                for (Ref<DescriptorSetAllocator>& allocator : pending->IterateUpTo(completedSerial))
-                {
-                    allocator->FinishDeallocation(this, completedSerial);
-                }
-                pending->ClearUpTo(completedSerial);
-            });
+                allocator->FinishDeallocation(this, completedSerial);
+            }
+            pending->ClearUpTo(completedSerial);
+        });
 
         RecycleCompletedCommandBuffer(completedSerial);
     }
@@ -281,7 +284,11 @@ namespace rhi::impl::vulkan
         return mDeleter;
     }
 
-    void Queue::CopyFromStagingToBufferImpl(BufferBase* src, uint64_t srcOffset, BufferBase* dst, uint64_t destOffset, uint64_t size)
+    void Queue::CopyFromStagingToBufferImpl(BufferBase* src,
+                                            uint64_t srcOffset,
+                                            BufferBase* dst,
+                                            uint64_t destOffset,
+                                            uint64_t size)
     {
         VkCommandBuffer commanBuffer = GetPendingRecordingContext()->commandBufferAndPool.bufferHandle;
 
@@ -300,7 +307,9 @@ namespace rhi::impl::vulkan
         vkCmdCopyBuffer(commanBuffer, checked_cast<Buffer>(src)->GetHandle(), dstBuffer->GetHandle(), 1, &copy);
     }
 
-    void Queue::CopyFromStagingToTextureImpl(BufferBase* src, const TextureSlice& dst, const TextureDataLayout& dataLayout)
+    void Queue::CopyFromStagingToTextureImpl(BufferBase* src,
+                                             const TextureSlice& dst,
+                                             const TextureDataLayout& dataLayout)
     {
         VkCommandBuffer commanBuffer = GetPendingRecordingContext()->commandBufferAndPool.bufferHandle;
 
@@ -310,14 +319,23 @@ namespace rhi::impl::vulkan
 
         Aspect aspect = AspectConvert(texture->APIGetFormat(), dst.aspect);
 
-        VkBufferImageCopy region = ComputeBufferImageCopyRegion(dataLayout, dst.size, 
-            texture, dst.mipLevel, dst.origin, aspect);
+        VkBufferImageCopy region = ComputeBufferImageCopyRegion(dataLayout,
+                                                                dst.size,
+                                                                texture,
+                                                                dst.mipLevel,
+                                                                dst.origin,
+                                                                aspect);
 
-        SubresourceRange range = { aspect, dst.origin.z, dst.size.depthOrArrayLayers, dst.mipLevel, 1 };
+        SubresourceRange range = {aspect, dst.origin.z, dst.size.depthOrArrayLayers, dst.mipLevel, 1};
 
         texture->TransitionUsageNow(this, TextureUsage::CopyDst, range);
 
-        vkCmdCopyBufferToImage(commanBuffer, buffer->GetHandle(), texture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+        vkCmdCopyBufferToImage(commanBuffer,
+                               buffer->GetHandle(),
+                               texture->GetHandle(),
+                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                               1,
+                               &region);
     }
 
     void Queue::WaitForImpl(QueueBase* queue, uint64_t submitSerial)

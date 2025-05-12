@@ -11,12 +11,12 @@
 namespace rhi::impl::vulkan
 {
     static VKAPI_ATTR VkBool32 VKAPI_CALL DebugMessageCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT messageType,
-        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-        void* pUserData)
+            VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+            VkDebugUtilsMessageTypeFlagsEXT messageType,
+            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+            void* pUserData)
     {
-        LoggingSeverity serverity = LoggingSeverity::Info;
+        LoggingSeverity severity = LoggingSeverity::Info;
 
         std::string prefix;
         if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
@@ -25,7 +25,7 @@ namespace rhi::impl::vulkan
             prefix = "\033[32m" + prefix + "\033[0m";
 #endif
             prefix = "VERBOSE: ";
-            serverity = LoggingSeverity::Verbose;
+            severity = LoggingSeverity::Verbose;
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
         {
@@ -33,7 +33,7 @@ namespace rhi::impl::vulkan
 #if defined(_WIN32)
             prefix = "\033[36m" + prefix + "\033[0m";
 #endif
-            serverity = LoggingSeverity::Info;
+            severity = LoggingSeverity::Info;
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         {
@@ -41,7 +41,7 @@ namespace rhi::impl::vulkan
 #if defined(_WIN32)
             prefix = "\033[33m" + prefix + "\033[0m";
 #endif
-            serverity = LoggingSeverity::Warning;
+            severity = LoggingSeverity::Warning;
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         {
@@ -49,7 +49,7 @@ namespace rhi::impl::vulkan
 #if defined(_WIN32)
             prefix = "\033[31m" + prefix + "\033[0m";
 #endif
-            serverity = LoggingSeverity::Error;
+            severity = LoggingSeverity::Error;
         }
 
         std::stringstream debugMessage;
@@ -63,7 +63,7 @@ namespace rhi::impl::vulkan
 
         if (gDebugMessageCallback)
         {
-            gDebugMessageCallback(serverity, debugMessage.str().c_str(), gDebugMessageCallbackUserData);
+            gDebugMessageCallback(severity, debugMessage.str().c_str(), gDebugMessageCallbackUserData);
         }
         else
         {
@@ -90,7 +90,7 @@ namespace rhi::impl::vulkan
 
     bool Instance::Initialize(const InstanceDesc& desc)
     {
-        std::vector<const char*> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
+        std::vector<const char*> instanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME};
 
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
         instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -123,7 +123,8 @@ namespace rhi::impl::vulkan
 
         for (auto extensionName : instanceExtensions)
         {
-            if (std::find(supportedInstanceExtensions.begin(), supportedInstanceExtensions.end(), extensionName) == supportedInstanceExtensions.end())
+            if (std::find(supportedInstanceExtensions.begin(), supportedInstanceExtensions.end(), extensionName) ==
+                supportedInstanceExtensions.end())
             {
                 LOG_ERROR(extensionName, " is not supported.");
                 return false;
@@ -143,8 +144,10 @@ namespace rhi::impl::vulkan
         {
             VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCI{};
             debugUtilsMessengerCI.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-            debugUtilsMessengerCI.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-            debugUtilsMessengerCI.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+            debugUtilsMessengerCI.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                    VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+            debugUtilsMessengerCI.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                    VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
             debugUtilsMessengerCI.pfnUserCallback = DebugMessageCallback;
             debugUtilsMessengerCI.pUserData = nullptr;
             instanceCreateInfo.pNext = &debugUtilsMessengerCI;
@@ -162,7 +165,8 @@ namespace rhi::impl::vulkan
             bool validationLayerPresent = false;
             for (VkLayerProperties& layer : instanceLayerProperties)
             {
-                if (strcmp(layer.layerName, validationLayerName) == 0) {
+                if (strcmp(layer.layerName, validationLayerName) == 0)
+                {
                     validationLayerPresent = true;
                     break;
                 }
@@ -173,31 +177,62 @@ namespace rhi::impl::vulkan
                 const VkBool32 setting_validate_core = VK_TRUE;
                 const VkBool32 setting_validate_sync = VK_TRUE;
                 const VkBool32 setting_thread_safety = VK_TRUE;
-                const char* setting_debug_action[] = { "VK_DBG_LAYER_ACTION_LOG_MSG" };
-                const char* setting_report_flags[] = { "info", "warn", "perf", "error", "debug" };
+                const char* setting_debug_action[] = {"VK_DBG_LAYER_ACTION_LOG_MSG"};
+                const char* setting_report_flags[] = {"info", "warn", "perf", "error", "debug"};
                 const VkBool32 setting_enable_message_limit = VK_TRUE;
                 const int32_t setting_duplicate_message_limit = 10;
 
                 const VkLayerSettingEXT settings[] = {
-                    {validationLayerName, "validate_core", VK_LAYER_SETTING_TYPE_BOOL32_EXT, 1, &setting_validate_core},
-                    {validationLayerName, "validate_sync", VK_LAYER_SETTING_TYPE_BOOL32_EXT, 1, &setting_validate_sync},
-                    {validationLayerName, "thread_safety", VK_LAYER_SETTING_TYPE_BOOL32_EXT, 1, &setting_thread_safety},
-                    {validationLayerName, "debug_action", VK_LAYER_SETTING_TYPE_STRING_EXT, 1, setting_debug_action},
-                    {validationLayerName, "report_flags", VK_LAYER_SETTING_TYPE_STRING_EXT, static_cast<uint32_t>(std::size(setting_report_flags)), setting_report_flags},
-                    {validationLayerName, "enable_message_limit", VK_LAYER_SETTING_TYPE_BOOL32_EXT, 1,&setting_enable_message_limit },
-                    {validationLayerName, "duplicate_message_limit", VK_LAYER_SETTING_TYPE_INT32_EXT, 1, &setting_duplicate_message_limit} };
+                        {validationLayerName,
+                         "validate_core",
+                         VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+                         1,
+                         &setting_validate_core},
+                        {validationLayerName,
+                         "validate_sync",
+                         VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+                         1,
+                         &setting_validate_sync},
+                        {validationLayerName,
+                         "thread_safety",
+                         VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+                         1,
+                         &setting_thread_safety},
+                        {validationLayerName,
+                         "debug_action",
+                         VK_LAYER_SETTING_TYPE_STRING_EXT,
+                         1,
+                         setting_debug_action},
+                        {validationLayerName,
+                         "report_flags",
+                         VK_LAYER_SETTING_TYPE_STRING_EXT,
+                         static_cast<uint32_t>(std::size(setting_report_flags)),
+                         setting_report_flags},
+                        {validationLayerName,
+                         "enable_message_limit",
+                         VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+                         1,
+                         &setting_enable_message_limit},
+                        {validationLayerName,
+                         "duplicate_message_limit",
+                         VK_LAYER_SETTING_TYPE_INT32_EXT,
+                         1,
+                         &setting_duplicate_message_limit}};
 
                 const VkLayerSettingsCreateInfoEXT layerSettingsCreateInfo =
                 {
-                    VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT, nullptr,
-                    static_cast<uint32_t>(std::size(settings)), settings
+                        VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT,
+                        nullptr,
+                        static_cast<uint32_t>(std::size(settings)),
+                        settings
                 };
                 debugUtilsMessengerCI.pNext = &layerSettingsCreateInfo;
 
                 instanceCreateInfo.ppEnabledLayerNames = &validationLayerName;
                 instanceCreateInfo.enabledLayerCount = 1;
             }
-            else {
+            else
+            {
                 LOG_ERROR("Validation layer VK_LAYER_KHRONOS_validation not present, validation is disabled");
             }
         }
@@ -207,7 +242,7 @@ namespace rhi::impl::vulkan
 
         VkResult result = vkCreateInstance(&instanceCreateInfo, nullptr, &mHandle);
         CHECK_VK_RESULT_FALSE(result, "Failed to create a Vulkan instance");
-        
+
         if (!RegisterDebugUtils())
         {
             return false;
@@ -217,15 +252,21 @@ namespace rhi::impl::vulkan
 
     bool Instance::RegisterDebugUtils()
     {
-        auto vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(mHandle, "vkCreateDebugUtilsMessengerEXT"));
+        auto vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
+            vkGetInstanceProcAddr(mHandle, "vkCreateDebugUtilsMessengerEXT"));
 
         VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCI{};
         debugUtilsMessengerCI.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        debugUtilsMessengerCI.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        debugUtilsMessengerCI.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+        debugUtilsMessengerCI.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        debugUtilsMessengerCI.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
         debugUtilsMessengerCI.pfnUserCallback = DebugMessageCallback;
         debugUtilsMessengerCI.pUserData = nullptr;
-        VkResult result = vkCreateDebugUtilsMessengerEXT(mHandle, &debugUtilsMessengerCI, nullptr, &mDebugUtilsMessenger);
+        VkResult result = vkCreateDebugUtilsMessengerEXT(mHandle,
+                                                         &debugUtilsMessengerCI,
+                                                         nullptr,
+                                                         &mDebugUtilsMessenger);
         CHECK_VK_RESULT_FALSE(result, "Failed to create vulkan debugUtilsMessenger");
         mDebugLayerEnabled = true;
         return true;
@@ -266,7 +307,8 @@ namespace rhi::impl::vulkan
     {
         if (mDebugUtilsMessenger)
         {
-            auto vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(mHandle, "vkDestroyDebugUtilsMessengerEXT"));
+            auto vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
+                vkGetInstanceProcAddr(mHandle, "vkDestroyDebugUtilsMessengerEXT"));
             vkDestroyDebugUtilsMessengerEXT(mHandle, mDebugUtilsMessenger, nullptr);
             mDebugUtilsMessenger = VK_NULL_HANDLE;
         }

@@ -13,11 +13,10 @@ namespace rhi::impl::vulkan
 {
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDesc& desc) :
         RenderPipelineBase(device, desc)
-    {
+    {}
 
-    }
-
-    RenderPipeline::~RenderPipeline() {}
+    RenderPipeline::~RenderPipeline()
+    {}
 
     VkPrimitiveTopology PrimitiveTopologyConvert(PrimitiveType type)
     {
@@ -102,9 +101,11 @@ namespace rhi::impl::vulkan
         static_assert(uint32_t(BlendFactor::DstAlpha) == uint32_t(VK_BLEND_FACTOR_DST_ALPHA));
         static_assert(uint32_t(BlendFactor::OneMinusDstAlpha) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA));
         static_assert(uint32_t(BlendFactor::ConstantColor) == uint32_t(VK_BLEND_FACTOR_CONSTANT_COLOR));
-        static_assert(uint32_t(BlendFactor::OneMinusConstantColor) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR));
+        static_assert(
+                uint32_t(BlendFactor::OneMinusConstantColor) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR));
         static_assert(uint32_t(BlendFactor::ConstantAlpha) == uint32_t(VK_BLEND_FACTOR_CONSTANT_ALPHA));
-        static_assert(uint32_t(BlendFactor::OneMinusConstantAlpha) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA));
+        static_assert(
+                uint32_t(BlendFactor::OneMinusConstantAlpha) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA));
         static_assert(uint32_t(BlendFactor::SrcAlphaSaturate) == uint32_t(VK_BLEND_FACTOR_SRC_ALPHA_SATURATE));
         static_assert(uint32_t(BlendFactor::Src1Color) == uint32_t(VK_BLEND_FACTOR_SRC1_COLOR));
         static_assert(uint32_t(BlendFactor::OneMinusSrc1Color) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR));
@@ -131,7 +132,9 @@ namespace rhi::impl::vulkan
         static_assert(uint32_t(ColorMask::Green) == uint32_t(VK_COLOR_COMPONENT_G_BIT));
         static_assert(uint32_t(ColorMask::Blue) == uint32_t(VK_COLOR_COMPONENT_B_BIT));
         static_assert(uint32_t(ColorMask::Alpha) == uint32_t(VK_COLOR_COMPONENT_A_BIT));
-        static_assert(uint32_t(ColorMask::All) == uint32_t(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT));
+        static_assert(uint32_t(ColorMask::All) == uint32_t(
+                VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
+                VK_COLOR_COMPONENT_A_BIT));
 
         return static_cast<VkColorComponentFlags>(uint32_t(mask));
     }
@@ -331,7 +334,9 @@ namespace rhi::impl::vulkan
                 auto& vertexInputBinding = vertexInputBindings.emplace_back();
                 vertexInputBinding.binding = attribute.bindingBufferSlot;
                 vertexInputBinding.stride = attribute.elementStride;
-                vertexInputBinding.inputRate = attribute.rate == VertexInputRate::Vertex ? VK_VERTEX_INPUT_RATE_VERTEX : VK_VERTEX_INPUT_RATE_INSTANCE;
+                vertexInputBinding.inputRate = attribute.rate == VertexInputRate::Vertex
+                        ? VK_VERTEX_INPUT_RATE_VERTEX
+                        : VK_VERTEX_INPUT_RATE_INSTANCE;
 
                 bufferSlotUsed[bufferSlot]++;
             }
@@ -359,7 +364,8 @@ namespace rhi::impl::vulkan
         rasterizationStateCI.cullMode = CullModeConvert(mRasterState.cullMode);
         rasterizationStateCI.polygonMode = PolygonModeConvert(mRasterState.fillMode);
         rasterizationStateCI.depthClampEnable = mRasterState.depthClampEnable;
-        rasterizationStateCI.depthBiasEnable = mDepthStencilState.depthBias != 0 || mDepthStencilState.depthBiasSlopeScale != 0;
+        rasterizationStateCI.depthBiasEnable = mDepthStencilState.depthBias != 0 || mDepthStencilState.
+                depthBiasSlopeScale != 0;
         rasterizationStateCI.depthBiasConstantFactor = mDepthStencilState.depthBias;
         rasterizationStateCI.depthBiasSlopeFactor = mDepthStencilState.depthBiasSlopeScale;
         rasterizationStateCI.lineWidth = mRasterState.lineWidth;
@@ -370,11 +376,15 @@ namespace rhi::impl::vulkan
         {
             VkPipelineColorBlendAttachmentState& blendState = colorBlendAttachmentStates[i];
             blendState.blendEnable = mBlendState.colorAttachmentBlendStates[i].blendEnable;
-            blendState.srcColorBlendFactor = BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].srcColorBlend);
-            blendState.dstColorBlendFactor = BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].destColorBlend);
+            blendState.srcColorBlendFactor =
+                    BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].srcColorBlend);
+            blendState.dstColorBlendFactor = BlendFactorConvert(
+                    mBlendState.colorAttachmentBlendStates[i].destColorBlend);
             blendState.colorBlendOp = BlendOpConvert(mBlendState.colorAttachmentBlendStates[i].colorBlendOp);
-            blendState.srcAlphaBlendFactor = BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].srcAlphaBlend);
-            blendState.dstAlphaBlendFactor = BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].destAlphaBlend);
+            blendState.srcAlphaBlendFactor =
+                    BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].srcAlphaBlend);
+            blendState.dstAlphaBlendFactor = BlendFactorConvert(
+                    mBlendState.colorAttachmentBlendStates[i].destAlphaBlend);
             blendState.alphaBlendOp = BlendOpConvert(mBlendState.colorAttachmentBlendStates[i].alphaBlendOp);
             blendState.colorWriteMask = ColorMaskConvert(mBlendState.colorAttachmentBlendStates[i].colorWriteMask);
 
@@ -401,11 +411,14 @@ namespace rhi::impl::vulkan
         VkSampleMask sampleMask = mSampleState.mask;
         multisampleStateCI.pSampleMask = &sampleMask;
         multisampleStateCI.alphaToOneEnable = false;
-        VkDynamicState dynamicStates[] = 
+        VkDynamicState dynamicStates[] =
         {
-            VK_DYNAMIC_STATE_VIEWPORT,     VK_DYNAMIC_STATE_SCISSOR,
-            /*VK_DYNAMIC_STATE_LINE_WIDTH, */  VK_DYNAMIC_STATE_BLEND_CONSTANTS,
-            VK_DYNAMIC_STATE_DEPTH_BOUNDS, VK_DYNAMIC_STATE_STENCIL_REFERENCE,
+                VK_DYNAMIC_STATE_VIEWPORT,
+                VK_DYNAMIC_STATE_SCISSOR,
+                /*VK_DYNAMIC_STATE_LINE_WIDTH, */
+                VK_DYNAMIC_STATE_BLEND_CONSTANTS,
+                VK_DYNAMIC_STATE_DEPTH_BOUNDS,
+                VK_DYNAMIC_STATE_STENCIL_REFERENCE,
         };
         VkPipelineDynamicStateCreateInfo dynamicStateCI{};
         dynamicStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -461,7 +474,7 @@ namespace rhi::impl::vulkan
 
     void RenderPipeline::DestroyImpl()
     {
-        Device* device = checked_cast<Device>(mDevice.Get()); 
+        Device* device = checked_cast<Device>(mDevice.Get());
 
         if (mHandle != VK_NULL_HANDLE)
         {

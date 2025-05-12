@@ -58,9 +58,7 @@ namespace rhi::impl::vulkan
 
     Sampler::Sampler(Device* device, const SamplerDesc& desc) :
         SamplerBase(device, desc)
-    {
-
-    }
+    {}
 
     Ref<Sampler> Sampler::Create(Device* device, const SamplerDesc& desc)
     {
@@ -97,7 +95,8 @@ namespace rhi::impl::vulkan
         if (device->GetVkDeviceInfo().features.samplerAnisotropy == true && mMaxAnisotropy > 1)
         {
             createInfo.anisotropyEnable = true;
-            createInfo.maxAnisotropy = (std::min)(mMaxAnisotropy, device->GetVkDeviceInfo().properties.limits.maxSamplerAnisotropy);
+            createInfo.maxAnisotropy = (std::min)(mMaxAnisotropy,
+                                                  device->GetVkDeviceInfo().properties.limits.maxSamplerAnisotropy);
         }
         else
         {
@@ -121,7 +120,8 @@ namespace rhi::impl::vulkan
         }
     }
 
-    Sampler::~Sampler() {}
+    Sampler::~Sampler()
+    {}
 
     VkSampler Sampler::GetHandle() const
     {

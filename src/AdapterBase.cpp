@@ -6,9 +6,12 @@ namespace rhi::impl
 {
     AdapterBase::AdapterBase(InstanceBase* instance) :
         mInstance(instance)
-    { }
+    {
+    }
 
-    AdapterBase::~AdapterBase() {}
+    AdapterBase::~AdapterBase()
+    {
+    }
 
     void AdapterBase::APIGetInfo(AdapterInfo* info) const
     {

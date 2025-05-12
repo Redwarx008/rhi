@@ -21,9 +21,7 @@ namespace rhi::impl::vulkan
 {
     CommandList::CommandList(Device* device, CommandEncoder* encoder) :
         CommandListBase(device, encoder)
-    {
-
-    }
+    {}
 
     Ref<CommandList> CommandList::Create(Device* device, CommandEncoder* encoder)
     {
@@ -74,7 +72,9 @@ namespace rhi::impl::vulkan
         for (uint32_t i = 0; i < scopeUsage.buffers.size(); ++i)
         {
             auto buffer = checked_cast<Buffer>(scopeUsage.buffers[i]);
-            buffer->TrackUsageAndGetResourceBarrier(queue, scopeUsage.bufferSyncInfos[i].usage, scopeUsage.bufferSyncInfos[i].shaderStages);
+            buffer->TrackUsageAndGetResourceBarrier(queue,
+                                                    scopeUsage.bufferSyncInfos[i].usage,
+                                                    scopeUsage.bufferSyncInfos[i].shaderStages);
         }
 
         for (uint32_t i = 0; i < scopeUsage.textures.size(); ++i)
@@ -95,16 +95,23 @@ namespace rhi::impl::vulkan
         VkRenderingInfo renderingInfo{};
         renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 
-        uint32_t renderWidth = checked_cast<TextureView>(renderPassCmd->colorAttachments[0].view)->GetTexture()->APIGetWidth();
-        uint32_t renderHeight = checked_cast<TextureView>(renderPassCmd->colorAttachments[0].view)->GetTexture()->APIGetHeight();
+        uint32_t renderWidth = checked_cast<TextureView>(renderPassCmd->colorAttachments[0].view)->GetTexture()->
+                APIGetWidth();
+        uint32_t renderHeight = checked_cast<TextureView>(renderPassCmd->colorAttachments[0].view)->GetTexture()->
+                APIGetHeight();
         std::array<VkRenderingAttachmentInfo, cMaxColorAttachments> colorAttachmentInfos;
 
         for (uint32_t i = 0; i < renderPassCmd->colorAttachmentCount; ++i)
         {
             TextureView* view = checked_cast<TextureView>(renderPassCmd->colorAttachments[i].view.Get());
-            INVALID_IF(view->GetTexture()->APIGetWidth() != renderWidth || view->GetTexture()->APIGetHeight() != renderHeight,
-                "The color attachment size (width: %u, height: %u) does not match the size of the other attachments (width: %u, height: %u).",
-                view->GetTexture()->APIGetWidth(), view->GetTexture()->APIGetHeight(), renderWidth, renderHeight);
+            INVALID_IF(
+                    view->GetTexture()->APIGetWidth() != renderWidth || view->GetTexture()->APIGetHeight() !=
+                    renderHeight,
+                    "The color attachment size (width: %u, height: %u) does not match the size of the other attachments (width: %u, height: %u).",
+                    view->GetTexture()->APIGetWidth(),
+                    view->GetTexture()->APIGetHeight(),
+                    renderWidth,
+                    renderHeight);
 
             VkRenderingAttachmentInfo& attachment = colorAttachmentInfos[i];
             attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -115,10 +122,10 @@ namespace rhi::impl::vulkan
             attachment.storeOp = VulkanAttachmentStoreOp(renderPassCmd->colorAttachments[i].storeOp);
             attachment.clearValue.color =
             {
-                renderPassCmd->colorAttachments[i].clearColor.r,
-                renderPassCmd->colorAttachments[i].clearColor.g,
-                renderPassCmd->colorAttachments[i].clearColor.b,
-                renderPassCmd->colorAttachments[i].clearColor.a,
+                    renderPassCmd->colorAttachments[i].clearColor.r,
+                    renderPassCmd->colorAttachments[i].clearColor.g,
+                    renderPassCmd->colorAttachments[i].clearColor.b,
+                    renderPassCmd->colorAttachments[i].clearColor.a,
             };
             attachment.resolveMode = VK_RESOLVE_MODE_NONE;
             attachment.resolveImageView = nullptr;
@@ -131,31 +138,38 @@ namespace rhi::impl::vulkan
             }
         }
 
-        renderingInfo.renderArea = { 0, 0, renderWidth, renderHeight };
+        renderingInfo.renderArea = {0, 0, renderWidth, renderHeight};
         renderingInfo.layerCount = 1;
         renderingInfo.colorAttachmentCount = renderPassCmd->colorAttachmentCount;
         renderingInfo.pColorAttachments = colorAttachmentInfos.data();
 
         // A single depth stencil attachment info can be used, but they can also be specified separately.
-        // When both are specified separately, the only requirement is that the image view is identical.    
+        // When both are specified separately, the only requirement is that the image view is identical.
         VkRenderingAttachmentInfo depthAttachment{};
         VkRenderingAttachmentInfo stencilAttachment{};
         if (renderPassCmd->depthStencilAttachment.view != nullptr)
         {
             TextureView* view = checked_cast<TextureView>(renderPassCmd->depthStencilAttachment.view.Get());
-            INVALID_IF(view->GetTexture()->APIGetWidth() < renderWidth || view->GetTexture()->APIGetHeight() < renderHeight,
-                "The depth stencil attachment size (width: %u, height: %u) is less than the size of the color attachments (width: %u, height: %u).",
-                view->GetTexture()->APIGetWidth(), view->GetTexture()->APIGetHeight(), renderWidth, renderHeight);
+            INVALID_IF(
+                    view->GetTexture()->APIGetWidth() < renderWidth || view->GetTexture()->APIGetHeight() <
+                    renderHeight,
+                    "The depth stencil attachment size (width: %u, height: %u) is less than the size of the color attachments (width: %u, height: %u).",
+                    view->GetTexture()->APIGetWidth(),
+                    view->GetTexture()->APIGetHeight(),
+                    renderWidth,
+                    renderHeight);
 
             depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-            depthAttachment.imageView = checked_cast<TextureView>(renderPassCmd->depthStencilAttachment.view)->GetHandle();
+            depthAttachment.imageView = checked_cast<TextureView>(renderPassCmd->depthStencilAttachment.view)->
+                    GetHandle();
             depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             depthAttachment.loadOp = VulkanAttachmentLoadOp(renderPassCmd->depthStencilAttachment.depthLoadOp);
             depthAttachment.storeOp = VulkanAttachmentStoreOp(renderPassCmd->depthStencilAttachment.depthStoreOp);
             depthAttachment.clearValue.depthStencil.depth = renderPassCmd->depthStencilAttachment.depthClearValue;
 
             stencilAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-            stencilAttachment.imageView = checked_cast<TextureView>(renderPassCmd->depthStencilAttachment.view)->GetHandle();
+            stencilAttachment.imageView = checked_cast<TextureView>(renderPassCmd->depthStencilAttachment.view)->
+                    GetHandle();
             stencilAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             stencilAttachment.loadOp = VulkanAttachmentLoadOp(renderPassCmd->depthStencilAttachment.stencilLoadOp);
             stencilAttachment.storeOp = VulkanAttachmentStoreOp(renderPassCmd->depthStencilAttachment.stencilStoreOp);
@@ -166,7 +180,7 @@ namespace rhi::impl::vulkan
         }
 
         vkCmdBeginRendering(commandBuffer, &renderingInfo);
-        
+
         // Set the default value for the dynamic state
         vkCmdSetDepthBounds(commandBuffer, 0.0f, 1.0f);
         vkCmdSetStencilReference(commandBuffer, VK_STENCIL_FRONT_AND_BACK, 0);
@@ -211,20 +225,30 @@ namespace rhi::impl::vulkan
                 bindSet->MarkUsedInQueue(queue->GetType());
                 VkDescriptorSet set = bindSet->GetHandle();
                 uint32_t* dynamicOffsets = nullptr;
-                if (cmd->dynamicOffsetCount > 0) {
+                if (cmd->dynamicOffsetCount > 0)
+                {
                     dynamicOffsets = mCommandIter.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
                 ASSERT(lastPipeline != nullptr);
                 VkPipelineLayout layout = checked_cast<PipelineLayout>(lastPipeline->GetLayout())->GetHandle();
-                vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, cmd->setIndex, 1,
-                    &set, cmd->dynamicOffsetCount, dynamicOffsets);
+                vkCmdBindDescriptorSets(commandBuffer,
+                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        layout,
+                                        cmd->setIndex,
+                                        1,
+                                        &set,
+                                        cmd->dynamicOffsetCount,
+                                        dynamicOffsets);
                 break;
             }
             case Command::SetIndexBuffer:
             {
                 SetIndexBufferCmd* cmd = mCommandIter.NextCommand<SetIndexBufferCmd>();
                 Buffer* indexBuffer = checked_cast<Buffer>(cmd->buffer.Get());
-                vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetHandle(), cmd->offset, VulkanIndexType(cmd->format));
+                vkCmdBindIndexBuffer(commandBuffer,
+                                     indexBuffer->GetHandle(),
+                                     cmd->offset,
+                                     VulkanIndexType(cmd->format));
                 break;
             }
             case Command::SetVertexBuffer:
@@ -249,21 +273,34 @@ namespace rhi::impl::vulkan
             case Command::DrawIndexed:
             {
                 DrawIndexedCmd* cmd = mCommandIter.NextCommand<DrawIndexedCmd>();
-                vkCmdDrawIndexed(commandBuffer, cmd->indexCount, cmd->instanceCount, cmd->firstIndex, cmd->baseVertex, cmd->firstInstance);
+                vkCmdDrawIndexed(commandBuffer,
+                                 cmd->indexCount,
+                                 cmd->instanceCount,
+                                 cmd->firstIndex,
+                                 cmd->baseVertex,
+                                 cmd->firstInstance);
                 break;
             }
             case Command::DrawIndirect:
             {
                 DrawIndirectCmd* cmd = mCommandIter.NextCommand<DrawIndirectCmd>();
                 Buffer* buffer = checked_cast<Buffer>(cmd->indirectBuffer.Get());
-                vkCmdDrawIndirect(commandBuffer, buffer->GetHandle(), static_cast<VkDeviceSize>(cmd->indirectOffset), 1, 0);
+                vkCmdDrawIndirect(commandBuffer,
+                                  buffer->GetHandle(),
+                                  static_cast<VkDeviceSize>(cmd->indirectOffset),
+                                  1,
+                                  0);
                 break;
             }
             case Command::DrawIndexedIndirect:
             {
                 DrawIndexedIndirectCmd* cmd = mCommandIter.NextCommand<DrawIndexedIndirectCmd>();
                 Buffer* buffer = checked_cast<Buffer>(cmd->indirectBuffer.Get());
-                vkCmdDrawIndexedIndirect(commandBuffer, buffer->GetHandle(), static_cast<VkDeviceSize>(cmd->indirectOffset), 1, 0);
+                vkCmdDrawIndexedIndirect(commandBuffer,
+                                         buffer->GetHandle(),
+                                         static_cast<VkDeviceSize>(cmd->indirectOffset),
+                                         1,
+                                         0);
                 break;
             }
             case Command::MultiDrawIndirect:
@@ -274,13 +311,21 @@ namespace rhi::impl::vulkan
                 Buffer* countBuffer = checked_cast<Buffer>(cmd->drawCountBuffer.Get());
                 if (countBuffer == nullptr)
                 {
-                    vkCmdDrawIndirect(commandBuffer, indirectBuffer->GetHandle(), static_cast<VkDeviceSize>(cmd->indirectOffset), cmd->maxDrawCount, cDrawIndirectSize);
+                    vkCmdDrawIndirect(commandBuffer,
+                                      indirectBuffer->GetHandle(),
+                                      static_cast<VkDeviceSize>(cmd->indirectOffset),
+                                      cmd->maxDrawCount,
+                                      cDrawIndirectSize);
                 }
                 else
                 {
-                    vkCmdDrawIndirectCount(commandBuffer, indirectBuffer->GetHandle(),
-                        static_cast<VkDeviceSize>(cmd->indirectOffset), countBuffer->GetHandle(),
-                        static_cast<VkDeviceSize>(cmd->drawCountOffset), cmd->maxDrawCount, cDrawIndirectSize);
+                    vkCmdDrawIndirectCount(commandBuffer,
+                                           indirectBuffer->GetHandle(),
+                                           static_cast<VkDeviceSize>(cmd->indirectOffset),
+                                           countBuffer->GetHandle(),
+                                           static_cast<VkDeviceSize>(cmd->drawCountOffset),
+                                           cmd->maxDrawCount,
+                                           cDrawIndirectSize);
                 }
                 break;
             }
@@ -293,13 +338,21 @@ namespace rhi::impl::vulkan
                 Buffer* countBuffer = checked_cast<Buffer>(cmd->drawCountBuffer.Get());
                 if (countBuffer == nullptr)
                 {
-                    vkCmdDrawIndexedIndirect(commandBuffer, indirectBuffer->GetHandle(), static_cast<VkDeviceSize>(cmd->indirectOffset), cmd->maxDrawCount, cDrawIndexedIndirectSize);
+                    vkCmdDrawIndexedIndirect(commandBuffer,
+                                             indirectBuffer->GetHandle(),
+                                             static_cast<VkDeviceSize>(cmd->indirectOffset),
+                                             cmd->maxDrawCount,
+                                             cDrawIndexedIndirectSize);
                 }
                 else
                 {
-                    vkCmdDrawIndexedIndirectCount(commandBuffer, indirectBuffer->GetHandle(),
-                        static_cast<VkDeviceSize>(cmd->indirectOffset), countBuffer->GetHandle(),
-                        static_cast<VkDeviceSize>(cmd->drawCountOffset), cmd->maxDrawCount, cDrawIndexedIndirectSize);
+                    vkCmdDrawIndexedIndirectCount(commandBuffer,
+                                                  indirectBuffer->GetHandle(),
+                                                  static_cast<VkDeviceSize>(cmd->indirectOffset),
+                                                  countBuffer->GetHandle(),
+                                                  static_cast<VkDeviceSize>(cmd->drawCountOffset),
+                                                  cmd->maxDrawCount,
+                                                  cDrawIndexedIndirectSize);
                 }
                 break;
             }
@@ -309,7 +362,12 @@ namespace rhi::impl::vulkan
                 void* data = mCommandIter.NextData<uint32_t>(cmd->size);
                 PipelineLayout* pipelineLayout = checked_cast<PipelineLayout>(lastPipeline->GetLayout());
 
-                vkCmdPushConstants(commandBuffer, pipelineLayout->GetHandle(), pipelineLayout->GetPushConstantVisibility(), 0, cmd->size, data);
+                vkCmdPushConstants(commandBuffer,
+                                   pipelineLayout->GetHandle(),
+                                   pipelineLayout->GetPushConstantVisibility(),
+                                   0,
+                                   cmd->size,
+                                   data);
                 break;
             }
             case Command::EndRenderPass:
@@ -363,10 +421,10 @@ namespace rhi::impl::vulkan
                 SetBlendConstantCmd* cmd = mCommandIter.NextCommand<SetBlendConstantCmd>();
                 const std::array<float, 4> blendConstants =
                 {
-                    cmd->color.r,
-                    cmd->color.g,
-                    cmd->color.b,
-                    cmd->color.a,
+                        cmd->color.r,
+                        cmd->color.g,
+                        cmd->color.b,
+                        cmd->color.a,
                 };
 
                 vkCmdSetBlendConstants(commandBuffer, blendConstants.data());
@@ -435,13 +493,20 @@ namespace rhi::impl::vulkan
                 bindSet->MarkUsedInQueue(queue->GetType());
                 VkDescriptorSet set = bindSet->GetHandle();
                 uint32_t* dynamicOffsets = nullptr;
-                if (cmd->dynamicOffsetCount > 0) {
+                if (cmd->dynamicOffsetCount > 0)
+                {
                     dynamicOffsets = mCommandIter.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
                 ASSERT(lastPipeline != nullptr);
                 VkPipelineLayout layout = checked_cast<PipelineLayout>(lastPipeline->GetLayout())->GetHandle();
-                vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, cmd->setIndex, 1,
-                    &set, cmd->dynamicOffsetCount, dynamicOffsets);
+                vkCmdBindDescriptorSets(commandBuffer,
+                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        layout,
+                                        cmd->setIndex,
+                                        1,
+                                        &set,
+                                        cmd->dynamicOffsetCount,
+                                        dynamicOffsets);
                 break;
             }
             case Command::Dispatch:
@@ -463,7 +528,12 @@ namespace rhi::impl::vulkan
                 void* data = mCommandIter.NextData<uint32_t>(cmd->size);
                 PipelineLayout* pipelineLayout = checked_cast<PipelineLayout>(lastPipeline->GetLayout());
 
-                vkCmdPushConstants(commandBuffer, pipelineLayout->GetHandle(), pipelineLayout->GetPushConstantVisibility(), 0, cmd->size, data);
+                vkCmdPushConstants(commandBuffer,
+                                   pipelineLayout->GetHandle(),
+                                   pipelineLayout->GetPushConstantVisibility(),
+                                   0,
+                                   cmd->size,
+                                   data);
                 break;
             }
             case Command::EndComputePass:
@@ -472,24 +542,24 @@ namespace rhi::impl::vulkan
                 break;
             }
             case Command::BeginDebugLabel:
+            {
+                BeginDebugLabelCmd* cmd = mCommandIter.NextCommand<BeginDebugLabelCmd>();
+                const char* label = mCommandIter.NextData<char>(cmd->labelLength);
+                if (mDevice->IsDebugLayerEnabled())
                 {
-                    BeginDebugLabelCmd* cmd = mCommandIter.NextCommand<BeginDebugLabelCmd>();
-                    const char* label = mCommandIter.NextData<char>(cmd->labelLength);
-                    if (mDevice->IsDebugLayerEnabled())
-                    {
-                        VkDebugUtilsLabelEXT utilsLabel;
-                        utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
-                        utilsLabel.pNext = nullptr;
-                        utilsLabel.pLabelName = label;
-                        utilsLabel.color[0] = cmd->color.r;
-                        utilsLabel.color[1] = cmd->color.g;
-                        utilsLabel.color[2] = cmd->color.b;
-                        utilsLabel.color[3] = cmd->color.a;
+                    VkDebugUtilsLabelEXT utilsLabel;
+                    utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+                    utilsLabel.pNext = nullptr;
+                    utilsLabel.pLabelName = label;
+                    utilsLabel.color[0] = cmd->color.r;
+                    utilsLabel.color[1] = cmd->color.g;
+                    utilsLabel.color[2] = cmd->color.b;
+                    utilsLabel.color[3] = cmd->color.a;
 
-                        device->Fn.vkCmdBeginDebugUtilsLabelEXT(commandBuffer, &utilsLabel);
-                    }
-                    break;
+                    device->Fn.vkCmdBeginDebugUtilsLabelEXT(commandBuffer, &utilsLabel);
                 }
+                break;
+            }
             case Command::EndDebugLabel:
             {
                 EndDebugLabelCmd* cmd = mCommandIter.NextCommand<EndDebugLabelCmd>();
@@ -605,15 +675,27 @@ namespace rhi::impl::vulkan
                 Buffer* srcBuffer = checked_cast<Buffer>(cmd->srcBuffer.Get());
                 Texture* dstTexture = checked_cast<Texture>(cmd->dstTexture.Get());
 
-                VkBufferImageCopy region = ComputeBufferImageCopyRegion(cmd->dataLayout, cmd->size, dstTexture, cmd->mipLevel, cmd->origin, cmd->aspect);
+                VkBufferImageCopy region = ComputeBufferImageCopyRegion(
+                        cmd->dataLayout,
+                        cmd->size,
+                        dstTexture,
+                        cmd->mipLevel,
+                        cmd->origin,
+                        cmd->aspect);
 
-                SubresourceRange range = { cmd->aspect, cmd->origin.z, cmd->size.depthOrArrayLayers, cmd->mipLevel, 1 };
+                SubresourceRange range = {cmd->aspect, cmd->origin.z, cmd->size.depthOrArrayLayers, cmd->mipLevel, 1};
 
                 srcBuffer->TrackUsageAndGetResourceBarrier(queue, BufferUsage::CopySrc);
-                dstTexture->TransitionUsageAndGetResourceBarrier(queue, TextureUsage::CopyDst, ShaderStage::None, range);
+                dstTexture->
+                        TransitionUsageAndGetResourceBarrier(queue, TextureUsage::CopyDst, ShaderStage::None, range);
                 recordContext->EmitBarriers();
 
-                vkCmdCopyBufferToImage(commandBuffer, srcBuffer->GetHandle(), dstTexture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+                vkCmdCopyBufferToImage(commandBuffer,
+                                       srcBuffer->GetHandle(),
+                                       dstTexture->GetHandle(),
+                                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                       1,
+                                       &region);
                 break;
             }
             case Command::CopyTextureToBuffer:
@@ -628,27 +710,39 @@ namespace rhi::impl::vulkan
                 Texture* srcTexture = checked_cast<Texture>(cmd->srcTexture.Get());
                 Buffer* dstBuffer = checked_cast<Buffer>(cmd->dstBuffer.Get());
 
-                VkBufferImageCopy region = ComputeBufferImageCopyRegion(cmd->dataLayout, cmd->size, srcTexture, cmd->mipLevel, cmd->origin, cmd->aspect);
+                VkBufferImageCopy region = ComputeBufferImageCopyRegion(
+                        cmd->dataLayout,
+                        cmd->size,
+                        srcTexture,
+                        cmd->mipLevel,
+                        cmd->origin,
+                        cmd->aspect);
 
-                SubresourceRange range = { cmd->aspect, cmd->origin.z, cmd->size.depthOrArrayLayers, cmd->mipLevel,  1};
+                SubresourceRange range = {cmd->aspect, cmd->origin.z, cmd->size.depthOrArrayLayers, cmd->mipLevel, 1};
 
-                srcTexture->TransitionUsageAndGetResourceBarrier(queue, TextureUsage::CopySrc, ShaderStage::None, range);
+                srcTexture->
+                        TransitionUsageAndGetResourceBarrier(queue, TextureUsage::CopySrc, ShaderStage::None, range);
                 dstBuffer->TrackUsageAndGetResourceBarrier(queue, BufferUsage::CopyDst);
                 recordContext->EmitBarriers();
 
-                vkCmdCopyImageToBuffer(commandBuffer, srcTexture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstBuffer->GetHandle(), 1, &region);
+                vkCmdCopyImageToBuffer(commandBuffer,
+                                       srcTexture->GetHandle(),
+                                       VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                       dstBuffer->GetHandle(),
+                                       1,
+                                       &region);
                 break;
             }
 
             case Command::CopyTextureToTexture:
             {
                 CopyTextureToTextureCmd* cmd = mCommandIter.NextCommand<CopyTextureToTextureCmd>();
-                
+
                 Extent3D size =
                 {
-                    (std::min)(cmd->srcSize.width, cmd->dstSize.width),
-                    (std::min)(cmd->srcSize.height, cmd->dstSize.height),
-                    (std::min)(cmd->srcSize.depthOrArrayLayers, cmd->dstSize.depthOrArrayLayers)
+                        (std::min)(cmd->srcSize.width, cmd->dstSize.width),
+                        (std::min)(cmd->srcSize.height, cmd->dstSize.height),
+                        (std::min)(cmd->srcSize.depthOrArrayLayers, cmd->dstSize.depthOrArrayLayers)
                 };
 
                 if (size.width == 0 || size.height == 0 || size.depthOrArrayLayers == 0)
@@ -659,11 +753,25 @@ namespace rhi::impl::vulkan
                 Texture* srcTexture = checked_cast<Texture>(cmd->srcTexture.Get());
                 Texture* dstTexture = checked_cast<Texture>(cmd->dstTexture.Get());
 
-                SubresourceRange srcRange = { cmd->srcAspect, cmd->srcOrigin.z, size.depthOrArrayLayers, cmd->srcMipLevel, 1 };
-                SubresourceRange dstRange = { cmd->dstAspect, cmd->dstOrigin.z, size.depthOrArrayLayers, cmd->dstMipLevel, 1 };
+                SubresourceRange srcRange = {cmd->srcAspect,
+                                             cmd->srcOrigin.z,
+                                             size.depthOrArrayLayers,
+                                             cmd->srcMipLevel,
+                                             1};
+                SubresourceRange dstRange = {cmd->dstAspect,
+                                             cmd->dstOrigin.z,
+                                             size.depthOrArrayLayers,
+                                             cmd->dstMipLevel,
+                                             1};
 
-                srcTexture->TransitionUsageAndGetResourceBarrier(queue, TextureUsage::CopySrc, ShaderStage::None, srcRange);
-                dstTexture->TransitionUsageAndGetResourceBarrier(queue, TextureUsage::CopyDst, ShaderStage::None, dstRange);
+                srcTexture->TransitionUsageAndGetResourceBarrier(queue,
+                                                                 TextureUsage::CopySrc,
+                                                                 ShaderStage::None,
+                                                                 srcRange);
+                dstTexture->TransitionUsageAndGetResourceBarrier(queue,
+                                                                 TextureUsage::CopyDst,
+                                                                 ShaderStage::None,
+                                                                 dstRange);
                 recordContext->EmitBarriers();
 
                 VkImageCopy region{};
@@ -690,8 +798,13 @@ namespace rhi::impl::vulkan
                 region.extent.height = size.height;
                 region.extent.depth = size.depthOrArrayLayers;
 
-                vkCmdCopyImage(commandBuffer, srcTexture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                    dstTexture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+                vkCmdCopyImage(commandBuffer,
+                               srcTexture->GetHandle(),
+                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                               dstTexture->GetHandle(),
+                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                               1,
+                               &region);
                 break;
             }
             case Command::EndComputePass:

@@ -14,8 +14,9 @@ namespace rhi::impl::vulkan
     public:
         static Ref<Sampler> Create(Device* device, const SamplerDesc& desc);
         VkSampler GetHandle() const;
+
     private:
-        explicit  Sampler(Device* device, const SamplerDesc& desc);
+        explicit Sampler(Device* device, const SamplerDesc& desc);
         ~Sampler();
         bool Initialize(const SamplerDesc& desc);
         void DestroyImpl() override;

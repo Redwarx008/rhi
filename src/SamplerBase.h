@@ -11,6 +11,7 @@ namespace rhi::impl
     {
     public:
         ResourceType GetType() const override;
+
     protected:
         explicit SamplerBase(DeviceBase* device, const SamplerDesc& desc);
         ~SamplerBase();

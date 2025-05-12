@@ -20,7 +20,8 @@ namespace rhi::impl
             MappedAtCreation,
             Destroyed
         };
-        // api 
+
+        // api
         BufferUsage APIGetUsage() const;
         uint64_t APIGetSize() const;
         virtual void* APIGetMappedPointer() = 0;
@@ -29,6 +30,7 @@ namespace rhi::impl
         ResourceType GetType() const override;
         void OnMapAsync(QueueBase* queue, MapMode usage, BufferMapCallback callback, void* userData);
         void OnMapCallbackCompleted(BufferMapAsyncStatus status);
+
     protected:
         explicit BufferBase(DeviceBase* device, const BufferDesc& desc);
         ~BufferBase();
@@ -56,6 +58,7 @@ namespace rhi::impl
             BufferUsage readUsage = BufferUsage::None;
             ShaderStage readShaderStages = ShaderStage::None;
         };
+
         std::array<UsageTrackInQueue, 3> mUsageTrackInQueues;
     };
 }

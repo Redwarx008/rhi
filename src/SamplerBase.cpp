@@ -11,11 +11,9 @@ namespace rhi::impl
         mMinFilter(desc.minFilter),
         mMipmapFilter(desc.mipmapFilter),
         mMaxAnisotropy(desc.maxAnisotropy)
-    {
+    {}
 
-    }
-
-    SamplerBase::~SamplerBase() {}
+    SamplerBase::~SamplerBase() = default;
 
     ResourceType SamplerBase::GetType() const
     {

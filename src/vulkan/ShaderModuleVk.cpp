@@ -10,11 +10,10 @@ namespace rhi::impl::vulkan
 {
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDesc& desc) :
         ShaderModuleBase(device, desc)
-    {
+    {}
 
-    }
-
-    ShaderModule::~ShaderModule() {}
+    ShaderModule::~ShaderModule()
+    {}
 
     Ref<ShaderModule> ShaderModule::Create(Device* device, const ShaderModuleDesc& desc)
     {

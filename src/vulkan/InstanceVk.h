@@ -13,7 +13,7 @@ namespace rhi::impl::vulkan
         static Ref<Instance> Create(const InstanceDesc& desc);
         ~Instance();
 
-        void APIEnumerateAdapters(AdapterBase** const adapters, uint32_t* adapterCount) override;
+        void APIEnumerateAdapters(AdapterBase** adapters, uint32_t* adapterCount) override;
         SurfaceBase* APICreateSurface(void* hwnd, void* hinstance) override;
         VkInstance GetHandle() const;
     private:

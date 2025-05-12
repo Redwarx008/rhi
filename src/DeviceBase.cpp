@@ -16,14 +16,16 @@
 
 namespace rhi::impl
 {
-    DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDesc& desc)
-        :mAdapter(adapter)
+    DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDesc& desc) :
+        mAdapter(adapter)
     {
         SetFeatures(desc);
         // Todo: create cache object.
     }
 
-    DeviceBase::~DeviceBase() {}
+    DeviceBase::~DeviceBase()
+    {
+    }
 
     void DeviceBase::SetFeatures(const DeviceDesc& desc)
     {
@@ -63,18 +65,19 @@ namespace rhi::impl
 
     void DeviceBase::DestroyObjects()
     {
-        static constexpr std::array<ResourceType, static_cast<uint32_t>(ResourceType::Count)> cResourceTypeDependencyOrder =
-        {
-            ResourceType::RenderPipeline,
-            ResourceType::ComputePipeline,
-            ResourceType::PipelineLayout,
-            ResourceType::BindSet,
-            ResourceType::BindSetLayout,
-            ResourceType::ShaderModule,
-            ResourceType::Texture,  // Note that Textures own the TextureViews.
-            ResourceType::Sampler,
-            ResourceType::Buffer,
-        };
+        static constexpr std::array<ResourceType, static_cast<uint32_t>(ResourceType::Count)>
+                cResourceTypeDependencyOrder =
+                {
+                        ResourceType::RenderPipeline,
+                        ResourceType::ComputePipeline,
+                        ResourceType::PipelineLayout,
+                        ResourceType::BindSet,
+                        ResourceType::BindSetLayout,
+                        ResourceType::ShaderModule,
+                        ResourceType::Texture, // Note that Textures own the TextureViews.
+                        ResourceType::Sampler,
+                        ResourceType::Buffer,
+                };
 
         for (ResourceType type : cResourceTypeDependencyOrder)
         {

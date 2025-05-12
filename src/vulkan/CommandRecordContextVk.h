@@ -25,8 +25,8 @@ namespace rhi::impl::vulkan
         std::vector<VkSemaphoreSubmitInfo> waitSemaphoreSubmitInfos;
         std::vector<VkSemaphoreSubmitInfo> signalSemaphoreSubmitInfos;
 
-        void AddBufferBarrier(VkBufferMemoryBarrier2 barrier);
-        void AddTextureBarrier(VkImageMemoryBarrier2 barrier);
+        void AddBufferBarrier(const VkBufferMemoryBarrier2& barrier);
+        void AddTextureBarrier(const VkImageMemoryBarrier2& barrier);
         void EmitBarriers();
         void Reset();
     private:

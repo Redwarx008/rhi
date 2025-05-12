@@ -34,7 +34,7 @@ namespace rhi::impl::vulkan
                 return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
             }
             return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        }    
+        }
         case rhi::impl::BindingType::Sampler:
             return VK_DESCRIPTOR_TYPE_SAMPLER;
         case rhi::impl::BindingType::CombinedTextureSampler:
@@ -48,9 +48,7 @@ namespace rhi::impl::vulkan
 
     BindSetLayout::BindSetLayout(DeviceBase* device, const BindSetLayoutDesc& desc):
         BindSetLayoutBase(device, desc)
-    {
-
-    }
+    {}
 
     Ref<BindSetLayout> BindSetLayout::Create(DeviceBase* device, const BindSetLayoutDesc& desc)
     {
@@ -62,7 +60,8 @@ namespace rhi::impl::vulkan
         return bindSetLayout;
     }
 
-    BindSetLayout::~BindSetLayout() {}
+    BindSetLayout::~BindSetLayout()
+    {}
 
     bool BindSetLayout::Initialize(const BindSetLayoutDesc& desc)
     {
@@ -138,8 +137,10 @@ namespace rhi::impl::vulkan
     }
 
     void BindSetLayout::DeallocateBindSet(BindSet* bindSet,
-        DescriptorSetAllocation* descriptorSetAllocation)
+                                          DescriptorSetAllocation* descriptorSetAllocation)
     {
-        mDescriptorSetAllocator->Deallocate(descriptorSetAllocation, bindSet->IsUsedInQueue(QueueType::Graphics), bindSet->IsUsedInQueue(QueueType::Compute));
+        mDescriptorSetAllocator->Deallocate(descriptorSetAllocation,
+                                            bindSet->IsUsedInQueue(QueueType::Graphics),
+                                            bindSet->IsUsedInQueue(QueueType::Compute));
     }
 }

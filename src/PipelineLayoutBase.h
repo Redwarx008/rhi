@@ -21,6 +21,7 @@ namespace rhi::impl
         const std::bitset<cMaxBindSets>& GetBindSetMask() const;
         ResourceType GetType() const override;
         const PushConstantRange& GetPushConstants() const;
+
     protected:
         explicit PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDesc& desc);
         ~PipelineLayoutBase();

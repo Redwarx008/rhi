@@ -1,14 +1,15 @@
 #include "VkResourceDeleter.h"
 #include "DeviceVk.h"
 #include "QueueVk.h"
-#include "InstanceVk.h"
 #include "AdapterVk.h"
 #include "../common/Utils.h"
 #include "../common/Error.h"
 
 namespace rhi::impl::vulkan
 {
-    VkResourceDeleter::VkResourceDeleter(Queue* queue) : mQueue(queue) {}
+    VkResourceDeleter::VkResourceDeleter(Queue* queue) :
+        mQueue(queue)
+    {}
 
     VkResourceDeleter::~VkResourceDeleter()
     {
@@ -56,7 +57,8 @@ namespace rhi::impl::vulkan
         }
         mPipelineLayoutsToDelete.ClearUpTo(completedSerial);
 
-        for (VkPipeline pipeline : mPipelinesToDelete.IterateUpTo(completedSerial)) {
+        for (VkPipeline pipeline : mPipelinesToDelete.IterateUpTo(completedSerial))
+        {
             vkDestroyPipeline(vkDeivce, pipeline, nullptr);
         }
         mPipelinesToDelete.ClearUpTo(completedSerial);

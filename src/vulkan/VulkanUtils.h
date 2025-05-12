@@ -8,9 +8,9 @@
 namespace rhi::impl::vulkan
 {
 
-    template<typename T>
+    template <typename T>
     struct ObjectTypeTraits;
-
+//clang-format off
 #define DEFINE_OBJECT_TYPE_TRAIT(handleType, objectType) \
     template<> \
     struct ObjectTypeTraits<handleType> { \
@@ -44,16 +44,24 @@ namespace rhi::impl::vulkan
     DEFINE_OBJECT_TYPE_TRAIT(VkCommandPool, VK_OBJECT_TYPE_COMMAND_POOL);
 
 #undef DEFINE_OBJECT_TYPE_TRAIT
-
+    //clang-format on
     class Device;
     class Texture;
 
-    void SetDebugNameInternal(Device* device, VkObjectType objectType, uint64_t objectHandle, const char* prefix, std::string_view name);
+    void SetDebugNameInternal(Device* device,
+                              VkObjectType objectType,
+                              uint64_t objectHandle,
+                              const char* prefix,
+                              std::string_view name);
 
     template <typename HandleType>
     void SetDebugName(Device* device, HandleType handle, const char* prefix, std::string_view name)
     {
-        SetDebugNameInternal(device, ObjectTypeTraits<HandleType>::value, reinterpret_cast<uint64_t>(handle), prefix, name);
+        SetDebugNameInternal(device,
+                             ObjectTypeTraits<HandleType>::value,
+                             reinterpret_cast<uint64_t>(handle),
+                             prefix,
+                             name);
     }
 
     VkCompareOp CompareOpConvert(CompareOp op);
@@ -64,5 +72,10 @@ namespace rhi::impl::vulkan
 
     VkImageAspectFlags ImageAspectFlagsConvert(Aspect aspects);
 
-    VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayout, const Extent3D& copySize, Texture* texture, uint32_t mipLevel, Origin3D origin, Aspect aspect);
+    VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayout,
+                                                   const Extent3D& copySize,
+                                                   Texture* texture,
+                                                   uint32_t mipLevel,
+                                                   Origin3D origin,
+                                                   Aspect aspect);
 }

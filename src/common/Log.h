@@ -31,7 +31,7 @@
 
 namespace rhi
 {
-    enum class LogSeverity 
+    enum class LogSeverity
     {
         Debug,
         Info,
@@ -39,7 +39,7 @@ namespace rhi
         Error,
     };
 
-    class LogMessage 
+    class LogMessage
     {
     public:
         explicit LogMessage(LogSeverity severity);
@@ -49,7 +49,8 @@ namespace rhi
         LogMessage& operator=(LogMessage&& other);
 
         template <typename T>
-        LogMessage& operator<<(T&& value) {
+        LogMessage& operator<<(T&& value)
+        {
             mStream << value;
             return *this;
         }
@@ -71,5 +72,5 @@ namespace rhi
     // DAWN_DEBUG is a helper macro that creates a DebugLog and outputs file/line/function
     // information
     LogMessage DebugLog(const char* file, const char* function, int line);
-    #define DEBUG() DebugLog(__FILE__, __func__, __LINE__)
+#define DEBUG() DebugLog(__FILE__, __func__, __LINE__)
 }

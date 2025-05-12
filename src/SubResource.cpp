@@ -4,16 +4,17 @@
 
 namespace rhi::impl
 {
-    SubresourceRange::SubresourceRange(Aspect _aspects, uint32_t _baseArrayLayer, uint32_t _layerCount, uint32_t _baseMipLevel, uint32_t _levelCount)
-        :
+    SubresourceRange::SubresourceRange(Aspect _aspects,
+                                       uint32_t _baseArrayLayer,
+                                       uint32_t _layerCount,
+                                       uint32_t _baseMipLevel,
+                                       uint32_t _levelCount) :
         aspects(_aspects),
         baseArrayLayer(_baseArrayLayer),
         layerCount(_layerCount),
-        baseMipLevel(_baseArrayLayer),
+        baseMipLevel(_baseMipLevel),
         levelCount(_levelCount)
-    {
-
-    }
+    {}
 
     SubresourceRange SubresourceRange::MakeSingle(Aspect aspect, uint32_t baseArrayLayer, uint32_t baseMipLevel)
     {
