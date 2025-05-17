@@ -92,6 +92,7 @@ namespace rhi::impl
             ASSERT(!"Unreachable");
             break;
         }
+        return TextureFormat::Undefined;
     }
 
     RenderPipelineBase::RenderPipelineBase(DeviceBase* device, const RenderPipelineDesc& desc) :

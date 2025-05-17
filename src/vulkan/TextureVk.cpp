@@ -821,18 +821,18 @@ namespace rhi::impl::vulkan
 
         Device* device = checked_cast<Device>(mDevice.Get());
 
-        //Ref<RefCountedHandle<ImageAllocation>> imageAllocation = AcquireRef(new RefCountedHandle<ImageAllocation>(device, { mHandle, mAllocation },
-        //    [](Device* device, ImageAllocation handle)
-        //    {
-        //        vmaDestroyImage(device->GetMemoryAllocator(), handle.image, handle.allocation);
-        //    }
-        //));
+        Ref<RefCountedHandle<ImageAllocation>> imageAllocation = AcquireRef(new RefCountedHandle<ImageAllocation>(device, { mHandle, mAllocation },
+            [](Device* device, ImageAllocation handle)
+            {
+                vmaDestroyImage(device->GetMemoryAllocator(), handle.image, handle.allocation);
+            }
+        ));
 
         for (uint32_t i = 0; i < isUsedInQueue.size(); ++i)
         {
             if (isUsedInQueue[i])
             {
-                //checked_cast<Queue>(device->GetQueue(static_cast<QueueType>(i)))->GetDeleter()->DeleteWhenUnused(imageAllocation);
+                checked_cast<Queue>(device->GetQueue(static_cast<QueueType>(i)))->GetDeleter()->DeleteWhenUnused(imageAllocation);
             }
         }
 

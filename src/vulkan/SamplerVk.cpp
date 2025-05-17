@@ -19,6 +19,7 @@ namespace rhi::impl::vulkan
             break;
         }
         ASSERT(!"Unreachable");
+        return VK_FILTER_LINEAR;
     }
 
     VkSamplerMipmapMode SamplerMipmapModeConvert(FilterMode filter)
@@ -33,6 +34,7 @@ namespace rhi::impl::vulkan
             break;
         }
         ASSERT(!"Unreachable");
+        return VK_SAMPLER_MIPMAP_MODE_LINEAR;
     }
 
     VkSamplerAddressMode SamplerAddressModeConvert(SamplerAddressMode mode)
@@ -53,6 +55,7 @@ namespace rhi::impl::vulkan
             break;
         }
         ASSERT(!"Unreachable");
+        return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     }
 
 
@@ -67,7 +70,7 @@ namespace rhi::impl::vulkan
         {
             return nullptr;
         }
-        return std::move(sampler);
+        return sampler;
     }
 
     bool Sampler::Initialize(const SamplerDesc& desc)
@@ -92,7 +95,7 @@ namespace rhi::impl::vulkan
         createInfo.unnormalizedCoordinates = VK_FALSE;
 
         Device* device = checked_cast<Device>(mDevice.Get());
-        if (device->GetVkDeviceInfo().features.samplerAnisotropy == true && mMaxAnisotropy > 1)
+        if (device->GetVkDeviceInfo().features.samplerAnisotropy == VK_TRUE && mMaxAnisotropy > 1)
         {
             createInfo.anisotropyEnable = true;
             createInfo.maxAnisotropy = (std::min)(mMaxAnisotropy,
@@ -107,6 +110,7 @@ namespace rhi::impl::vulkan
         CHECK_VK_RESULT_FALSE(err, "CreateSampler");
 
         SetDebugName(device, mHandle, "Sampler", GetName());
+        return true;
     }
 
     void Sampler::DestroyImpl()

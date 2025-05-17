@@ -12,8 +12,7 @@ namespace rhi::impl::vulkan
         ShaderModuleBase(device, desc)
     {}
 
-    ShaderModule::~ShaderModule()
-    {}
+    ShaderModule::~ShaderModule() = default;
 
     Ref<ShaderModule> ShaderModule::Create(Device* device, const ShaderModuleDesc& desc)
     {

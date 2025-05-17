@@ -56,6 +56,7 @@ namespace rhi::impl
             return 2;
         default:
             assert(!"unreachable");
+            return 0;
         }
     }
 
@@ -133,7 +134,7 @@ namespace rhi::impl
             return Aspect::Depth | Aspect::Stencil;
         default:
             assert(!"Invalid Enumeration Value");
-            break;
+            return Aspect::Color;
         } // todo: add  multi-planar formats support.
     }
 
@@ -169,6 +170,7 @@ namespace rhi::impl
             break;
         }
         assert(!"Unreachable");
+        return aspectsFromFormat;
     }
 
     Aspect ViewAspectConvert(TextureFormat format, TextureAspect aspect)

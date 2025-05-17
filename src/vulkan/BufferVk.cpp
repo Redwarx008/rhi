@@ -274,12 +274,12 @@ namespace rhi::impl::vulkan
         else
         {
             // Buffers in concurrent mode may be used by multiple queues and there is no way to tell who was last to use .
-            //Ref<RefCountedHandle<BufferAllocation>> bufferAllocation = AcquireRef(new RefCountedHandle<BufferAllocation>(device, { mHandle, mAllocation },
-            //    [](Device* device, BufferAllocation handle)
-            //    {
-            //        vmaDestroyBuffer(device->GetMemoryAllocator(), handle.buffer, handle.allocation);
-            //    }
-            //));
+            Ref<RefCountedHandle<BufferAllocation>> bufferAllocation = AcquireRef(new RefCountedHandle<BufferAllocation>(device, { mHandle, mAllocation },
+                [](Device* device, BufferAllocation handle)
+                {
+                    vmaDestroyBuffer(device->GetMemoryAllocator(), handle.buffer, handle.allocation);
+                }
+            ));
 
             for (uint32_t i = 0; i < mUsageTrackInQueues.size(); ++i)
             {
@@ -288,7 +288,7 @@ namespace rhi::impl::vulkan
                 {
                     continue;
                 }
-                //queue->GetDeleter()->DeleteWhenUnused(bufferAllocation);
+                queue->GetDeleter()->DeleteWhenUnused(bufferAllocation);
             }
         }
 

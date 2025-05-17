@@ -39,7 +39,6 @@ namespace rhi::impl::vulkan
     bool Surface::Initialize()
     {
         Instance* instance = checked_cast<Instance>(mInstance);
-        Device* device = checked_cast<Device>(mDevice.Get());
 #if defined(WIN32)
         VkWin32SurfaceCreateInfoKHR createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

@@ -5,8 +5,8 @@
 
 namespace rhi::impl
 {
-    class BeginRenderPassCmd;
-    class BeginComputePassCmd;
+    struct BeginRenderPassCmd;
+    struct BeginComputePassCmd;
 }
 
 namespace rhi::impl::vulkan

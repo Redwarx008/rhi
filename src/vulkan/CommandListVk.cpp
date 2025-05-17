@@ -39,6 +39,7 @@ namespace rhi::impl::vulkan
             return VK_INDEX_TYPE_UINT32;
         }
         ASSERT(!"Unreachable");
+        return VK_INDEX_TYPE_UINT16;
     }
 
     VkAttachmentLoadOp VulkanAttachmentLoadOp(LoadOp op)

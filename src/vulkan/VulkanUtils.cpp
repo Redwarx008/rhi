@@ -117,7 +117,6 @@ namespace rhi::impl::vulkan
     {
         switch (stage)
         {
-
         case ShaderStage::Vertex:
             return VK_SHADER_STAGE_VERTEX_BIT;
         case ShaderStage::TessellationControl:

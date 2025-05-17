@@ -7,8 +7,6 @@
 
 namespace rhi::impl
 {
-    class PipelineBase;
-
     class PassEncoder : public RefCounted
     {
     public:

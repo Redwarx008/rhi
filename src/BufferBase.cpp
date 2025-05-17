@@ -1,5 +1,3 @@
-#pragma once
-
 #include "BufferBase.h"
 #include "CallbackTaskManager.h"
 #include "QueueBase.h"

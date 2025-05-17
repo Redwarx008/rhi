@@ -9,7 +9,6 @@
 #include "../common/Constants.h"
 
 #include <algorithm>
-#include <memory>
 
 namespace rhi::impl::vulkan
 {
@@ -28,6 +27,7 @@ namespace rhi::impl::vulkan
         default:
             ASSERT(!"Unreachable");
         }
+        return VK_PRESENT_MODE_FIFO_KHR;
     }
 
     PresentMode ToPresentMode(VkPresentModeKHR mode)
@@ -45,6 +45,7 @@ namespace rhi::impl::vulkan
         default:
             ASSERT(!"Unreachable");
         }
+        return PresentMode::Fifo;
     }
 
     uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode)
@@ -61,6 +62,7 @@ namespace rhi::impl::vulkan
             break;
         }
         ASSERT(!"Unreachable");
+        return 2;
     }
 
     Ref<SwapChain> SwapChain::Create(Device* device,
@@ -154,7 +156,7 @@ namespace rhi::impl::vulkan
         vkGetPhysicalDeviceSurfacePresentModesKHR(device->GetVkPhysicalDevice(),
                                                   surface->GetHandle(),
                                                   &presentModeCount,
-                                                  NULL);
+                                                  nullptr);
         assert(presentModeCount > 0);
 
         std::vector<VkPresentModeKHR> presentModes(presentModeCount);
@@ -165,7 +167,7 @@ namespace rhi::impl::vulkan
 
         VkExtent2D swapchainExtent = {};
         // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
-        if (surfCaps.currentExtent.width == (uint32_t)-1)
+        if (surfCaps.currentExtent.width == static_cast<uint32_t>(-1))
         {
             // If the surface size is undefined, the size is set to
             // the size of the images requested.
@@ -321,7 +323,7 @@ namespace rhi::impl::vulkan
         }
 
         uint32_t imageCount;
-        vkGetSwapchainImagesKHR(device->GetHandle(), mHandle, &imageCount, NULL);
+        vkGetSwapchainImagesKHR(device->GetHandle(), mHandle, &imageCount, nullptr);
         std::vector<VkImage> images{imageCount};
         err = vkGetSwapchainImagesKHR(device->GetHandle(), mHandle, &imageCount, images.data());
         CHECK_VK_RESULT_FALSE(err, "GetSwapchainImages");
@@ -354,7 +356,6 @@ namespace rhi::impl::vulkan
 
     void SwapChain::DestroySwapChain()
     {
-        Surface* surface = checked_cast<Surface>(mSurface);
         Device* device = checked_cast<Device>(mDevice);
         Queue* queue = checked_cast<Queue>(device->GetQueue(QueueType::Graphics).Get());
 
@@ -447,6 +448,8 @@ namespace rhi::impl::vulkan
         waitInfo.stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
         waitInfo.semaphore = semaphore;
         waitInfo.value = 0;
+
+        return status;
     }
 
     Ref<TextureViewBase> SwapChain::GetCurrentTextureView()

@@ -3,7 +3,6 @@
 #include "../SwapchainBase.h"
 
 #include <vector>
-#include <memory>
 #include <vulkan/vulkan.h>
 
 namespace rhi::impl::vulkan
