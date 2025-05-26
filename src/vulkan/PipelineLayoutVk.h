@@ -13,13 +13,15 @@ namespace rhi::impl::vulkan
     {
     public:
         static Ref<PipelineLayout> Create(Device* device, const PipelineLayoutDesc& desc);
+        static Ref<PipelineLayout> Create(Device* device, const PipelineLayoutDesc2& desc);
         VkPipelineLayout GetHandle() const;
         VkShaderStageFlags GetPushConstantVisibility() const;
 
     private:
         explicit PipelineLayout(Device* device, const PipelineLayoutDesc& desc);
+        explicit PipelineLayout(Device* device, const PipelineLayoutDesc2& desc);
         ~PipelineLayout();
-        bool Initialize(const PipelineLayoutDesc& desc);
+        bool Initialize();
         void DestroyImpl() override;
 
         VkPipelineLayout mHandle = VK_NULL_HANDLE;

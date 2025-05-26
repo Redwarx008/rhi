@@ -32,7 +32,7 @@ TextureBase::~TextureBase() = default;
 
     void TextureBase::Initialize()
     {
-        ResourceBase::Initialize();
+        ResourceBase::TrackResource();
     }
 
     ResourceType TextureBase::GetType() const
@@ -172,7 +172,7 @@ TextureBase::~TextureBase() = default;
 
     void TextureViewBase::Initialize()
     {
-        ResourceBase::Initialize();
+        ResourceBase::TrackResource();
     }
 
     ResourceList* TextureViewBase::GetList() const

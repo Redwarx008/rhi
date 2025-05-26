@@ -112,6 +112,11 @@ RHIPipelineLayout rhiCreatePipelineLayout(RHIDevice device, const RHIPipelineLay
     auto result = device->APICreatePipelineLayout(*reinterpret_cast<const PipelineLayoutDesc*>(desc));
     return static_cast<RHIPipelineLayout>(result);
 }
+RHIPipelineLayout rhiCreatePipelineLayout2(RHIDevice device, const RHIPipelineLayoutDesc2* desc)
+{
+    auto result = device->APICreatePipelineLayout2(*reinterpret_cast<const PipelineLayoutDesc2*>(desc));
+    return static_cast<RHIPipelineLayout>(result);
+}
 RHIRenderPipeline rhiDeviceCreateRenderPipeline(RHIDevice device, const RHIRenderPipelineDesc* desc)
 {
     auto result = device->APICreateRenderPipeline(*reinterpret_cast<const RenderPipelineDesc*>(desc));
@@ -353,9 +358,9 @@ void rhiRenderPassEncoderMultiDrawIndexedIndirect(RHIRenderPassEncoder encoder, 
 {
     encoder->APIMultiDrawIndirect(indirectBuffer, indirectOffset, maxDrawCount, drawCountBuffer, drawCountBufferOffset);
 }
-void rhiRenderPassEncoderSetPushConstant(RHIRenderPassEncoder encoder, const void* data, uint32_t size)
+void rhiRenderPassEncoderSetPushConstant(RHIRenderPassEncoder encoder, RHIShaderStage stage, const void* data, uint32_t size, uint32_t offset)
 {
-    encoder->APISetPushConstant(data, size);
+    encoder->APISetPushConstant(static_cast<ShaderStage>(stage), data, size, offset);
 }
 void rhiRenderPassEncoderBeginDebugLabel(RHIRenderPassEncoder encoder, RHIStringView label, const RHIColor* color)
 {
@@ -394,9 +399,9 @@ void rhiComputePassEncoderSetBindSet(RHIComputePassEncoder encoder, RHIBindSet s
 {
     encoder->APISetBindSet(set, setIndex, dynamicOffsetCount, dynamicOffsets);
 }
-void rhiComputePassEncoderSetPushConstant(RHIComputePassEncoder encoder, const void* data, uint32_t size)
+void rhiComputePassEncoderSetPushConstant(RHIComputePassEncoder encoder, RHIShaderStage stage, const void* data, uint32_t size, uint32_t offset)
 {
-    encoder->APISetPushConstant(data, size);
+    encoder->APISetPushConstant(static_cast<ShaderStage>(stage), data, size, offset);
 }
 void rhiComputePassEncoderBeginDebugLabel(RHIComputePassEncoder encoder, RHIStringView label, const RHIColor* color)
 {

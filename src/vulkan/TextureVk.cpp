@@ -512,7 +512,8 @@ namespace rhi::impl::vulkan
         case cSwapChainImagePresentUsage:
             return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
         default:
-            assert(!"Invalid Enumeration Value");
+            ASSERT(!"Invalid Enumeration Value");
+            return VK_IMAGE_LAYOUT_UNDEFINED;
         }
     }
 

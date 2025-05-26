@@ -574,6 +574,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     struct DeviceDesc;
     struct InstanceDesc;
     struct PipelineLayoutDesc;
+    struct PipelineLayoutDesc2;
     struct RenderPassDesc;
     struct RenderPipelineDesc;
     struct SamplerDesc;
@@ -798,7 +799,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         inline void DispatchIndirect(Buffer& indirectBuffer, uint64_t indirectOffset);
         inline void SetBindSet(BindSet& set, uint32_t setIndex, uint32_t dynamicOffsetCount = 0, const uint32_t* dynamicOffsets = nullptr);
         inline void End();
-        inline void SetPushConstant(const void* data, uint32_t size);
+        inline void SetPushConstant(ShaderStage stage, const void* data, uint32_t size, uint32_t offset);
         inline void BeginDebugLabel(std::string_view label, const Color* color = nullptr);
         inline void EndDebugLabel();
     private:
@@ -827,6 +828,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         inline Adapter GetAdapter() const;
         inline Queue GetQueue(QueueType queueType);
         inline PipelineLayout CreatePipelineLayout(const PipelineLayoutDesc& desc);
+        inline PipelineLayout CreatePipelineLayout2(const PipelineLayoutDesc2& desc);
         inline RenderPipeline CreateRenderPipeline(const RenderPipelineDesc& desc);
         inline ComputePipeline CreateComputePipeline(const ComputePipelineDesc& desc);
         inline BindSetLayout CreateBindSetLayout(const BindSetLayoutDesc& desc);
@@ -904,7 +906,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         inline void MultiDrawIndexedIndirect(Buffer& indirectBuffer, uint64_t indirectOffset, uint32_t maxDrawCount, Buffer drawCountBuffer = nullptr, uint64_t drawCountBufferOffset = 0);
         inline void SetBindSet(BindSet& set, uint32_t setIndex, uint32_t dynamicOffsetCount = 0, const uint32_t* dynamicOffsets = nullptr);
         inline void End();
-        inline void SetPushConstant(const void* data, uint32_t size);
+        inline void SetPushConstant(ShaderStage stage, const void* data, uint32_t size, uint32_t offset);
         inline void BeginDebugLabel(std::string_view label, const Color* color = nullptr);
         inline void EndDebugLabel();
     private:
@@ -1188,9 +1190,9 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     {
         rhiComputePassEncoderEnd(Get());
     }
-    void ComputePassEncoder::SetPushConstant(const void* data, uint32_t size)
+    void ComputePassEncoder::SetPushConstant(ShaderStage stage, const void* data, uint32_t size, uint32_t offset)
     {
-        rhiComputePassEncoderSetPushConstant(Get(), data, size);
+        rhiComputePassEncoderSetPushConstant(Get(), static_cast<RHIShaderStage>(stage), data, size, offset);
     }
     void ComputePassEncoder::BeginDebugLabel(std::string_view label, const Color* color)
     {
@@ -1244,6 +1246,11 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     PipelineLayout Device::CreatePipelineLayout(const PipelineLayoutDesc& desc)
     {
         RHIPipelineLayout result = rhiCreatePipelineLayout(Get(), reinterpret_cast<const RHIPipelineLayoutDesc*>(&desc));
+        return PipelineLayout::Acquire(result);
+    }
+    PipelineLayout Device::CreatePipelineLayout2(const PipelineLayoutDesc2& desc)
+    {
+        RHIPipelineLayout result = rhiCreatePipelineLayout2(Get(), reinterpret_cast<const RHIPipelineLayoutDesc2*>(&desc));
         return PipelineLayout::Acquire(result);
     }
     RenderPipeline Device::CreateRenderPipeline(const RenderPipelineDesc& desc)
@@ -1453,9 +1460,9 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     {
         rhiRenderPassEncoderEnd(Get());
     }
-    void RenderPassEncoder::SetPushConstant(const void* data, uint32_t size)
+    void RenderPassEncoder::SetPushConstant(ShaderStage stage, const void* data, uint32_t size, uint32_t offset)
     {
-        rhiRenderPassEncoderSetPushConstant(Get(), data, size);
+        rhiRenderPassEncoderSetPushConstant(Get(), static_cast<RHIShaderStage>(stage), data, size, offset);
     }
     void RenderPassEncoder::BeginDebugLabel(std::string_view label, const Color* color)
     {
@@ -2398,19 +2405,21 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         std::string_view name;
         BindSetLayout const* bindSetLayouts;
         uint32_t bindSetLayoutCount;
-        PushConstantRange pushConstantRange;
+        PushConstantRange const* pushConstantRanges;
+        uint32_t pushConstantCount;
     };
     static_assert(sizeof(PipelineLayoutDesc) == sizeof(RHIPipelineLayoutDesc), "sizeof mismatch for PipelineLayoutDesc");
     static_assert(alignof(PipelineLayoutDesc) == alignof(RHIPipelineLayoutDesc), "alignof mismatch for PipelineLayoutDesc");
     static_assert(offsetof(PipelineLayoutDesc, name) == offsetof(RHIPipelineLayoutDesc, name));
     static_assert(offsetof(PipelineLayoutDesc, bindSetLayouts) == offsetof(RHIPipelineLayoutDesc, bindSetLayouts));
     static_assert(offsetof(PipelineLayoutDesc, bindSetLayoutCount) == offsetof(RHIPipelineLayoutDesc, bindSetLayoutCount));
-    static_assert(offsetof(PipelineLayoutDesc, pushConstantRange) == offsetof(RHIPipelineLayoutDesc, pushConstantRange));
+    static_assert(offsetof(PipelineLayoutDesc, pushConstantRanges) == offsetof(RHIPipelineLayoutDesc, pushConstantRanges));
+    static_assert(offsetof(PipelineLayoutDesc, pushConstantCount) == offsetof(RHIPipelineLayoutDesc, pushConstantCount));
 
     struct PipelineLayoutDesc2
     {
         std::string_view name;
-        ShaderState const* shaders;
+        ShaderModule const* shaders;
         uint32_t shaderCount;
     };
     static_assert(sizeof(PipelineLayoutDesc2) == sizeof(RHIPipelineLayoutDesc2), "sizeof mismatch for PipelineLayoutDesc2");

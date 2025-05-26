@@ -210,7 +210,7 @@ namespace rhi::impl
 
     CommandListBase* CommandEncoder::APIFinish()
     {
-        Ref<CommandListBase> commandBuffer = mDevice->CreateCommandList(this);
+        Ref<CommandListBase> commandBuffer = mDevice->CreateCommandListImpl(this);
         return commandBuffer.Detach();
     }
 

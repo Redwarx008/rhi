@@ -15,7 +15,7 @@ namespace rhi::impl
     {
         ASSERT(config.device != nullptr);
         mDevice = config.device;
-        mSwapChain = mDevice->CreateSwapChain(this, mSwapChain.Get(), config);
+        mSwapChain = mDevice->CreateSwapChainImpl(this, mSwapChain.Get(), config);
     }
 
     void SurfaceBase::APIUnconfigure()

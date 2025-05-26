@@ -12,7 +12,7 @@ namespace rhi::impl
     public:
         explicit PassEncoder(CommandEncoder* encoder, EncodingContext& encodingContext);
         ~PassEncoder();
-        void APISetPushConstant(const void* data, uint32_t size);
+        void APISetPushConstant(ShaderStage stage, const void* data, uint32_t size, uint32_t offset);
         void APIBeginDebugLabel(std::string_view label, const Color* color);
         void APIEndDebugLabel();
 

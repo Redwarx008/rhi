@@ -1,15 +1,14 @@
 #include "ShaderModuleVk.h"
+#include "../common/Utils.h"
 #include "DeviceVk.h"
 #include "ErrorsVk.h"
 #include "VulkanUtils.h"
-#include "../common/Utils.h"
 
-//#include <spirv_reflect.h>
+// #include <spirv_reflect.h>
 
 namespace rhi::impl::vulkan
 {
-    ShaderModule::ShaderModule(Device* device, const ShaderModuleDesc& desc) :
-        ShaderModuleBase(device, desc)
+    ShaderModule::ShaderModule(Device* device, const ShaderModuleDesc& desc) : ShaderModuleBase(device, desc)
     {}
 
     ShaderModule::~ShaderModule() = default;
@@ -21,15 +20,12 @@ namespace rhi::impl::vulkan
         {
             return nullptr;
         }
-        return std::move(shaderModule);
+        return shaderModule;
     }
 
     bool ShaderModule::Initialize(const ShaderModuleDesc& desc)
     {
-        ShaderModuleBase::Initialize();
-
-        mSpirvData.reserve(desc.code.size() / sizeof(uint32_t));
-        memcpy_s(mSpirvData.data(), desc.code.size(), desc.code.data(), desc.code.size());
+        ShaderModuleBase::TrackResource();
 
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -61,4 +57,5 @@ namespace rhi::impl::vulkan
     {
         return mHandle;
     }
-}
+
+} // namespace rhi::impl::vulkan

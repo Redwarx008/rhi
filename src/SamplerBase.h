@@ -2,19 +2,25 @@
 
 #include "ResourceBase.h"
 #include "RHIStruct.h"
+#include "common/Cached.hpp"
 
 namespace rhi::impl
 {
-    class DeviceBase;
-
-    class SamplerBase : public ResourceBase
+    class SamplerBase : public ResourceBase, public Cached<SamplerBase>
     {
     public:
-        ResourceType GetType() const override;
-
-    protected:
         explicit SamplerBase(DeviceBase* device, const SamplerDesc& desc);
         ~SamplerBase();
+        ResourceType GetType() const override;
+        size_t ComputeContentHash() override;
+
+        struct Equal
+        {
+            bool operator()(const SamplerBase* a, const SamplerBase* b) const;
+        };
+
+    protected:
+        void DestroyImpl() override;
         FilterMode mMagFilter = FilterMode::Linear;
         FilterMode mMinFilter = FilterMode::Linear;
         FilterMode mMipmapFilter = FilterMode::Linear;

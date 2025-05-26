@@ -167,9 +167,9 @@ namespace rhi::impl::vulkan
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
         submitInfo.commandBufferInfoCount = 1;
         submitInfo.pCommandBufferInfos = &commandBufferInfo;
-        submitInfo.signalSemaphoreInfoCount = mRecordContext.signalSemaphoreSubmitInfos.size();
+        submitInfo.signalSemaphoreInfoCount = static_cast<uint32_t>(mRecordContext.signalSemaphoreSubmitInfos.size());
         submitInfo.pSignalSemaphoreInfos = mRecordContext.signalSemaphoreSubmitInfos.data();
-        submitInfo.waitSemaphoreInfoCount = mRecordContext.waitSemaphoreSubmitInfos.size();
+        submitInfo.waitSemaphoreInfoCount = static_cast<uint32_t>(mRecordContext.waitSemaphoreSubmitInfos.size());
         submitInfo.pWaitSemaphoreInfos = mRecordContext.waitSemaphoreSubmitInfos.data();
 
         err = vkQueueSubmit2(mHandle, 1, &submitInfo, nullptr);

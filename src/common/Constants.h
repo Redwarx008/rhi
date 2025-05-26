@@ -12,7 +12,7 @@ namespace rhi::impl
     static constexpr uint32_t cMaxVertexBufferArrayStride = 2048u;
     static constexpr uint8_t cMaxColorAttachments = 8u;
     static constexpr uint8_t cMaxViewports = 8;
-    static constexpr uint32_t cNumStages = 5;
+    static constexpr uint32_t cNumStages = 8;
 
     // Per stage maximum limits used to optimized rhi internals.
     static constexpr uint32_t cMaxSampledTexturesPerShaderStage = 16;

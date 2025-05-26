@@ -907,13 +907,14 @@ typedef struct RHIPipelineLayoutDesc
     RHIStringView name;
     RHIBindSetLayout const* bindSetLayouts;
     uint32_t bindSetLayoutCount;
-    RHIPushConstantRange pushConstantRange;
+    RHIPushConstantRange const* pushConstantRanges;
+    uint32_t pushConstantCount;
 }RHIPipelineLayoutDesc;
 
 typedef struct RHIPipelineLayoutDesc2
 {
     RHIStringView name;
-    RHIShaderState const* shaders;
+    RHIShaderModule const* shaders;
     uint32_t shaderCount;
 }RHIPipelineLayoutDesc2;
 
@@ -991,6 +992,7 @@ void rhiAdapterRelease(RHIAdapter adapter);
 RHIAdapter rhiDeviceGetAdapter(RHIDevice device);
 RHIQueue rhiDeviceGetQueue(RHIDevice device, RHIQueueType queueType);
 RHIPipelineLayout rhiCreatePipelineLayout(RHIDevice device, const RHIPipelineLayoutDesc* desc);
+RHIPipelineLayout rhiCreatePipelineLayout2(RHIDevice device, const RHIPipelineLayoutDesc2* desc);
 RHIRenderPipeline rhiDeviceCreateRenderPipeline(RHIDevice device, const RHIRenderPipelineDesc* desc);
 RHIComputePipeline rhiDeviceCreateComputePipeline(RHIDevice device, const RHIComputePipelineDesc* desc);
 RHIBindSetLayout rhiDeviceCreateBindSetLayout(RHIDevice device, const RHIBindSetLayoutDesc* desc);
@@ -1050,7 +1052,7 @@ void rhiRenderPassEncoderDrawIndirect(RHIRenderPassEncoder encoder, RHIBuffer in
 void rhiRenderPassEncoderDrawIndexedIndirect(RHIRenderPassEncoder encoder, RHIBuffer indirectBuffer, uint64_t indirectOffset);
 void rhiRenderPassEncoderMultiDrawIndirect(RHIRenderPassEncoder encoder, RHIBuffer indirectBuffer, uint64_t indirectOffset, uint32_t maxDrawCount, RHIBuffer drawCountBuffer, uint64_t drawCountBufferOffset);
 void rhiRenderPassEncoderMultiDrawIndexedIndirect(RHIRenderPassEncoder encoder, RHIBuffer indirectBuffer, uint64_t indirectOffset, uint32_t maxDrawCount, RHIBuffer drawCountBuffer, uint64_t drawCountBufferOffset);
-void rhiRenderPassEncoderSetPushConstant(RHIRenderPassEncoder encoder, const void* data, uint32_t size);
+void rhiRenderPassEncoderSetPushConstant(RHIRenderPassEncoder encoder, RHIShaderStage stage, const void* data, uint32_t size, uint32_t offset);
 void rhiRenderPassEncoderBeginDebugLabel(RHIRenderPassEncoder encoder, RHIStringView label, const RHIColor* color);
 void rhiRenderPassEncoderEndDebugLabel(RHIRenderPassEncoder encoder);
 void rhiRenderPassEncoderEnd(RHIRenderPassEncoder encoder);
@@ -1061,7 +1063,7 @@ void rhiComputePassEncoderSetPipeline(RHIComputePassEncoder encoder, RHIComputeP
 void rhiComputePassEncoderDispatch(RHIComputePassEncoder encoder, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
 void rhiComputePassEncoderDispatchIndirect(RHIComputePassEncoder encoder, RHIBuffer indirectBuffer, uint64_t indirectOffset);
 void rhiComputePassEncoderSetBindSet(RHIComputePassEncoder encoder, RHIBindSet set, uint32_t setIndex, uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets);
-void rhiComputePassEncoderSetPushConstant(RHIComputePassEncoder encoder, const void* data, uint32_t size);
+void rhiComputePassEncoderSetPushConstant(RHIComputePassEncoder encoder, RHIShaderStage stage, const void* data, uint32_t size, uint32_t offset);
 void rhiComputePassEncoderBeginDebugLabel(RHIComputePassEncoder encoder, RHIStringView label, const RHIColor* color);
 void rhiComputePassEncoderEndDebugLabel(RHIComputePassEncoder encoder);
 void rhiComputePassEncoderEnd(RHIComputePassEncoder encoder);

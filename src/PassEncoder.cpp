@@ -34,17 +34,18 @@ namespace rhi::impl
         }
     }
 
-    void PassEncoder::APISetPushConstant(const void* data, uint32_t size)
+    void PassEncoder::APISetPushConstant(ShaderStage stage, const void* data, uint32_t size, uint32_t offset)
     {
         INVALID_IF(mLastPipeline == nullptr, "Must set pipeline before set pushConstant.");
         ASSERT(data != nullptr);
-        ASSERT(size <= mLastPipeline->GetLayout()->GetPushConstants().size);
+        ASSERT(mLastPipeline->GetLayout()->GetPushConstantRange(stage).has_value());
+        ASSERT(offset + size <= mLastPipeline->GetLayout()->GetPushConstantRange(stage).value().size);
         INVALID_IF(size % 4 != 0, "PushConstant size (%u) is not  a multiple of 4.", size);
 
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
         SetPushConstantCmd* cmd = allocator.Allocate<SetPushConstantCmd>(Command::SetPushConstant);
-        cmd->size = mLastPipeline->GetLayout()->GetPushConstants().size;
-
+        cmd->size = size;
+        cmd->offset = offset;
         uint8_t* pData = allocator.AllocateData<uint8_t>(size);
         memcpy(pData, data, size);
     }

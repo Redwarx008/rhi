@@ -27,19 +27,19 @@
 
 #pragma once
 
-#include <cassert>
 #include <array>
+#include <cassert>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <type_traits>
 #include <vector>
-#include <functional>
 
-#include "common/Utils.h"
-#include "common/EnumFlagIterator.hpp"
 #include "Subresource.h"
+#include "common/EnumFlagIterator.hpp"
+#include "common/Utils.h"
 
-#ifdef  max()
+#ifdef max()
 #undef max
 #endif //  max()
 
@@ -282,14 +282,11 @@ namespace rhi::impl
     void SubresourceStorage<T>::Update(const SubresourceRange& range,
                                        std::function<void(const SubresourceRange&, T&)>&& updateFunc)
     {
-        assert(range.baseArrayLayer < mArrayLayerCount &&
-                range.baseArrayLayer + range.layerCount <= mArrayLayerCount);
-        assert(range.baseMipLevel < mMipLevelCount &&
-                range.baseMipLevel + range.levelCount <= mMipLevelCount);
+        assert(range.baseArrayLayer < mArrayLayerCount && range.baseArrayLayer + range.layerCount <= mArrayLayerCount);
+        assert(range.baseMipLevel < mMipLevelCount && range.baseMipLevel + range.levelCount <= mMipLevelCount);
 
         bool fullLayers = range.baseMipLevel == 0 && range.levelCount == mMipLevelCount;
-        bool fullAspects =
-                range.baseArrayLayer == 0 && range.layerCount == mArrayLayerCount && fullLayers;
+        bool fullAspects = range.baseArrayLayer == 0 && range.layerCount == mArrayLayerCount && fullLayers;
 
         for (Aspect aspect : IterateEnumFlags(range.aspects))
         {
@@ -370,10 +367,7 @@ namespace rhi::impl
             {
                 const U& otherData = other.DataInline(aspectIndex);
                 Update(SubresourceRange::MakeFull(aspect, mArrayLayerCount, mMipLevelCount),
-                       [&](const SubresourceRange& subrange, T& data)
-                       {
-                           mergeFunc(subrange, data, otherData);
-                       });
+                       [&](const SubresourceRange& subrange, T& data) { mergeFunc(subrange, data, otherData); });
                 continue;
             }
 
@@ -390,10 +384,7 @@ namespace rhi::impl
                 {
                     const U& otherData = other.Data(aspectIndex, layer);
                     Update(GetFullLayerRange(aspect, layer),
-                           [&](const SubresourceRange& subrange, T& data)
-                           {
-                               mergeFunc(subrange, data, otherData);
-                           });
+                           [&](const SubresourceRange& subrange, T& data) { mergeFunc(subrange, data, otherData); });
                     continue;
                 }
 
@@ -406,9 +397,7 @@ namespace rhi::impl
                 for (uint32_t level = 0; level < mMipLevelCount; level++)
                 {
                     SubresourceRange updateRange = SubresourceRange::MakeSingle(aspect, layer, level);
-                    mergeFunc(updateRange,
-                              Data(aspectIndex, layer, level),
-                              other.Data(aspectIndex, layer, level));
+                    mergeFunc(updateRange, Data(aspectIndex, layer, level), other.Data(aspectIndex, layer, level));
                 }
 
                 RecompressLayer(aspectIndex, layer);
@@ -654,4 +643,4 @@ namespace rhi::impl
         return mData[(aspectIndex * mArrayLayerCount + layer) * mMipLevelCount + level];
     }
 
-}
+} // namespace rhi::impl

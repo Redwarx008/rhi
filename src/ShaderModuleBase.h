@@ -12,11 +12,12 @@ namespace rhi::impl
     public:
         ResourceType GetType() const override;
         std::string_view GetEntry() const;
-
+        const std::vector<uint32_t>& GetSpirvData() const;
     protected:
         explicit ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc& desc);
         ~ShaderModuleBase();
 
         std::string mEntry;
+        std::vector<uint32_t> mSpirvData;
     };
 }

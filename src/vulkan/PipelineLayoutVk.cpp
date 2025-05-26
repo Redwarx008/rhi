@@ -1,12 +1,14 @@
 #include "PipelineLayoutVk.h"
 
 #include "BindSetLayoutVk.h"
+#include "ShaderModuleVk.h"
 #include "DeviceVk.h"
 #include "VulkanUtils.h"
 #include "ErrorsVk.h"
 #include "../common/BitSetUtils.h"
 #include "../common/Constants.h"
 #include "../common/Utils.h"
+
 #include <array>
 
 namespace rhi::impl::vulkan
@@ -15,21 +17,39 @@ namespace rhi::impl::vulkan
         PipelineLayoutBase(device, desc)
     {}
 
+    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDesc2& desc) :
+        PipelineLayoutBase(device, desc)
+    {
+
+    }
+
     PipelineLayout::~PipelineLayout()
     {}
 
     Ref<PipelineLayout> PipelineLayout::Create(Device* device, const PipelineLayoutDesc& desc)
     {
         Ref<PipelineLayout> pipelineLayout = AcquireRef(new PipelineLayout(device, desc));
-        if (!pipelineLayout->Initialize(desc))
+        if (!pipelineLayout->Initialize())
         {
             return nullptr;
         }
         return pipelineLayout;
     }
 
-    bool PipelineLayout::Initialize(const PipelineLayoutDesc& desc)
+    Ref<PipelineLayout> PipelineLayout::Create(Device* device, const PipelineLayoutDesc2& desc)
     {
+        Ref<PipelineLayout> pipelineLayout = AcquireRef(new PipelineLayout(device, desc));
+        if (!pipelineLayout->Initialize())
+        {
+            return nullptr;
+        }
+        return pipelineLayout;
+    }
+
+    bool PipelineLayout::Initialize()
+    {
+        PipelineLayoutBase::TrackResource();
+
         auto bindSetMask = GetBindSetMask();
         uint32_t highestBindSetIndex = GetHighestBitSetIndex(bindSetMask) + 1;
         std::array<VkDescriptorSetLayout, cMaxBindSets> descriptorSetLayouts{};
@@ -51,16 +71,21 @@ namespace rhi::impl::vulkan
         createInfo.setLayoutCount = highestBindSetIndex;
         createInfo.pSetLayouts = descriptorSetLayouts.data();
 
-        VkPushConstantRange pushConstantRange;
-        if (desc.pushConstantRange.size != 0)
+        std::vector<VkPushConstantRange> pushConstantRanges;
+        uint32_t offset = 0;
+        for (const std::optional<PushConstantRange>& pcr : mPushConstantRanges)
         {
-            pushConstantRange.stageFlags = ShaderStageFlagsConvert(desc.pushConstantRange.visibility);
-            pushConstantRange.offset = 0;
-            pushConstantRange.size = desc.pushConstantRange.size;
-
-            createInfo.pushConstantRangeCount = 1;
-            createInfo.pPushConstantRanges = &pushConstantRange;
+            if (pcr.has_value())
+            {
+                VkPushConstantRange& vkpcr = pushConstantRanges.emplace_back();
+                vkpcr.stageFlags = ToVkShaderStageFlags(pcr.value().visibility);
+                vkpcr.offset = offset;
+                vkpcr.size = pcr.value().size;
+                offset += vkpcr.size;
+            }
         }
+        createInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstantRanges.size());
+        createInfo.pPushConstantRanges = pushConstantRanges.data();
 
         Device* device = checked_cast<Device>(mDevice.Get());
 
@@ -74,6 +99,7 @@ namespace rhi::impl::vulkan
 
     void PipelineLayout::DestroyImpl()
     {
+        PipelineLayoutBase::DestroyImpl();
         Device* device = checked_cast<Device>(mDevice.Get());
 
         if (mHandle != VK_NULL_HANDLE)

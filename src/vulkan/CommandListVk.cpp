@@ -366,7 +366,7 @@ namespace rhi::impl::vulkan
                 vkCmdPushConstants(commandBuffer,
                                    pipelineLayout->GetHandle(),
                                    pipelineLayout->GetPushConstantVisibility(),
-                                   0,
+                                   cmd->offset,
                                    cmd->size,
                                    data);
                 break;
@@ -532,7 +532,7 @@ namespace rhi::impl::vulkan
                 vkCmdPushConstants(commandBuffer,
                                    pipelineLayout->GetHandle(),
                                    pipelineLayout->GetPushConstantVisibility(),
-                                   0,
+                                   cmd->offset,
                                    cmd->size,
                                    data);
                 break;

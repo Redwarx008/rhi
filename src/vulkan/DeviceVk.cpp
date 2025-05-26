@@ -163,7 +163,7 @@ namespace rhi::impl::vulkan
         deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
         deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
         deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-        deviceCreateInfo.queueCreateInfoCount = queueCIs.size();
+        deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCIs.size());
         deviceCreateInfo.pQueueCreateInfos = queueCIs.data();
         deviceCreateInfo.pNext = &feature12;
 
@@ -194,7 +194,7 @@ namespace rhi::impl::vulkan
         vkGetPhysicalDeviceProperties(adapter->GetHandle(), &mVkDeviceInfo.properties);
 
         LoadExtFunctions();
-
+        DeviceBase::Initialize();
         return true;
     }
 
@@ -229,12 +229,12 @@ namespace rhi::impl::vulkan
 
     uint32_t Device::GetOptimalBytesPerRowAlignment() const
     {
-        return mVkDeviceInfo.properties.limits.optimalBufferCopyRowPitchAlignment;
+        return static_cast<uint32_t>(mVkDeviceInfo.properties.limits.optimalBufferCopyRowPitchAlignment);
     }
 
     uint32_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const
     {
-        return mVkDeviceInfo.properties.limits.optimalBufferCopyOffsetAlignment;
+        return static_cast<uint32_t>(mVkDeviceInfo.properties.limits.optimalBufferCopyOffsetAlignment);
     }
 
     Device::~Device()
@@ -270,59 +270,64 @@ namespace rhi::impl::vulkan
         return mMemoryAllocator;
     }
 
-    Ref<SwapChainBase> Device::CreateSwapChain(SurfaceBase* surface, SwapChainBase* previous,
+    Ref<SwapChainBase> Device::CreateSwapChainImpl(SurfaceBase* surface, SwapChainBase* previous,
                                                const SurfaceConfiguration& config)
     {
         return SwapChain::Create(this, surface, previous, config);
     }
 
-    Ref<PipelineLayoutBase> Device::CreatePipelineLayout(const PipelineLayoutDesc& desc)
+    Ref<PipelineLayoutBase> Device::CreatePipelineLayoutImpl(const PipelineLayoutDesc& desc)
     {
         return PipelineLayout::Create(this, desc);
     }
 
-    Ref<RenderPipelineBase> Device::CreateRenderPipeline(const RenderPipelineDesc& desc)
+    Ref<PipelineLayoutBase> Device::CreatePipelineLayout2Impl(const PipelineLayoutDesc2& desc)
+    {
+        return PipelineLayout::Create(this, desc);
+    }
+
+    Ref<RenderPipelineBase> Device::CreateRenderPipelineImpl(const RenderPipelineDesc& desc)
     {
         return RenderPipeline::Create(this, desc);
     }
 
-    Ref<ComputePipelineBase> Device::CreateComputePipeline(const ComputePipelineDesc& desc)
+    Ref<ComputePipelineBase> Device::CreateComputePipelineImpl(const ComputePipelineDesc& desc)
     {
         return ComputePipeline::Create(this, desc);
     }
 
-    Ref<BindSetLayoutBase> Device::CreateBindSetLayout(const BindSetLayoutDesc& desc)
+    Ref<BindSetLayoutBase> Device::CreateBindSetLayoutImpl(const BindSetLayoutDesc& desc)
     {
         return BindSetLayout::Create(this, desc);
     }
 
-    Ref<BindSetBase> Device::CreateBindSet(const BindSetDesc& desc)
+    Ref<BindSetBase> Device::CreateBindSetImpl(const BindSetDesc& desc)
     {
         return BindSet::Create(this, desc);
     }
 
-    Ref<TextureBase> Device::CreateTexture(const TextureDesc& desc)
+    Ref<TextureBase> Device::CreateTextureImpl(const TextureDesc& desc)
     {
         return Texture::Create(this, desc);
     }
 
 
-    Ref<BufferBase> Device::CreateBuffer(const BufferDesc& desc)
+    Ref<BufferBase> Device::CreateBufferImpl(const BufferDesc& desc)
     {
         return Buffer::Create(this, desc);
     }
 
-    Ref<ShaderModuleBase> Device::CreateShader(const ShaderModuleDesc& desc)
+    Ref<ShaderModuleBase> Device::CreateShaderImpl(const ShaderModuleDesc& desc)
     {
         return ShaderModule::Create(this, desc);
     }
 
-    Ref<SamplerBase> Device::CreateSampler(const SamplerDesc& desc)
+    Ref<SamplerBase> Device::CreateSamplerImpl(const SamplerDesc& desc)
     {
         return Sampler::Create(this, desc);
     }
 
-    Ref<CommandListBase> Device::CreateCommandList(CommandEncoder* encoder)
+    Ref<CommandListBase> Device::CreateCommandListImpl(CommandEncoder* encoder)
     {
         return CommandList::Create(this, encoder);
     }

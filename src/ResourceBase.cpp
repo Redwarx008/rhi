@@ -43,7 +43,7 @@ namespace rhi::impl
         return mName;
     }
 
-    void ResourceBase::Initialize()
+    void ResourceBase::TrackResource()
     {
         ResourceList* list = GetList();
         assert(list);

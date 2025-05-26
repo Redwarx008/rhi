@@ -84,14 +84,13 @@ add_subdirectory(third_party)
 set(interface_rhi 
 	"include/rhi/rhi.h"
 	"src/RHIStruct.h" "include/rhi/rhi_cpp.h" )
-set(common_rhi
-	  )
 
 set(src_common
 	"src/common/Error.h"
 	"src/common/Utils.h"
 	"src/common/NoCopyable.h"
 	"src/common/Ref.hpp"
+	"src/common/WeakRef.hpp"
 	"src/common/LinkedList.h"
 	"src/common/ObjectContentHasher.h" 
 	"src/common/RefCounted.h"
@@ -146,8 +145,8 @@ set (src
 	 "src/RenderPipelineBase.h"
 	 "src/RenderPipelineBase.cpp"
 	 "src/PerShaderStage.hpp" 
-	 "src/CachedObject.h"
-	 "src/CachedObject.cpp"
+	 "src/common/Cached.hpp"
+	 
 	 "src/PassResourceUsage.h"
 	 "src/EncodingContext.h" 
 	 "src/EncodingContext.cpp"
@@ -170,7 +169,7 @@ set (src
 	 "src/ComputePassEncoder.h" 
 	 "src/ComputePassEncoder.cpp" 
 	 "src/PassResourceUsage.cpp" 
-	 "src/Commands.cpp")
+	 "src/Commands.cpp"  )
 
 set(src_vk
 	"src/vulkan/VMA.cpp"
@@ -225,7 +224,6 @@ add_library(rhi "")
 
 target_sources(rhi	PRIVATE
 				${interface_rhi}
-				${common_rhi}
 				${src}
 				${src_common}
 				${src_vk} )

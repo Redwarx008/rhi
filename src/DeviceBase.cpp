@@ -1,30 +1,63 @@
 #include "DeviceBase.h"
+#include <functional>
+#include <type_traits>
 #include "AdapterBase.h"
-#include "InstanceBase.h"
-#include "QueueBase.h"
-#include "ShaderModuleBase.h"
-#include "SamplerBase.h"
-#include "BufferBase.h"
-#include "TextureBase.h"
-#include "CommandEncoder.h"
 #include "BindSetBase.h"
 #include "BindSetLayoutBase.h"
-#include "RenderPipelineBase.h"
+#include "BufferBase.h"
+#include "CommandEncoder.h"
 #include "ComputePipelineBase.h"
+#include "InstanceBase.h"
 #include "PipelineLayoutBase.h"
-
+#include "QueueBase.h"
+#include "RenderPipelineBase.h"
+#include "SamplerBase.h"
+#include "ShaderModuleBase.h"
+#include "TextureBase.h"
+#include "common/Cached.hpp"
 
 namespace rhi::impl
 {
-    DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDesc& desc) :
-        mAdapter(adapter)
+    struct DeviceBase::Cache
+    {
+        CachedObjects<BindSetLayoutBase> bindSetLayouts;
+        CachedObjects<PipelineLayoutBase> pipelineLayouts;
+        CachedObjects<SamplerBase> samplers;
+    };
+
+    template <typename T>
+    Ref<T> GetOrCreate(CachedObjects<T>& cache, T* key, std::function<Ref<T>()> createFunc)
+    {
+        static_assert(std::is_base_of_v<RefCounted, T>, "Type must be refcounted.");
+        static_assert(std::is_base_of_v<Cached<T>, T>, "Type must be Cached.");
+
+        Ref<T> result = cache.Find(key);
+        if (result != nullptr)
+        {
+            return result;
+        }
+
+        result = createFunc();
+        ASSERT(result != nullptr);
+        bool inserted = false;
+        std::tie(result, inserted) = cache.Insert(result.Get());
+        ASSERT(inserted);
+        return result;
+    }
+
+    DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDesc& desc) : mAdapter(adapter)
     {
         SetFeatures(desc);
         // Todo: create cache object.
     }
 
     DeviceBase::~DeviceBase()
+    {}
+
+    void DeviceBase::Initialize()
     {
+        mCaches = std::make_unique<DeviceBase::Cache>();
+        CreateEmptyBindSetLayout();
     }
 
     void DeviceBase::SetFeatures(const DeviceDesc& desc)
@@ -66,8 +99,7 @@ namespace rhi::impl
     void DeviceBase::DestroyObjects()
     {
         static constexpr std::array<ResourceType, static_cast<uint32_t>(ResourceType::Count)>
-                cResourceTypeDependencyOrder =
-                {
+                cResourceTypeDependencyOrder = {
                         ResourceType::RenderPipeline,
                         ResourceType::ComputePipeline,
                         ResourceType::PipelineLayout,
@@ -101,49 +133,49 @@ namespace rhi::impl
 
     RenderPipelineBase* DeviceBase::APICreateRenderPipeline(const RenderPipelineDesc& desc)
     {
-        Ref<RenderPipelineBase> pipeline = CreateRenderPipeline(desc);
+        Ref<RenderPipelineBase> pipeline = CreateRenderPipelineImpl(desc);
         return pipeline.Detach();
     }
 
     ComputePipelineBase* DeviceBase::APICreateComputePipeline(const ComputePipelineDesc& desc)
     {
-        Ref<ComputePipelineBase> pipeline = CreateComputePipeline(desc);
+        Ref<ComputePipelineBase> pipeline = CreateComputePipelineImpl(desc);
         return pipeline.Detach();
     }
 
     BindSetLayoutBase* DeviceBase::APICreateBindSetLayout(const BindSetLayoutDesc& desc)
     {
-        Ref<BindSetLayoutBase> bindSetLayout = CreateBindSetLayout(desc);
+        Ref<BindSetLayoutBase> bindSetLayout = GetOrCreateBindSetLayout(desc);
         return bindSetLayout.Detach();
     }
 
     BindSetBase* DeviceBase::APICreateBindSet(const BindSetDesc& desc)
     {
-        Ref<BindSetBase> bindSet = CreateBindSet(desc);
+        Ref<BindSetBase> bindSet = CreateBindSetImpl(desc);
         return bindSet.Detach();
     }
 
     TextureBase* DeviceBase::APICreateTexture(const TextureDesc& desc)
     {
-        Ref<TextureBase> texture = CreateTexture(desc);
+        Ref<TextureBase> texture = CreateTextureImpl(desc);
         return texture.Detach();
     }
 
     BufferBase* DeviceBase::APICreateBuffer(const BufferDesc& desc)
     {
-        Ref<BufferBase> buffer = CreateBuffer(desc);
+        Ref<BufferBase> buffer = CreateBufferImpl(desc);
         return buffer.Detach();
     }
 
     ShaderModuleBase* DeviceBase::APICreateShader(const ShaderModuleDesc& desc)
     {
-        Ref<ShaderModuleBase> shader = CreateShader(desc);
+        Ref<ShaderModuleBase> shader = CreateShaderImpl(desc);
         return shader.Detach();
     }
 
     SamplerBase* DeviceBase::APICreateSampler(const SamplerDesc& desc)
     {
-        Ref<SamplerBase> sampler = CreateSampler(desc);
+        Ref<SamplerBase> sampler = GetOrCreateSampler(desc);
         return sampler.Detach();
     }
 
@@ -154,7 +186,13 @@ namespace rhi::impl
 
     PipelineLayoutBase* DeviceBase::APICreatePipelineLayout(const PipelineLayoutDesc& desc)
     {
-        Ref<PipelineLayoutBase> layout = CreatePipelineLayout(desc);
+        Ref<PipelineLayoutBase> layout = GetOrCreatePipelineLayout(desc);
+        return layout.Detach();
+    }
+
+    PipelineLayoutBase* DeviceBase::APICreatePipelineLayout2(const PipelineLayoutDesc2& desc)
+    {
+        Ref<PipelineLayoutBase> layout = GetOrCreatePipelineLayout2(desc);
         return layout.Detach();
     }
 
@@ -162,6 +200,78 @@ namespace rhi::impl
     {
         Ref<AdapterBase> adapter = mAdapter;
         return adapter.Detach();
+    }
+
+    Ref<PipelineLayoutBase> DeviceBase::GetOrCreatePipelineLayout(const PipelineLayoutDesc& desc)
+    {
+        PipelineLayoutBase key(this, desc);
+        const size_t hash = key.ComputeContentHash();
+        key.SetContentHash(hash);
+
+        Ref<PipelineLayoutBase> result = GetOrCreate<PipelineLayoutBase>(mCaches->pipelineLayouts,
+                                                                         &key,
+                                                                         [&]() -> Ref<PipelineLayoutBase>
+                                                                         {
+                                                                             Ref<PipelineLayoutBase> pipelineLayout =
+                                                                                     CreatePipelineLayoutImpl(desc);
+                                                                             pipelineLayout->SetContentHash(hash);
+                                                                             return pipelineLayout;
+                                                                         });
+        return result;
+    }
+
+    Ref<PipelineLayoutBase> DeviceBase::GetOrCreatePipelineLayout2(const PipelineLayoutDesc2& desc)
+    {
+        PipelineLayoutBase key(this, desc);
+        const size_t hash = key.ComputeContentHash();
+        key.SetContentHash(hash);
+
+        Ref<PipelineLayoutBase> result = GetOrCreate<PipelineLayoutBase>(mCaches->pipelineLayouts,
+                                                                         &key,
+                                                                         [&]() -> Ref<PipelineLayoutBase>
+                                                                         {
+                                                                             Ref<PipelineLayoutBase> pipelineLayout =
+                                                                                     CreatePipelineLayout2Impl(desc);
+                                                                             pipelineLayout->SetContentHash(hash);
+                                                                             return pipelineLayout;
+                                                                         });
+        return result;
+    }
+
+    Ref<BindSetLayoutBase> DeviceBase::GetOrCreateBindSetLayout(const BindSetLayoutDesc& desc)
+    {
+        BindSetLayoutBase key(this, desc);
+        const size_t hash = key.ComputeContentHash();
+        key.SetContentHash(hash);
+
+        Ref<BindSetLayoutBase> result = GetOrCreate<BindSetLayoutBase>(mCaches->bindSetLayouts,
+                                                                       &key,
+                                                                       [&]() -> Ref<BindSetLayoutBase>
+                                                                       {
+                                                                           Ref<BindSetLayoutBase> bindSetLayout =
+                                                                                   CreateBindSetLayoutImpl(desc);
+                                                                           bindSetLayout->SetContentHash(hash);
+                                                                           return bindSetLayout;
+                                                                       });
+        return result;
+    }
+
+    Ref<SamplerBase> DeviceBase::GetOrCreateSampler(const SamplerDesc& desc)
+    {
+        SamplerBase key(this, desc);
+        const size_t hash = key.ComputeContentHash();
+        key.SetContentHash(hash);
+
+        Ref<SamplerBase> result = GetOrCreate<SamplerBase>(mCaches->samplers,
+                                                           &key,
+                                                           [&]() -> Ref<SamplerBase>
+                                                           {
+                                                               Ref<SamplerBase> sampler =
+                                                                       CreateSamplerImpl(desc);
+                                                               sampler->SetContentHash(hash);
+                                                               return sampler;
+                                                           });
+        return result;
     }
 
     BindSetLayoutBase* DeviceBase::GetEmptyBindSetLayout()
@@ -180,6 +290,6 @@ namespace rhi::impl
         desc.name = "EmptyBindSetLayout";
         desc.entryCount = 0;
         desc.entries = nullptr;
-        mEmptyBindSetLayout = CreateBindSetLayout(desc);
+        mEmptyBindSetLayout = CreateBindSetLayoutImpl(desc);
     }
-}
+} // namespace rhi::impl

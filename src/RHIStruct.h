@@ -855,6 +855,15 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     {
         ShaderStage visibility = ShaderStage::None;
         uint32_t size = 0;
+        bool operator==(const PushConstantRange& other) const
+        {
+            return this->visibility == other.visibility &&
+                this->size == other.size;
+        }
+        bool operator!=(const PushConstantRange& other) const
+        {
+            return !(*this == other);
+        }
     };
 
     struct TextureSubresourceRange
@@ -976,13 +985,14 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         std::string_view name;
         BindSetLayoutBase* const* bindSetLayouts;
         uint32_t bindSetLayoutCount;
-        PushConstantRange pushConstantRange;
+        PushConstantRange const* pushConstantRanges;
+        uint32_t pushConstantCount;
     };
 
     struct PipelineLayoutDesc2
     {
         std::string_view name;
-        ShaderState const* shaders;
+        ShaderModuleBase* const* shaders;
         uint32_t shaderCount;
     };
 

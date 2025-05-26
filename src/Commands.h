@@ -257,6 +257,7 @@ namespace rhi::impl
         SetPushConstantCmd();
         ~SetPushConstantCmd();
         uint32_t size;
+        uint32_t offset;
     };
 
 

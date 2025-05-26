@@ -121,7 +121,7 @@ namespace rhi::impl
             desc.size = AlignUp(allocationSize, 4u);
             desc.name = "UploadStageBuffer";
 
-            Ref<BufferBase> buffer = mDevice->CreateBuffer(desc);
+            Ref<BufferBase> buffer = mDevice->CreateBufferImpl(desc);
             UploadAllocation allocation{};
             allocation.buffer = buffer.Get();
             allocation.mappedAddress = buffer->APIGetMappedPointer();
@@ -165,7 +165,7 @@ namespace rhi::impl
             desc.size = AlignUp(targetRingBuffer->GetSize(), 4u);
             desc.name = "UploadStageBuffer";
 
-            Ref<BufferBase> buffer = mDevice->CreateBuffer(desc);
+            Ref<BufferBase> buffer = mDevice->CreateBufferImpl(desc);
             targetRingBuffer->buffer = std::move(buffer);
         }
 

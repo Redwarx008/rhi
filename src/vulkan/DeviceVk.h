@@ -24,19 +24,20 @@ namespace rhi::impl::vulkan
         static Ref<Device> Create(Adapter* adapter, const DeviceDesc& desc);
         // api implementation
         //void WaitIdle() override;
-        Ref<SwapChainBase> CreateSwapChain(SurfaceBase* surface,
+        Ref<SwapChainBase> CreateSwapChainImpl(SurfaceBase* surface,
                                            SwapChainBase* previous,
                                            const SurfaceConfiguration& config) override;
-        Ref<PipelineLayoutBase> CreatePipelineLayout(const PipelineLayoutDesc& desc) override;
-        Ref<RenderPipelineBase> CreateRenderPipeline(const RenderPipelineDesc& desc) override;
-        Ref<ComputePipelineBase> CreateComputePipeline(const ComputePipelineDesc& desc) override;
-        Ref<BindSetLayoutBase> CreateBindSetLayout(const BindSetLayoutDesc& desc) override;
-        Ref<BindSetBase> CreateBindSet(const BindSetDesc& desc) override;
-        Ref<TextureBase> CreateTexture(const TextureDesc& desc) override;
-        Ref<BufferBase> CreateBuffer(const BufferDesc& desc) override;
-        Ref<ShaderModuleBase> CreateShader(const ShaderModuleDesc& desc) override;
-        Ref<SamplerBase> CreateSampler(const SamplerDesc& desc) override;
-        Ref<CommandListBase> CreateCommandList(CommandEncoder* encoder) override;
+        Ref<PipelineLayoutBase> CreatePipelineLayoutImpl(const PipelineLayoutDesc& desc) override;
+        Ref<PipelineLayoutBase> CreatePipelineLayout2Impl(const PipelineLayoutDesc2& desc) override;
+        Ref<RenderPipelineBase> CreateRenderPipelineImpl(const RenderPipelineDesc& desc) override;
+        Ref<ComputePipelineBase> CreateComputePipelineImpl(const ComputePipelineDesc& desc) override;
+        Ref<BindSetLayoutBase> CreateBindSetLayoutImpl(const BindSetLayoutDesc& desc) override;
+        Ref<BindSetBase> CreateBindSetImpl(const BindSetDesc& desc) override;
+        Ref<TextureBase> CreateTextureImpl(const TextureDesc& desc) override;
+        Ref<BufferBase> CreateBufferImpl(const BufferDesc& desc) override;
+        Ref<ShaderModuleBase> CreateShaderImpl(const ShaderModuleDesc& desc) override;
+        Ref<SamplerBase> CreateSamplerImpl(const SamplerDesc& desc) override;
+        Ref<CommandListBase> CreateCommandListImpl(CommandEncoder* encoder) override;
 
         VkDevice GetHandle() const;
         VmaAllocator GetMemoryAllocator() const;

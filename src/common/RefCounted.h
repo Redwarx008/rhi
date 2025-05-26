@@ -25,13 +25,34 @@ namespace rhi::impl
                 DeleteThis();
             }
         }
-
-    protected:
         uint64_t GetRefCount() const
         {
-            return mRefCount;
+            return mRefCount.load(std::memory_order_relaxed);
+        }
+        bool TryIncrement() 
+        {
+            uint64_t current = mRefCount.load(std::memory_order_relaxed);
+            bool success = false;
+            do 
+            {
+                if (current == 0u) 
+                {
+                    return false;
+                }
+                // The relaxed ordering guarantees only the atomicity of the update. This is fine because:
+                //   - If another thread's decrement happens before this increment, the increment should
+                //     fail.
+                //   - If another thread's decrement happens after this increment, the decrement shouldn't
+                //     delete the object, because the ref count > 0.
+                // See Boost library for reference:
+                //   https://github.com/boostorg/smart_ptr/blob/develop/include/boost/smart_ptr/detail/sp_counted_base_std_atomic.hpp#L62
+                success = mRefCount.compare_exchange_weak(current, current + 1,
+                    std::memory_order_relaxed);
+            } while (!success);
+            return true;
         }
 
+    protected:
         virtual ~RefCounted()
         {}
 
@@ -43,4 +64,4 @@ namespace rhi::impl
     private:
         std::atomic<uint64_t> mRefCount = 1;
     };
-}
+} // namespace rhi::impl

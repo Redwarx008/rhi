@@ -1,10 +1,9 @@
 #pragma once
 
-
+#include <absl/strings/str_format.h>
+#include <iostream>
 #include "../RHIStruct.h"
 #include "Utils.h"
-#include <iostream>
-#include <absl/strings/str_format.h>
 
 namespace rhi::impl
 {
@@ -46,41 +45,45 @@ namespace rhi::impl
         }
     }
 
-#define ASSERT_CALLSITE_HELPER(file, func, line, condition) \
-    do                                    \
-    {                                        \
-        if(!(condition))                    \
-        {                                    \
-            LogMsg(LoggingSeverity::Error, file, func, line, #condition);    \
-            abort();                            \
-        }                                    \
-    } while(false)
-#define LOG_ERROR(...)                                                                             \
-    do                                                                                             \
-    {                                                                                             \
-         LogMsg(LoggingSeverity::Error, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__);                \
-    } while (false)
+#define ASSERT_CALLSITE_HELPER(file, func, line, condition)                                                            \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!(condition))                                                                                              \
+        {                                                                                                              \
+            LogMsg(LoggingSeverity::Error, file, func, line, #condition);                                              \
+            abort();                                                                                                   \
+        }                                                                                                              \
+    }                                                                                                                  \
+    while (false)
+#define LOG_ERROR(...)                                                                                                 \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        LogMsg(LoggingSeverity::Error, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__);                               \
+    }                                                                                                                  \
+    while (false)
 
 
-#define LOG_WARNING(...)                                                                             \
-    do                                                                                             \
-    {                                                                                             \
-         LogMsg(LoggingSeverity::Warning, __FILE__, __FUNCTION__, __LINE__, absl::StrFormat(##__VA_ARGS__));                \
-    } while (false)
+#define LOG_WARNING(...)                                                                                               \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        LogMsg(LoggingSeverity::Warning, __FILE__, __FUNCTION__, __LINE__, absl::StrFormat(##__VA_ARGS__));            \
+    }                                                                                                                  \
+    while (false)
 
 
 #ifdef NDEBUG
 #define ASSERT_MSG(EXPR, ...) ((void)0)
 #else
-#define ASSERT_MSG(EXPR, ...)   \
-            do                    \
-            {                    \
-                if(!(EXPR))        \
-                {                \
-                    LogMsg(LoggingSeverity::Error, __FILE__,  __FUNCTION__, __LINE__, absl::StrFormat(__VA_ARGS__));    \
-                    abort();\
-                }            \
-            } while (false)
+#define ASSERT_MSG(EXPR, ...)                                                                                          \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!(EXPR))                                                                                                   \
+        {                                                                                                              \
+            LogMsg(LoggingSeverity::Error, __FILE__, __FUNCTION__, __LINE__, absl::StrFormat(__VA_ARGS__));            \
+            abort();                                                                                                   \
+        }                                                                                                              \
+    }                                                                                                                  \
+    while (false)
 #endif // NDEBUG
 
 
@@ -94,16 +97,17 @@ namespace rhi::impl
 #ifdef NDEBUG
 #define INVALID_IF(EXPR, ...) ((void)0)
 #else
-#define INVALID_IF(EXPR, ...)   \
-            do                    \
-            {                    \
-                if(EXPR)        \
-                {                \
-                    LogMsg(LoggingSeverity::Error, __FILE__, __FUNCTION__, __LINE__, absl::StrFormat(__VA_ARGS__));    \
-                    abort();\
-                }            \
-            } while (false)
+#define INVALID_IF(EXPR, ...)                                                                                          \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (EXPR)                                                                                                      \
+        {                                                                                                              \
+            LogMsg(LoggingSeverity::Error, __FILE__, __FUNCTION__, __LINE__, absl::StrFormat(__VA_ARGS__));            \
+            abort();                                                                                                   \
+        }                                                                                                              \
+    }                                                                                                                  \
+    while (false)
 #endif // NDEBUG
 
 
-}
+} // namespace rhi::impl

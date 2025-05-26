@@ -54,7 +54,7 @@ namespace rhi::impl::vulkan
             return VK_CULL_MODE_BACK_BIT;
         default:
             ASSERT(!"Unreachable");
-            break;
+            return VK_CULL_MODE_NONE;
         }
     }
 
@@ -68,7 +68,7 @@ namespace rhi::impl::vulkan
             return VK_FRONT_FACE_CLOCKWISE;
         default:
             ASSERT(!"Unreachable");
-            break;
+            return VK_FRONT_FACE_COUNTER_CLOCKWISE;
         }
     }
 
@@ -84,7 +84,7 @@ namespace rhi::impl::vulkan
             return VK_POLYGON_MODE_POINT;
         default:
             ASSERT(!"Unreachable");
-            break;
+            return VK_POLYGON_MODE_FILL;
         }
     }
 
@@ -252,6 +252,7 @@ namespace rhi::impl::vulkan
             return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
         default:
             ASSERT(!"Unreachable");
+            return VK_FORMAT_R32G32B32_SFLOAT;
         }
     }
 
@@ -276,7 +277,7 @@ namespace rhi::impl::vulkan
             if (!state.constants.empty())
             {
                 ++shaderWithSpecCount;
-                specConstantCount += state.constants.size();
+                specConstantCount += static_cast<uint32_t>(state.constants.size());
             }
         }
 
@@ -302,7 +303,7 @@ namespace rhi::impl::vulkan
 
                 VkSpecializationInfo& specInfo = specInfos.emplace_back();
                 specInfo.pData = specDatas.data() + specDatas.size();
-                specInfo.mapEntryCount = state.constants.size();
+                specInfo.mapEntryCount = static_cast<uint32_t>(state.constants.size());
                 specInfo.pMapEntries = specMapEntries.data() + specMapEntries.size();
                 specInfo.dataSize = state.constants.size() * sizeof(uint32_t);
 
@@ -314,7 +315,7 @@ namespace rhi::impl::vulkan
                     specMapEntry.offset = dataOffset;
                     specMapEntry.size = sizeof(uint32_t);
                     specDatas.push_back(constant.value.u);
-                    dataOffset += specMapEntry.size;
+                    dataOffset += static_cast<uint32_t>(specMapEntry.size);
                 }
             }
         }
@@ -350,9 +351,9 @@ namespace rhi::impl::vulkan
 
         VkPipelineVertexInputStateCreateInfo vertexInputStateCI{};
         vertexInputStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputStateCI.vertexBindingDescriptionCount = vertexInputBindings.size();
+        vertexInputStateCI.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexInputBindings.size());
         vertexInputStateCI.pVertexBindingDescriptions = vertexInputBindings.data();
-        vertexInputStateCI.vertexAttributeDescriptionCount = vertexInputAttributes.size();
+        vertexInputStateCI.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexInputAttributes.size());
         vertexInputStateCI.pVertexAttributeDescriptions = vertexInputAttributes.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCI{};
@@ -366,7 +367,7 @@ namespace rhi::impl::vulkan
         rasterizationStateCI.depthClampEnable = mRasterState.depthClampEnable;
         rasterizationStateCI.depthBiasEnable = mDepthStencilState.depthBias != 0 || mDepthStencilState.
                 depthBiasSlopeScale != 0;
-        rasterizationStateCI.depthBiasConstantFactor = mDepthStencilState.depthBias;
+        rasterizationStateCI.depthBiasConstantFactor = static_cast<float>(mDepthStencilState.depthBias);
         rasterizationStateCI.depthBiasSlopeFactor = mDepthStencilState.depthBiasSlopeScale;
         rasterizationStateCI.lineWidth = mRasterState.lineWidth;
         rasterizationStateCI.frontFace = FrontFaceConvert(mRasterState.frontFace);
@@ -391,7 +392,7 @@ namespace rhi::impl::vulkan
         }
         VkPipelineColorBlendStateCreateInfo colorBlendStateCI{};
         colorBlendStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-        colorBlendStateCI.attachmentCount = colorBlendAttachmentStates.size();
+        colorBlendStateCI.attachmentCount = static_cast<uint32_t>(colorBlendAttachmentStates.size());
         colorBlendStateCI.pAttachments = colorBlendAttachmentStates.data();
         // Depth and stencil state
         VkPipelineDepthStencilStateCreateInfo depthStencilStateCI{};
@@ -442,7 +443,7 @@ namespace rhi::impl::vulkan
         }
         VkPipelineRenderingCreateInfo pipelineRenderingCI{};
         pipelineRenderingCI.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-        pipelineRenderingCI.colorAttachmentCount = mColorAttachmentFormats.size();
+        pipelineRenderingCI.colorAttachmentCount = static_cast<uint32_t>(mColorAttachmentFormats.size());
         pipelineRenderingCI.pColorAttachmentFormats = colorAttachmentFormats;
         pipelineRenderingCI.depthAttachmentFormat = ToVkFormat(mDepthStencilFormat);
         pipelineRenderingCI.stencilAttachmentFormat = pipelineRenderingCI.depthAttachmentFormat;

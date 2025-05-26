@@ -21,7 +21,7 @@ namespace rhi::impl::vulkan
         BindSetBase(device, desc),
         mDescriptorSetAllocation(descriptorSetAllocation)
     {
-        BindSetBase::Initialize();
+        BindSetBase::TrackResource();
 
         absl::InlinedVector<VkWriteDescriptorSet, cMaxOptimalBindingsPerGroup> writes(desc.entryCount);
         absl::InlinedVector<VkDescriptorBufferInfo, cMaxOptimalBindingsPerGroup> writeBufferInfo(desc.entryCount);

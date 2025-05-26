@@ -68,7 +68,7 @@ namespace rhi::impl
 
     void BufferBase::Initialize()
     {
-        ResourceBase::Initialize();
+        ResourceBase::TrackResource();
     }
 
     BufferUsage BufferBase::APIGetUsage() const

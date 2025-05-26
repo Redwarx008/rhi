@@ -35,15 +35,25 @@ namespace rhi::impl::vulkan
             mPoolSizes.push_back(VkDescriptorPoolSize{type, count});
         }
 
-        assert(totalDescriptorCount <= cMaxBindingsPerPipelineLayout);
-        // Compute the total number of descriptors sets that fits given the max.
-        mMaxSets = cMaxDescriptorsPerPool / totalDescriptorCount;
-        assert(mMaxSets > 0);
-
-        // Grow the number of desciptors in the pool to fit the computed |mMaxSets|.
-        for (auto& poolSize : mPoolSizes)
+        if (totalDescriptorCount == 0)
         {
-            poolSize.descriptorCount *= mMaxSets;
+            // Vulkan specs requires that valid usage of vkCreateDescriptorPool must have a non-zero
+            // number of pools, each of which has non-zero descriptor counts.
+            mPoolSizes.push_back(VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 });
+            mMaxSets = 1;
+        }
+        else
+        {
+            assert(totalDescriptorCount <= cMaxBindingsPerPipelineLayout);
+            // Compute the total number of descriptors sets that fits given the max.
+            mMaxSets = cMaxDescriptorsPerPool / totalDescriptorCount;
+            assert(mMaxSets > 0);
+
+            // Grow the number of desciptors in the pool to fit the computed |mMaxSets|.
+            for (auto& poolSize : mPoolSizes)
+            {
+                poolSize.descriptorCount *= mMaxSets;
+            }
         }
     }
 

@@ -61,12 +61,12 @@ namespace rhi::impl::vulkan
         case CompareOp::Always:
             return VK_COMPARE_OP_ALWAYS;
         default:
-            break;
+            ASSERT(!"Unreachable");
+            return VK_COMPARE_OP_LESS_OR_EQUAL;
         }
-        ASSERT(!"Unreachable");
     }
 
-    VkShaderStageFlags ShaderStageFlagsConvert(ShaderStage stages)
+    VkShaderStageFlags ToVkShaderStageFlags(ShaderStage stages)
     {
         VkShaderStageFlags flags = 0;
 
@@ -140,7 +140,7 @@ namespace rhi::impl::vulkan
         case ShaderStage::None:
         default:
             ASSERT(!"Unreachable");
-            break;
+            return VK_SHADER_STAGE_ALL;
         }
     }
 

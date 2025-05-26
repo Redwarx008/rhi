@@ -65,7 +65,7 @@ namespace rhi::impl::vulkan
 
     bool BindSetLayout::Initialize(const BindSetLayoutDesc& desc)
     {
-        BindSetLayoutBase::Initialize(desc);
+        BindSetLayoutBase::TrackResource();
 
         std::vector<VkDescriptorSetLayoutBinding> vkBindings;
         vkBindings.reserve(desc.entryCount);
@@ -77,7 +77,7 @@ namespace rhi::impl::vulkan
             vkBinding.binding = entry.binding;
             vkBinding.descriptorType = ToVkDescriptorType(entry.type, entry.hasDynamicOffset);
             vkBinding.descriptorCount = entry.arrayElementCount;
-            vkBinding.stageFlags = ShaderStageFlagsConvert(entry.visibleStages);
+            vkBinding.stageFlags = ToVkShaderStageFlags(entry.visibleStages);
             vkBinding.pImmutableSamplers = nullptr;
         }
 
@@ -113,6 +113,7 @@ namespace rhi::impl::vulkan
 
     void BindSetLayout::DestroyImpl()
     {
+        BindSetLayoutBase::DestroyImpl();
         Device* device = checked_cast<Device>(mDevice.Get());
 
         if (mHandle != VK_NULL_HANDLE)

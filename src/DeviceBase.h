@@ -17,6 +17,7 @@ namespace rhi::impl
         AdapterBase* APIGetAdapter() const;
         QueueBase* APIGetQueue(QueueType queueType);
         PipelineLayoutBase* APICreatePipelineLayout(const PipelineLayoutDesc& desc);
+        PipelineLayoutBase* APICreatePipelineLayout2(const PipelineLayoutDesc2& desc);
         RenderPipelineBase* APICreateRenderPipeline(const RenderPipelineDesc& desc);
         ComputePipelineBase* APICreateComputePipeline(const ComputePipelineDesc& desc);
         BindSetLayoutBase* APICreateBindSetLayout(const BindSetLayoutDesc& desc);
@@ -29,19 +30,26 @@ namespace rhi::impl
         void APITick();
 
         Ref<QueueBase> GetQueue(QueueType queueType);
-        virtual Ref<SwapChainBase> CreateSwapChain(SurfaceBase* surface,
+
+        Ref<PipelineLayoutBase> GetOrCreatePipelineLayout(const PipelineLayoutDesc& desc);
+        Ref<PipelineLayoutBase> GetOrCreatePipelineLayout2(const PipelineLayoutDesc2& desc);
+        Ref<BindSetLayoutBase> GetOrCreateBindSetLayout(const BindSetLayoutDesc& desc);
+        Ref<SamplerBase> GetOrCreateSampler(const SamplerDesc& desc);
+
+        virtual Ref<SwapChainBase> CreateSwapChainImpl(SurfaceBase* surface,
                                                    SwapChainBase* previous,
                                                    const SurfaceConfiguration& config) = 0;
-        virtual Ref<PipelineLayoutBase> CreatePipelineLayout(const PipelineLayoutDesc& desc) = 0;
-        virtual Ref<RenderPipelineBase> CreateRenderPipeline(const RenderPipelineDesc& desc) = 0;
-        virtual Ref<ComputePipelineBase> CreateComputePipeline(const ComputePipelineDesc& desc) = 0;
-        virtual Ref<BindSetLayoutBase> CreateBindSetLayout(const BindSetLayoutDesc& desc) = 0;
-        virtual Ref<BindSetBase> CreateBindSet(const BindSetDesc& desc) = 0;
-        virtual Ref<TextureBase> CreateTexture(const TextureDesc& desc) = 0;
-        virtual Ref<BufferBase> CreateBuffer(const BufferDesc& desc) = 0;
-        virtual Ref<ShaderModuleBase> CreateShader(const ShaderModuleDesc& desc) = 0;
-        virtual Ref<SamplerBase> CreateSampler(const SamplerDesc& desc) = 0;
-        virtual Ref<CommandListBase> CreateCommandList(CommandEncoder* encoder) = 0;
+        virtual Ref<PipelineLayoutBase> CreatePipelineLayoutImpl(const PipelineLayoutDesc& desc) = 0;
+        virtual Ref<PipelineLayoutBase> CreatePipelineLayout2Impl(const PipelineLayoutDesc2& desc) = 0;
+        virtual Ref<RenderPipelineBase> CreateRenderPipelineImpl(const RenderPipelineDesc& desc) = 0;
+        virtual Ref<ComputePipelineBase> CreateComputePipelineImpl(const ComputePipelineDesc& desc) = 0;
+        virtual Ref<BindSetLayoutBase> CreateBindSetLayoutImpl(const BindSetLayoutDesc& desc) = 0;
+        virtual Ref<BindSetBase> CreateBindSetImpl(const BindSetDesc& desc) = 0;
+        virtual Ref<TextureBase> CreateTextureImpl(const TextureDesc& desc) = 0;
+        virtual Ref<BufferBase> CreateBufferImpl(const BufferDesc& desc) = 0;
+        virtual Ref<ShaderModuleBase> CreateShaderImpl(const ShaderModuleDesc& desc) = 0;
+        virtual Ref<SamplerBase> CreateSamplerImpl(const SamplerDesc& desc) = 0;
+        virtual Ref<CommandListBase> CreateCommandListImpl(CommandEncoder* encoder) = 0;
         virtual uint32_t GetOptimalBytesPerRowAlignment() const = 0;
         virtual uint32_t GetOptimalBufferToTextureCopyOffsetAlignment() const = 0;
         ResourceList* GetTrackedObjectList(ResourceType type);
@@ -52,6 +60,7 @@ namespace rhi::impl
     protected:
         explicit DeviceBase(AdapterBase* adapter, const DeviceDesc& desc);
         ~DeviceBase();
+        void Initialize();
         bool HasRequiredFeature(FeatureName feature);
         void CreateEmptyBindSetLayout();
         void DestroyObjects();
@@ -69,5 +78,8 @@ namespace rhi::impl
         std::array<ResourceList, static_cast<uint32_t>(ResourceType::Count)> mTrackedResources;
 
         CallbackTaskManager mCallbackTaskManager;
+
+        struct Cache;
+        std::unique_ptr<Cache> mCaches;
     };
 }

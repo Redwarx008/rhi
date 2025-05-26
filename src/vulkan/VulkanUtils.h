@@ -66,7 +66,7 @@ namespace rhi::impl::vulkan
 
     VkCompareOp CompareOpConvert(CompareOp op);
 
-    VkShaderStageFlags ShaderStageFlagsConvert(ShaderStage stages);
+    VkShaderStageFlags ToVkShaderStageFlags(ShaderStage stages);
 
     VkShaderStageFlagBits ShaderStageFlagBitsConvert(ShaderStage stage);
 

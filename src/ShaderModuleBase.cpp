@@ -3,9 +3,11 @@
 namespace rhi::impl
 {
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc& desc) :
-        ResourceBase(device, desc.name),
-        mEntry(desc.entry)
-    {}
+        ResourceBase(device, desc.name), mEntry(desc.entry)
+    {
+        mSpirvData.resize(desc.code.size() / sizeof(uint32_t));
+        memcpy_s(mSpirvData.data(), desc.code.size(), desc.code.data(), desc.code.size());
+    }
 
     ShaderModuleBase::~ShaderModuleBase() = default;
 
@@ -18,4 +20,8 @@ namespace rhi::impl
     {
         return mEntry;
     }
-}
+    const std::vector<uint32_t>& ShaderModuleBase::GetSpirvData() const
+    {
+        return mSpirvData;
+    }
+} // namespace rhi::impl

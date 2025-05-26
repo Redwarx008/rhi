@@ -3,8 +3,8 @@
 #include "../ShaderModuleBase.h"
 #include "../common/Ref.hpp"
 
-#include <vulkan/vulkan.h>
 #include <vector>
+#include <vulkan/vulkan.h>
 
 namespace rhi::impl::vulkan
 {
@@ -23,6 +23,5 @@ namespace rhi::impl::vulkan
         void DestroyImpl() override;
 
         VkShaderModule mHandle = VK_NULL_HANDLE;
-        std::vector<uint32_t> mSpirvData;
     };
-}
+} // namespace rhi::impl::vulkan

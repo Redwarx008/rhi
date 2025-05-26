@@ -75,7 +75,7 @@ namespace rhi::impl::vulkan
 
     bool Sampler::Initialize(const SamplerDesc& desc)
     {
-        SamplerBase::Initialize();
+        SamplerBase::TrackResource();
 
         VkSamplerCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -115,6 +115,7 @@ namespace rhi::impl::vulkan
 
     void Sampler::DestroyImpl()
     {
+        SamplerBase::DestroyImpl();
         // Usually there is no situation to destroy the sampler during use, so destroy it directly.
         if (mHandle != VK_NULL_HANDLE)
         {

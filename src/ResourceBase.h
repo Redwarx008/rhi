@@ -68,7 +68,7 @@ namespace rhi::impl
 
     protected:
         // will be called by the derived class to track the object
-        void Initialize();
+        void TrackResource();
         void DeleteThis() override;
         virtual void DestroyImpl() = 0;
         virtual ResourceList* GetList() const;
