@@ -31,4 +31,4 @@ namespace rhi::impl
     {
         mComputePassUsages.push_back(usageTracker.AcquireSyncScopeUsage());
     }
-}
+} // namespace rhi::impl

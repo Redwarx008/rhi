@@ -1,9 +1,9 @@
 #pragma once
 
-#include "RHIStruct.h"
-#include "PassEncoder.h"
-#include "SyncScopeUsageTracker.h"
 #include "EncodingContext.h"
+#include "PassEncoder.h"
+#include "RHIStruct.h"
+#include "SyncScopeUsageTracker.h"
 
 namespace rhi::impl
 {
@@ -64,4 +64,4 @@ namespace rhi::impl
         ~RenderPassEncoder();
         SyncScopeUsageTracker mUsageTracker;
     };
-}
+} // namespace rhi::impl

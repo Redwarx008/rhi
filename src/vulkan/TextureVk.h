@@ -1,15 +1,15 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-#include <vk_mem_alloc.h>
 #include <vector>
+#include <vk_mem_alloc.h>
+#include <vulkan/vulkan.h>
 
-#include "rhi/RHI.h"
-#include "../common/Ref.hpp"
-#include "../TextureBase.h"
 #include "../Subresource.h"
 #include "../SubresourceStorage.hpp"
 #include "../SyncScopeUsageTracker.h"
+#include "../TextureBase.h"
+#include "../common/Ref.hpp"
+#include "rhi/RHI.h"
 
 namespace rhi::impl::vulkan
 {
@@ -24,7 +24,7 @@ namespace rhi::impl::vulkan
 
         Ref<TextureViewBase> CreateView(const TextureViewDesc& desc) override;
 
-        // internal 
+        // internal
         VkImage GetHandle() const;
 
         void TransitionOwnership(Queue* queue, const SubresourceRange& range, Queue* recevingQueue);
@@ -41,7 +41,7 @@ namespace rhi::impl::vulkan
 
     protected:
         explicit Texture(Device* device, const TextureDesc& desc);
-        ~Texture();
+        ~Texture() override;
         VkImage mHandle = VK_NULL_HANDLE;
         SubresourceStorage<TextureSyncInfo> mSubresourceLastSyncInfos;
 
@@ -71,7 +71,7 @@ namespace rhi::impl::vulkan
     {
     public:
         static Ref<TextureView> Create(TextureBase* texture, const TextureViewDesc& desc);
-        // internal 
+        // internal
         VkImageView GetHandle() const;
 
     private:
@@ -97,4 +97,4 @@ namespace rhi::impl::vulkan
     VkImageAspectFlags GetVkAspectMask(VkFormat format);
 
     VkImageLayout ImageLayoutConvert(TextureUsage usage, TextureFormat format);
-}
+} // namespace rhi::impl::vulkan

@@ -21,7 +21,7 @@ namespace rhi::impl::vulkan
         bool IsUsedInQueue(QueueType queueType);
 
     private:
-        ~BindSet();
+        ~BindSet() override;
         void DestroyImpl() override;
 
         DescriptorSetAllocation mDescriptorSetAllocation;

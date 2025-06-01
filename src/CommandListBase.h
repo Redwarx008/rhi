@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common/RefCounted.h"
-#include "PassResourceUsage.h"
 #include "CommandAllocator.h"
+#include "PassResourceUsage.h"
+#include "common/RefCounted.h"
 
 namespace rhi::impl
 {
@@ -15,9 +15,9 @@ namespace rhi::impl
 
     protected:
         explicit CommandListBase(DeviceBase* device, CommandEncoder* encoder);
-        ~CommandListBase();
+        ~CommandListBase() override;
         DeviceBase* mDevice;
         CommandIterator mCommandIter;
         CommandListResourceUsage mResourceUsages;
     };
-}
+} // namespace rhi::impl

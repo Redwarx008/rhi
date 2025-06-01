@@ -1,30 +1,27 @@
 #include "PipelineLayoutVk.h"
 
-#include "BindSetLayoutVk.h"
-#include "ShaderModuleVk.h"
-#include "DeviceVk.h"
-#include "VulkanUtils.h"
-#include "ErrorsVk.h"
 #include "../common/BitSetUtils.h"
 #include "../common/Constants.h"
 #include "../common/Utils.h"
+#include "BindSetLayoutVk.h"
+#include "DeviceVk.h"
+#include "ErrorsVk.h"
+#include "ShaderModuleVk.h"
+#include "VulkanUtils.h"
 
 #include <array>
 
 namespace rhi::impl::vulkan
 {
-    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDesc& desc) :
-        PipelineLayoutBase(device, desc)
+    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDesc& desc)
+        : PipelineLayoutBase(device, desc)
     {}
 
-    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDesc2& desc) :
-        PipelineLayoutBase(device, desc)
-    {
-
-    }
-
-    PipelineLayout::~PipelineLayout()
+    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDesc2& desc)
+        : PipelineLayoutBase(device, desc)
     {}
+
+    PipelineLayout::~PipelineLayout() {}
 
     Ref<PipelineLayout> PipelineLayout::Create(Device* device, const PipelineLayoutDesc& desc)
     {
@@ -33,6 +30,7 @@ namespace rhi::impl::vulkan
         {
             return nullptr;
         }
+        pipelineLayout->TrackResource();
         return pipelineLayout;
     }
 
@@ -43,13 +41,12 @@ namespace rhi::impl::vulkan
         {
             return nullptr;
         }
+        pipelineLayout->TrackResource();
         return pipelineLayout;
     }
 
     bool PipelineLayout::Initialize()
     {
-        PipelineLayoutBase::TrackResource();
-
         auto bindSetMask = GetBindSetMask();
         uint32_t highestBindSetIndex = GetHighestBitSetIndex(bindSetMask) + 1;
         std::array<VkDescriptorSetLayout, cMaxBindSets> descriptorSetLayouts{};
@@ -61,8 +58,8 @@ namespace rhi::impl::vulkan
             }
             else
             {
-                descriptorSetLayouts[index] = checked_cast<BindSetLayout>(mDevice->GetEmptyBindSetLayout())->
-                        GetHandle();
+                descriptorSetLayouts[index] =
+                        checked_cast<BindSetLayout>(mDevice->GetEmptyBindSetLayout())->GetHandle();
             }
         }
 
@@ -87,7 +84,7 @@ namespace rhi::impl::vulkan
         createInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstantRanges.size());
         createInfo.pPushConstantRanges = pushConstantRanges.data();
 
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         VkResult err = vkCreatePipelineLayout(device->GetHandle(), &createInfo, nullptr, &mHandle);
         CHECK_VK_RESULT_FALSE(err, "CreatePipelineLayout");
@@ -100,7 +97,7 @@ namespace rhi::impl::vulkan
     void PipelineLayout::DestroyImpl()
     {
         PipelineLayoutBase::DestroyImpl();
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         if (mHandle != VK_NULL_HANDLE)
         {
@@ -118,4 +115,4 @@ namespace rhi::impl::vulkan
     {
         return mPushConstantVisibility;
     }
-}
+} // namespace rhi::impl::vulkan

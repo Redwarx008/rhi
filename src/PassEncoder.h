@@ -1,9 +1,9 @@
 #pragma once
 
-#include "RHIStruct.h"
-#include "common/RefCounted.h"
-#include "common/Ref.hpp"
 #include "EncodingContext.h"
+#include "RHIStruct.h"
+#include "common/Ref.hpp"
+#include "common/RefCounted.h"
 
 namespace rhi::impl
 {
@@ -17,7 +17,9 @@ namespace rhi::impl
         void APIEndDebugLabel();
 
     protected:
-        void RecordSetBindSet(BindSetBase* set, uint32_t setIndex, uint32_t dynamicOffsetCount = 0,
+        void RecordSetBindSet(BindSetBase* set,
+                              uint32_t setIndex,
+                              uint32_t dynamicOffsetCount = 0,
                               const uint32_t* dynamicOffsets = nullptr);
         EncodingContext& mEncodingContext;
         Ref<CommandEncoder> mCommandEncoder;
@@ -25,4 +27,4 @@ namespace rhi::impl
         uint64_t mDebugLabelCount = 0;
         PipelineBase* mLastPipeline = nullptr;
     };
-}
+} // namespace rhi::impl

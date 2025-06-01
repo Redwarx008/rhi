@@ -24,7 +24,7 @@ namespace rhi::impl::vulkan
 
     private:
         explicit BindSetLayout(DeviceBase* device, const BindSetLayoutDesc& desc);
-        ~BindSetLayout();
+        ~BindSetLayout() override;
         bool Initialize(const BindSetLayoutDesc& desc);
         void DestroyImpl() override;
         VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;

@@ -2,8 +2,8 @@
 
 namespace rhi::impl
 {
-    ComputePipelineBase::ComputePipelineBase(DeviceBase* device, const ComputePipelineDesc& desc) :
-        PipelineBase(device, desc)
+    ComputePipelineBase::ComputePipelineBase(DeviceBase* device, const ComputePipelineDesc& desc)
+        : PipelineBase(device, desc)
     {}
 
     ComputePipelineBase::~ComputePipelineBase() = default;
@@ -12,4 +12,4 @@ namespace rhi::impl
     {
         return ResourceType::ComputePipeline;
     }
-}
+} // namespace rhi::impl

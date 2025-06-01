@@ -9,13 +9,11 @@
 
 namespace rhi::impl
 {
-    class DeviceBase;
-
     class BindSetLayoutBase : public ResourceBase, public Cached<BindSetLayoutBase>
     {
     public:
         explicit BindSetLayoutBase(DeviceBase* device, const BindSetLayoutDesc& desc);
-        ~BindSetLayoutBase();
+        ~BindSetLayoutBase() override;
         ResourceType GetType() const override;
         BindingType GetBindingType(uint32_t binding) const;
         bool HasDynamicOffset(uint32_t binding) const;

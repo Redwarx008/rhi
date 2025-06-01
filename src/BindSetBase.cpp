@@ -4,9 +4,9 @@
 
 namespace rhi::impl
 {
-    BindSetBase::BindSetBase(DeviceBase* device, const BindSetDesc& desc) :
-        ResourceBase(device, desc.name),
-        mLayout(desc.layout)
+    BindSetBase::BindSetBase(DeviceBase* device, const BindSetDesc& desc)
+        : ResourceBase(device, desc.name)
+        , mLayout(desc.layout)
     {
         mEntries.resize(desc.entryCount);
         for (uint32_t i = 0; i < desc.entryCount; ++i)
@@ -15,9 +15,7 @@ namespace rhi::impl
         }
     }
 
-    BindSetBase::~BindSetBase()
-    {
-    }
+    BindSetBase::~BindSetBase() = default;
 
     void BindSetBase::APIDestroy()
     {
@@ -38,4 +36,4 @@ namespace rhi::impl
     {
         return mEntries;
     }
-}
+} // namespace rhi::impl

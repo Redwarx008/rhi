@@ -1,24 +1,22 @@
 #include "PassEncoder.h"
 #include "CommandEncoder.h"
+#include "Commands.h"
 #include "PipelineBase.h"
 #include "PipelineLayoutBase.h"
-#include "Commands.h"
 #include "common/Error.h"
 
 namespace rhi::impl
 {
-    PassEncoder::PassEncoder(CommandEncoder* encoder, EncodingContext& encodingContext) :
-        mCommandEncoder(encoder),
-        mEncodingContext(encodingContext)
-    {
+    PassEncoder::PassEncoder(CommandEncoder* encoder, EncodingContext& encodingContext)
+        : mCommandEncoder(encoder)
+        , mEncodingContext(encodingContext)
+    {}
 
-    }
+    PassEncoder::~PassEncoder() {}
 
-    PassEncoder::~PassEncoder()
-    {
-    }
-
-    void PassEncoder::RecordSetBindSet(BindSetBase* set, uint32_t setIndex, uint32_t dynamicOffsetCount,
+    void PassEncoder::RecordSetBindSet(BindSetBase* set,
+                                       uint32_t setIndex,
+                                       uint32_t dynamicOffsetCount,
                                        const uint32_t* dynamicOffsets)
     {
         INVALID_IF(mLastPipeline == nullptr, "Must set pipeline before set BindSet.");
@@ -67,4 +65,4 @@ namespace rhi::impl
         allocator.Allocate<EndDebugLabelCmd>(Command::EndDebugLabel);
         --mDebugLabelCount;
     }
-}
+} // namespace rhi::impl

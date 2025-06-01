@@ -6,4 +6,4 @@ namespace rhi::impl
     {
         return (a.usage == b.usage) && (a.shaderStages == b.shaderStages);
     }
-}
+} // namespace rhi::impl

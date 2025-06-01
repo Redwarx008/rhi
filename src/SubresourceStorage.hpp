@@ -256,8 +256,10 @@ namespace rhi::impl
     SubresourceStorage<T>::SubresourceStorage(Aspect aspects,
                                               uint32_t arrayLayerCount,
                                               uint32_t mipLevelCount,
-                                              const T& initialValue) :
-        mAspects(aspects), mMipLevelCount(mipLevelCount), mArrayLayerCount(arrayLayerCount)
+                                              const T& initialValue)
+        : mAspects(aspects)
+        , mMipLevelCount(mipLevelCount)
+        , mArrayLayerCount(arrayLayerCount)
     {
         assert(arrayLayerCount <= std::numeric_limits<decltype(mArrayLayerCount)>::max());
         assert(mipLevelCount <= std::numeric_limits<decltype(mMipLevelCount)>::max());

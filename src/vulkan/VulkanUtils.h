@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
 #include <string>
+#include <vulkan/vulkan.h>
 #include "../RHIStruct.h"
 #include "../Subresource.h"
 
@@ -11,10 +11,11 @@ namespace rhi::impl::vulkan
     template <typename T>
     struct ObjectTypeTraits;
 //clang-format off
-#define DEFINE_OBJECT_TYPE_TRAIT(handleType, objectType) \
-    template<> \
-    struct ObjectTypeTraits<handleType> { \
-        static constexpr VkObjectType value = objectType; \
+#define DEFINE_OBJECT_TYPE_TRAIT(handleType, objectType)                                                               \
+    template <>                                                                                                        \
+    struct ObjectTypeTraits<handleType>                                                                                \
+    {                                                                                                                  \
+        static constexpr VkObjectType value = objectType;                                                              \
     }
 
     DEFINE_OBJECT_TYPE_TRAIT(VkInstance, VK_OBJECT_TYPE_INSTANCE);
@@ -48,20 +49,14 @@ namespace rhi::impl::vulkan
     class Device;
     class Texture;
 
-    void SetDebugNameInternal(Device* device,
-                              VkObjectType objectType,
-                              uint64_t objectHandle,
-                              const char* prefix,
-                              std::string_view name);
+    void SetDebugNameInternal(
+            Device* device, VkObjectType objectType, uint64_t objectHandle, const char* prefix, std::string_view name);
 
     template <typename HandleType>
     void SetDebugName(Device* device, HandleType handle, const char* prefix, std::string_view name)
     {
-        SetDebugNameInternal(device,
-                             ObjectTypeTraits<HandleType>::value,
-                             reinterpret_cast<uint64_t>(handle),
-                             prefix,
-                             name);
+        SetDebugNameInternal(
+                device, ObjectTypeTraits<HandleType>::value, reinterpret_cast<uint64_t>(handle), prefix, name);
     }
 
     VkCompareOp CompareOpConvert(CompareOp op);
@@ -78,4 +73,4 @@ namespace rhi::impl::vulkan
                                                    uint32_t mipLevel,
                                                    Origin3D origin,
                                                    Aspect aspect);
-}
+} // namespace rhi::impl::vulkan

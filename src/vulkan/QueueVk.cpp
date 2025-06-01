@@ -1,13 +1,12 @@
 #include "QueueVk.h"
-#include "ErrorsVk.h"
+#include "../Subresource.h"
+#include "../common/Utils.h"
+#include "BufferVk.h"
 #include "CommandListVk.h"
+#include "DescriptorSetAllocator.h"
 #include "DeviceVk.h"
 #include "ErrorsVk.h"
-#include "BufferVk.h"
 #include "TextureVk.h"
-#include "DescriptorSetAllocator.h"
-#include "../common/Utils.h"
-#include "../Subresource.h"
 #include "VulkanUtils.h"
 
 namespace rhi::impl::vulkan
@@ -20,19 +19,27 @@ namespace rhi::impl::vulkan
         return queue;
     }
 
-    Queue::Queue(Device* device, uint32_t family, QueueType type) :
-        QueueBase(device, type),
-        mQueueFamilyIndex(family),
-        mDeleter(this)
+    Queue::Queue(Device* device, uint32_t family, QueueType type)
+        : QueueBase(device, type)
+        , mQueueFamilyIndex(family)
+        , mDeleter(this)
     {
         vkGetDeviceQueue(device->GetHandle(), mQueueFamilyIndex, 0, &mHandle);
     }
 
-    Queue::~Queue()
+    Queue::~Queue() {}
+
+    void Queue::Destroy()
     {
         Device* device = checked_cast<Device>(mDevice);
 
         TickImpl(UINT64_MAX);
+
+        mRecordContext.needsSubmit = false;
+        if (mRecordContext.commandBufferAndPool.poolHandle)
+        {
+            vkDestroyCommandPool(device->GetHandle(), mRecordContext.commandBufferAndPool.poolHandle, nullptr);
+        }
 
         ASSERT(mCommandBufferInFlight.Empty());
 
@@ -125,7 +132,7 @@ namespace rhi::impl::vulkan
     {
         ASSERT(mRecordContext.needsSubmit != true);
         ASSERT(mRecordContext.commandBufferAndPool.bufferHandle == VK_NULL_HANDLE &&
-                mRecordContext.commandBufferAndPool.poolHandle == VK_NULL_HANDLE);
+               mRecordContext.commandBufferAndPool.poolHandle == VK_NULL_HANDLE);
 
         CommandPoolAndBuffer poolAndBuffer = GetOrCreateCommandPoolAndBuffer();
 
@@ -228,14 +235,15 @@ namespace rhi::impl::vulkan
     {
         mDeleter->Tick(completedSerial);
 
-        mDescriptorAllocatorsPendingDeallocation.Use([&](auto pending)
-        {
-            for (Ref<DescriptorSetAllocator>& allocator : pending->IterateUpTo(completedSerial))
-            {
-                allocator->FinishDeallocation(this, completedSerial);
-            }
-            pending->ClearUpTo(completedSerial);
-        });
+        mDescriptorAllocatorsPendingDeallocation.Use(
+                [&](auto pending)
+                {
+                    for (Ref<DescriptorSetAllocator>& allocator : pending->IterateUpTo(completedSerial))
+                    {
+                        allocator->FinishDeallocation(this, completedSerial);
+                    }
+                    pending->ClearUpTo(completedSerial);
+                });
 
         RecycleCompletedCommandBuffer(completedSerial);
     }
@@ -284,11 +292,8 @@ namespace rhi::impl::vulkan
         return mDeleter;
     }
 
-    void Queue::CopyFromStagingToBufferImpl(BufferBase* src,
-                                            uint64_t srcOffset,
-                                            BufferBase* dst,
-                                            uint64_t destOffset,
-                                            uint64_t size)
+    void Queue::CopyFromStagingToBufferImpl(
+            BufferBase* src, uint64_t srcOffset, BufferBase* dst, uint64_t destOffset, uint64_t size)
     {
         VkCommandBuffer commanBuffer = GetPendingRecordingContext()->commandBufferAndPool.bufferHandle;
 
@@ -319,12 +324,8 @@ namespace rhi::impl::vulkan
 
         Aspect aspect = AspectConvert(texture->APIGetFormat(), dst.aspect);
 
-        VkBufferImageCopy region = ComputeBufferImageCopyRegion(dataLayout,
-                                                                dst.size,
-                                                                texture,
-                                                                dst.mipLevel,
-                                                                dst.origin,
-                                                                aspect);
+        VkBufferImageCopy region =
+                ComputeBufferImageCopyRegion(dataLayout, dst.size, texture, dst.mipLevel, dst.origin, aspect);
 
         SubresourceRange range = {aspect, dst.origin.z, dst.size.depthOrArrayLayers, dst.mipLevel, 1};
 
@@ -351,4 +352,4 @@ namespace rhi::impl::vulkan
         semaphoreInfo.semaphore = waitQueue->GetTrackingSubmitSemaphore();
         semaphoreInfo.value = submitSerial;
     }
-}
+} // namespace rhi::impl::vulkan

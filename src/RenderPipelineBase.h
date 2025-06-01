@@ -9,7 +9,7 @@ namespace rhi::impl
     {
     public:
         explicit RenderPipelineBase(DeviceBase* device, const RenderPipelineDesc& desc);
-        ~RenderPipelineBase();
+        ~RenderPipelineBase() override;
         ResourceType GetType() const override;
 
     protected:
@@ -25,4 +25,4 @@ namespace rhi::impl
         uint32_t mViewportCount = 1;
         uint32_t mPatchControlPoints = 0;
     };
-}
+} // namespace rhi::impl

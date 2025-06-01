@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ResourceBase.h"
 #include "RHIStruct.h"
+#include "ResourceBase.h"
 #include "common/Cached.hpp"
 
 namespace rhi::impl
@@ -10,7 +10,7 @@ namespace rhi::impl
     {
     public:
         explicit SamplerBase(DeviceBase* device, const SamplerDesc& desc);
-        ~SamplerBase();
+        ~SamplerBase() override;
         ResourceType GetType() const override;
         size_t ComputeContentHash() override;
 
@@ -30,4 +30,4 @@ namespace rhi::impl
 
         float mMaxAnisotropy = 1.f;
     };
-}
+} // namespace rhi::impl

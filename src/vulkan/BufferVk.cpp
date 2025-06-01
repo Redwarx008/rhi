@@ -1,26 +1,23 @@
 #include "BufferVk.h"
 
-#include "DeviceVk.h"
-#include "QueueVk.h"
-#include "ErrorsVk.h"
+#include "../common/Constants.h"
+#include "../common/Error.h"
+#include "../common/Utils.h"
 #include "CommandListVk.h"
+#include "DeviceVk.h"
+#include "ErrorsVk.h"
+#include "QueueVk.h"
+#include "RefCountedHandle.h"
 #include "ResourceToDelete.h"
 #include "VulkanUtils.h"
-#include "RefCountedHandle.h"
-#include "../common/Utils.h"
-#include "../common/Error.h"
-#include "../common/Constants.h"
 
 #include <algorithm>
 
 namespace rhi::impl::vulkan
 {
-    constexpr BufferUsage cShaderBufferUsages =
-            BufferUsage::Uniform | BufferUsage::Storage | cReadOnlyStorageBuffer;
-    constexpr BufferUsage cMappableBufferUsages =
-            BufferUsage::MapRead | BufferUsage::MapWrite;
-    constexpr BufferUsage cReadOnlyBufferUsages =
-            BufferUsage::MapRead | BufferUsage::CopySrc | BufferUsage::Index |
+    constexpr BufferUsage cShaderBufferUsages = BufferUsage::Uniform | BufferUsage::Storage | cReadOnlyStorageBuffer;
+    constexpr BufferUsage cMappableBufferUsages = BufferUsage::MapRead | BufferUsage::MapWrite;
+    constexpr BufferUsage cReadOnlyBufferUsages = BufferUsage::MapRead | BufferUsage::CopySrc | BufferUsage::Index |
             BufferUsage::Vertex | BufferUsage::Uniform | cReadOnlyStorageBuffer;
 
     VkBufferUsageFlags BufferUsageConvert(BufferUsage usage)
@@ -160,30 +157,25 @@ namespace rhi::impl::vulkan
     }
 
 
-    Ref<Buffer> Buffer::Create(DeviceBase* device, const BufferDesc& desc)
+    Ref<Buffer> Buffer::Create(DeviceBase* device, const BufferDesc& desc, QueueType initialQueueOwner)
     {
-        Ref<Buffer> buffer = AcquireRef(new Buffer(device, desc));
+        Ref<Buffer> buffer = AcquireRef(new Buffer(device, desc, initialQueueOwner));
         if (!buffer->Initialize())
         {
             return nullptr;
         }
+        buffer->TrackResource();
         return buffer;
     }
 
-    Buffer::Buffer(DeviceBase* device, const BufferDesc& desc) :
-        BufferBase(device, desc)
-    {
+    Buffer::Buffer(DeviceBase* device, const BufferDesc& desc, QueueType initialQueueOwner)
+        : BufferBase(device, desc, initialQueueOwner)
+    {}
 
-    }
-
-    Buffer::~Buffer()
-    {
-    }
+    Buffer::~Buffer() {}
 
     bool Buffer::Initialize()
     {
-        BufferBase::Initialize();
-
         constexpr BufferUsage cMapWriteAllowedUsages = BufferUsage::CopySrc | BufferUsage::MapWrite;
         INVALID_IF(HasFlag(BufferUsage::MapWrite, mUsage) && !IsSubset(mUsage, cMapWriteAllowedUsages),
                    "The BufferUsage::MapWrite flag can only compatible with BufferUsage::CopySrc.");
@@ -194,10 +186,9 @@ namespace rhi::impl::vulkan
         // Vulkan requires the size to be non-zero.
         uint64_t toAllocatedSize = (std::max)(mSize, 4ull);
 
-        ASSERT_MSG(!(toAllocatedSize & (3ull << 62ull)),
-                   "Buffer size is HUGE and could cause overflows");
+        ASSERT_MSG(!(toAllocatedSize & (3ull << 62ull)), "Buffer size is HUGE and could cause overflows");
 
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         VkBufferCreateInfo bufferCI{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
         bufferCI.size = toAllocatedSize;
@@ -209,8 +200,8 @@ namespace rhi::impl::vulkan
             queueFamiles.push_back(checked_cast<Queue>(device->GetQueue(QueueType::Graphics))->GetQueueFamilyIndex());
             if (device->GetQueue(QueueType::Compute))
             {
-                queueFamiles.
-                        push_back(checked_cast<Queue>(device->GetQueue(QueueType::Compute))->GetQueueFamilyIndex());
+                queueFamiles.push_back(
+                        checked_cast<Queue>(device->GetQueue(QueueType::Compute))->GetQueueFamilyIndex());
             }
             if (device->GetQueue(QueueType::Transfer))
             {
@@ -242,8 +233,8 @@ namespace rhi::impl::vulkan
             }
         }
 
-        VkResult err = vmaCreateBuffer(device->GetMemoryAllocator(), &bufferCI, &allocCI, &mHandle, &mAllocation,
-                                       &mAllocationInfo);
+        VkResult err = vmaCreateBuffer(
+                device->GetMemoryAllocator(), &bufferCI, &allocCI, &mHandle, &mAllocation, &mAllocationInfo);
         CHECK_VK_RESULT_FALSE(err, "Could not create buffer");
 
         SetDebugName(device, mHandle, "Buffer", GetName());
@@ -264,22 +255,23 @@ namespace rhi::impl::vulkan
         }
         mState = State::Unmapped;
 
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         if (mShareMode == ShareMode::Exclusive)
         {
-            checked_cast<Queue>(device->GetQueue(mLastUsedQueue))->GetDeleter()->DeleteWhenUnused(
-                    {mHandle, mAllocation});
+            auto queue = checked_cast<Queue>(device->GetQueue(mLastUsedQueue));
+            queue->GetDeleter()->DeleteWhenUnused({mHandle, mAllocation});
         }
         else
         {
-            // Buffers in concurrent mode may be used by multiple queues and there is no way to tell who was last to use .
-            Ref<RefCountedHandle<BufferAllocation>> bufferAllocation = AcquireRef(new RefCountedHandle<BufferAllocation>(device, { mHandle, mAllocation },
-                [](Device* device, BufferAllocation handle)
-                {
-                    vmaDestroyBuffer(device->GetMemoryAllocator(), handle.buffer, handle.allocation);
-                }
-            ));
+            // Buffers in concurrent mode may be used by multiple queues and there is no way to tell who was last to use
+            // .
+            Ref<RefCountedHandle<BufferAllocation>> bufferAllocation =
+                    AcquireRef(new RefCountedHandle<BufferAllocation>(
+                            device,
+                            {mHandle, mAllocation},
+                            [](Device* device, BufferAllocation handle)
+                            { vmaDestroyBuffer(device->GetMemoryAllocator(), handle.buffer, handle.allocation); }));
 
             for (uint32_t i = 0; i < mUsageTrackInQueues.size(); ++i)
             {
@@ -378,6 +370,7 @@ namespace rhi::impl::vulkan
         VkAccessFlags2 srcAccess = 0;
         VkPipelineStageFlags2 srcStage = 0;
 
+        ASSERT(static_cast<uint32_t>(queueType) < mUsageTrackInQueues.size());
         BufferUsage& readUsage = mUsageTrackInQueues[static_cast<uint32_t>(queueType)].readUsage;
         ShaderStage& readShaderStages = mUsageTrackInQueues[static_cast<uint32_t>(queueType)].readShaderStages;
 
@@ -389,7 +382,7 @@ namespace rhi::impl::vulkan
             if ((shaderStage & ShaderStage::Fragment) != 0 && (readShaderStages & ShaderStage::Vertex) != 0)
             {
                 // There is an implicit vertex->fragment dependency, so if the vertex stage has already
-                // waited, there is no need for fragment to wait. Add the fragment usage so we know to 
+                // waited, there is no need for fragment to wait. Add the fragment usage so we know to
                 // wait for it before the next write.
                 readShaderStages |= ShaderStage::Fragment;
             }
@@ -473,8 +466,8 @@ namespace rhi::impl::vulkan
         barrier.size = VK_WHOLE_SIZE;
         if (needTransferOwnership)
         {
-            barrier.srcQueueFamilyIndex = checked_cast<Queue>(checked_cast<Device>(mDevice)->GetQueue(mLastUsedQueue))->
-                    GetQueueFamilyIndex();
+            barrier.srcQueueFamilyIndex =
+                    checked_cast<Queue>(checked_cast<Device>(mDevice)->GetQueue(mLastUsedQueue))->GetQueueFamilyIndex();
             barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();
         }
 
@@ -504,4 +497,4 @@ namespace rhi::impl::vulkan
             TransitionUsageNow(checked_cast<Queue>(queue), BufferUsage::MapWrite);
         }
     }
-}
+} // namespace rhi::impl::vulkan

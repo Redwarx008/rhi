@@ -2,11 +2,11 @@
 
 #include "common/NoCopyable.h"
 
+#include <limits>
 #include <memory>
 #include <vector>
-#include <limits>
 
-#if defined (max)
+#if defined(max)
 #undef max
 #endif
 
@@ -86,13 +86,12 @@ namespace rhi::impl
             static_assert(sizeof(E) == sizeof(uint32_t));
             static_assert(alignof(E) == alignof(uint32_t));
             static_assert(alignof(T) <= cMaxSupportedAlignment);
-            T* result =
-                    reinterpret_cast<T*>(Allocate(static_cast<uint32_t>(commandId), sizeof(T), alignof(T)));
+            T* result = reinterpret_cast<T*>(Allocate(static_cast<uint32_t>(commandId), sizeof(T), alignof(T)));
             if (!result)
             {
                 return nullptr;
             }
-            new(result) T;
+            new (result) T;
             return result;
         }
 
@@ -107,7 +106,7 @@ namespace rhi::impl
             }
             for (size_t i = 0; i < count; i++)
             {
-                new(result + i) T;
+                new (result + i) T;
             }
             return result;
         }
@@ -146,4 +145,4 @@ namespace rhi::impl
         char* mCurrentPtr = nullptr;
         char* mEndPtr = nullptr;
     };
-}
+} // namespace rhi::impl

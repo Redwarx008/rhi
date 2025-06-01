@@ -9,21 +9,19 @@
 
 namespace rhi::impl
 {
-    bool BindSetLayoutBase::BindingInfo::operator == (const BindingInfo& other) const
+    bool BindSetLayoutBase::BindingInfo::operator==(const BindingInfo& other) const
     {
-        return this->type == other.type &&
-            this->visibility == other.visibility &&
-            this->arrayElementCount == other.arrayElementCount &&
-            this->hasDynamicOffset == other.hasDynamicOffset;
+        return this->type == other.type && this->visibility == other.visibility &&
+                this->arrayElementCount == other.arrayElementCount && this->hasDynamicOffset == other.hasDynamicOffset;
     }
 
-    bool BindSetLayoutBase::BindingInfo::operator != (const BindingInfo& other) const
+    bool BindSetLayoutBase::BindingInfo::operator!=(const BindingInfo& other) const
     {
         return !(*this == other);
     }
 
-    BindSetLayoutBase::BindSetLayoutBase(DeviceBase* device, const BindSetLayoutDesc& desc) :
-        ResourceBase(device, desc.name)
+    BindSetLayoutBase::BindSetLayoutBase(DeviceBase* device, const BindSetLayoutDesc& desc)
+        : ResourceBase(device, desc.name)
     {
         uint32_t maxBinding = 0;
         for (uint32_t i = 0; i < desc.entryCount; ++i)
@@ -38,15 +36,14 @@ namespace rhi::impl
         {
             auto& entry = desc.entries[i];
             INVALID_IF(mBindingIndexToInfoMap[entry.binding].has_value(),
-                "Multiple BindSetLayoutEntry are defined in the same slot (%d)",
-                entry.binding);
+                       "Multiple BindSetLayoutEntry are defined in the same slot (%d)",
+                       entry.binding);
 
-            mBindingIndexToInfoMap[entry.binding] =
-            {
-                entry.type ,
-                entry.visibleStages,
-                entry.arrayElementCount,
-                entry.hasDynamicOffset,
+            mBindingIndexToInfoMap[entry.binding] = {
+                    entry.type,
+                    entry.visibleStages,
+                    entry.arrayElementCount,
+                    entry.hasDynamicOffset,
             };
         }
     }
@@ -97,7 +94,10 @@ namespace rhi::impl
                 const BindingInfo& bindingInfo = mBindingIndexToInfoMap[i].value();
 
                 recorder.Record(bindingIndex);
-                recorder.Record(bindingInfo.type, bindingInfo.visibility, bindingInfo.arrayElementCount, bindingInfo.hasDynamicOffset);
+                recorder.Record(bindingInfo.type,
+                                bindingInfo.visibility,
+                                bindingInfo.arrayElementCount,
+                                bindingInfo.hasDynamicOffset);
             }
         }
 

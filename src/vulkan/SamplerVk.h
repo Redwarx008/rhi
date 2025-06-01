@@ -17,10 +17,10 @@ namespace rhi::impl::vulkan
 
     private:
         explicit Sampler(Device* device, const SamplerDesc& desc);
-        ~Sampler();
+        ~Sampler() override;
         bool Initialize(const SamplerDesc& desc);
         void DestroyImpl() override;
 
         VkSampler mHandle = VK_NULL_HANDLE;
     };
-}
+} // namespace rhi::impl::vulkan

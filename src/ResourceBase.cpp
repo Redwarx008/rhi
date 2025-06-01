@@ -1,20 +1,21 @@
 #include "ResourceBase.h"
 
-#include "DeviceBase.h"
 #include <string_view>
+
+#include "DeviceBase.h"
 
 namespace rhi::impl
 {
-    ResourceBase::ResourceBase(DeviceBase* device, std::string_view name) :
-        mDevice(device),
-        mName(name)
+    ResourceBase::ResourceBase(DeviceBase* device, std::string_view name)
+        : mDevice(device)
+        , mName(name)
     {}
 
     ResourceBase::~ResourceBase() = default;
 
     DeviceBase* ResourceBase::GetDevice() const
     {
-        return mDevice.Get();
+        return mDevice;
     }
 
     void ResourceBase::Destroy()
@@ -68,17 +69,11 @@ namespace rhi::impl
 
     void ResourceList::Track(ResourceBase* object)
     {
-        mObjects.Use([&object](auto lockedObjects)
-        {
-            lockedObjects->Prepend(object);
-        });
+        mObjects.Use([&object](auto lockedObjects) { lockedObjects->Prepend(object); });
     }
 
     bool ResourceList::Untrack(ResourceBase* object)
     {
-        return mObjects.Use([&object](auto lockedObjects)
-        {
-            return object->RemoveFromList();
-        });
+        return mObjects.Use([&object](auto lockedObjects) { return object->RemoveFromList(); });
     }
-}
+} // namespace rhi::impl

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "CommandAllocator.h"
-#include "common/Constants.h"
-#include "common/Ref.hpp"
-#include "Subresource.h"
-#include "BufferBase.h"
-#include "BindSetBase.h"
 #include <array>
 #include <string_view>
+#include "BindSetBase.h"
+#include "BufferBase.h"
+#include "CommandAllocator.h"
+#include "Subresource.h"
+#include "common/Constants.h"
+#include "common/Ref.hpp"
 
 namespace rhi::impl
 {
@@ -286,10 +286,9 @@ namespace rhi::impl
         Ref<BufferBase> indirectBuffer;
         uint64_t indirectOffset;
     };
-
-    struct DrawIndexedIndirectCmd : DrawIndirectCmd
-    {};
-
+    // clang-format off
+    struct DrawIndexedIndirectCmd : DrawIndirectCmd {};
+    // clang-format on
     struct MultiDrawIndirectCmd
     {
         MultiDrawIndirectCmd();
@@ -301,10 +300,9 @@ namespace rhi::impl
         Ref<BufferBase> drawCountBuffer;
         uint64_t drawCountOffset;
     };
-
-    struct MultiDrawIndexedIndirectCmd : MultiDrawIndirectCmd
-    {};
-
+    // clang-format off
+    struct MultiDrawIndexedIndirectCmd : MultiDrawIndirectCmd {};
+    // clang-format on
     struct EndRenderPassCmd
     {
         EndRenderPassCmd();
@@ -352,4 +350,4 @@ namespace rhi::impl
     };
 
     void FreeCommands(CommandIterator* commands);
-}
+} // namespace rhi::impl

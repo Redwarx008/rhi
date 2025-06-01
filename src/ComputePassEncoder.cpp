@@ -1,13 +1,13 @@
 #include "ComputePassEncoder.h"
-#include "ComputePipelineBase.h"
 #include "CommandEncoder.h"
 #include "Commands.h"
+#include "ComputePipelineBase.h"
 #include "common/Error.h"
 
 namespace rhi::impl
 {
-    ComputePassEncoder::ComputePassEncoder(CommandEncoder* encoder, EncodingContext& encodingContext) :
-        PassEncoder(encoder, encodingContext)
+    ComputePassEncoder::ComputePassEncoder(CommandEncoder* encoder, EncodingContext& encodingContext)
+        : PassEncoder(encoder, encodingContext)
     {}
 
     ComputePassEncoder::~ComputePassEncoder()
@@ -54,7 +54,9 @@ namespace rhi::impl
         cmd->indirectOffset = indirectOffset;
     }
 
-    void ComputePassEncoder::APISetBindSet(BindSetBase* set, uint32_t setIndex, uint32_t dynamicOffsetCount,
+    void ComputePassEncoder::APISetBindSet(BindSetBase* set,
+                                           uint32_t setIndex,
+                                           uint32_t dynamicOffsetCount,
                                            const uint32_t* dynamicOffsets)
     {
         ASSERT(set != nullptr);
@@ -70,4 +72,4 @@ namespace rhi::impl
         mEncodingContext.ExitComputePass(mUsageTracker);
         mCommandEncoder->OnComputePassEnd();
     }
-}
+} // namespace rhi::impl

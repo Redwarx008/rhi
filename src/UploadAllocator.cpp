@@ -1,17 +1,16 @@
 #include "UploadAllocator.h"
-#include "DeviceBase.h"
 #include "BufferBase.h"
-#include "common/Utils.h"
+#include "DeviceBase.h"
 #include "common/Error.h"
+#include "common/Utils.h"
 
 namespace rhi::impl
 {
-    UploadAllocator::RingBuffer::RingBuffer(uint64_t maxSize) :
-        mMaxBlockSize(maxSize)
+    UploadAllocator::RingBuffer::RingBuffer(uint64_t maxSize)
+        : mMaxBlockSize(maxSize)
     {}
 
-    UploadAllocator::RingBuffer::~RingBuffer()
-    {};
+    UploadAllocator::RingBuffer::~RingBuffer() {};
 
     uint64_t UploadAllocator::RingBuffer::Allocate(uint64_t allocationSize, uint64_t serial, uint64_t offsetAlignment)
     {
@@ -105,12 +104,12 @@ namespace rhi::impl
         return mInflightRequests.Empty();
     }
 
-    UploadAllocator::UploadAllocator(DeviceBase* device) :
-        mDevice(device)
+    UploadAllocator::UploadAllocator(DeviceBase* device, QueueBase* queueOwner)
+        : mDevice(device)
+        , mQueueOwner(queueOwner)
     {}
 
-    UploadAllocator::~UploadAllocator()
-    {}
+    UploadAllocator::~UploadAllocator() {}
 
     UploadAllocation UploadAllocator::Allocate(uint64_t allocationSize, uint64_t serial, uint64_t offsetAlignment)
     {
@@ -165,7 +164,7 @@ namespace rhi::impl
             desc.size = AlignUp(targetRingBuffer->GetSize(), 4u);
             desc.name = "UploadStageBuffer";
 
-            Ref<BufferBase> buffer = mDevice->CreateBufferImpl(desc);
+            Ref<BufferBase> buffer = mDevice->CreateBufferImpl(desc, mQueueOwner->GetType());
             targetRingBuffer->buffer = std::move(buffer);
         }
 
@@ -196,4 +195,4 @@ namespace rhi::impl
         }
         mLargeStageBuffersToDelete.CIterateUpTo(lastCompletedSerial);
     }
-}
+} // namespace rhi::impl

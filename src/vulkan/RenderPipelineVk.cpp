@@ -1,22 +1,22 @@
 #include "RenderPipelineVk.h"
 
-#include "DeviceVk.h"
-#include "TextureVk.h"
-#include "ShaderModuleVk.h"
-#include "PipelineLayoutVk.h"
-#include "ErrorsVk.h"
-#include "VulkanUtils.h"
-#include "../common/EnumFlagIterator.hpp"
 #include <vector>
+#include "../common/EnumFlagIterator.hpp"
+#include "DeviceVk.h"
+#include "ErrorsVk.h"
+#include "PipelineLayoutVk.h"
+#include "ShaderModuleVk.h"
+#include "TextureVk.h"
+#include "PipelineCacheVk.h"
+#include "VulkanUtils.h"
 
 namespace rhi::impl::vulkan
 {
-    RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDesc& desc) :
-        RenderPipelineBase(device, desc)
+    RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDesc& desc)
+        : RenderPipelineBase(device, desc)
     {}
 
-    RenderPipeline::~RenderPipeline()
-    {}
+    RenderPipeline::~RenderPipeline() {}
 
     VkPrimitiveTopology PrimitiveTopologyConvert(PrimitiveType type)
     {
@@ -101,11 +101,11 @@ namespace rhi::impl::vulkan
         static_assert(uint32_t(BlendFactor::DstAlpha) == uint32_t(VK_BLEND_FACTOR_DST_ALPHA));
         static_assert(uint32_t(BlendFactor::OneMinusDstAlpha) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA));
         static_assert(uint32_t(BlendFactor::ConstantColor) == uint32_t(VK_BLEND_FACTOR_CONSTANT_COLOR));
-        static_assert(
-                uint32_t(BlendFactor::OneMinusConstantColor) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR));
+        static_assert(uint32_t(BlendFactor::OneMinusConstantColor) ==
+                      uint32_t(VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR));
         static_assert(uint32_t(BlendFactor::ConstantAlpha) == uint32_t(VK_BLEND_FACTOR_CONSTANT_ALPHA));
-        static_assert(
-                uint32_t(BlendFactor::OneMinusConstantAlpha) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA));
+        static_assert(uint32_t(BlendFactor::OneMinusConstantAlpha) ==
+                      uint32_t(VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA));
         static_assert(uint32_t(BlendFactor::SrcAlphaSaturate) == uint32_t(VK_BLEND_FACTOR_SRC_ALPHA_SATURATE));
         static_assert(uint32_t(BlendFactor::Src1Color) == uint32_t(VK_BLEND_FACTOR_SRC1_COLOR));
         static_assert(uint32_t(BlendFactor::OneMinusSrc1Color) == uint32_t(VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR));
@@ -132,9 +132,9 @@ namespace rhi::impl::vulkan
         static_assert(uint32_t(ColorMask::Green) == uint32_t(VK_COLOR_COMPONENT_G_BIT));
         static_assert(uint32_t(ColorMask::Blue) == uint32_t(VK_COLOR_COMPONENT_B_BIT));
         static_assert(uint32_t(ColorMask::Alpha) == uint32_t(VK_COLOR_COMPONENT_A_BIT));
-        static_assert(uint32_t(ColorMask::All) == uint32_t(
-                VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
-                VK_COLOR_COMPONENT_A_BIT));
+        static_assert(uint32_t(ColorMask::All) ==
+                      uint32_t(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
+                               VK_COLOR_COMPONENT_A_BIT));
 
         return static_cast<VkColorComponentFlags>(uint32_t(mask));
     }
@@ -256,7 +256,7 @@ namespace rhi::impl::vulkan
         }
     }
 
-    bool RenderPipeline::Initialize()
+    bool RenderPipeline::Initialize(PipelineCacheBase* cache)
     {
         // shader stage
         ASSERT(HasShaderStage(ShaderStage::Vertex));
@@ -319,7 +319,7 @@ namespace rhi::impl::vulkan
                 }
             }
         }
-        // vertex input 
+        // vertex input
         std::vector<VkVertexInputBindingDescription> vertexInputBindings;
         std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 
@@ -365,8 +365,8 @@ namespace rhi::impl::vulkan
         rasterizationStateCI.cullMode = CullModeConvert(mRasterState.cullMode);
         rasterizationStateCI.polygonMode = PolygonModeConvert(mRasterState.fillMode);
         rasterizationStateCI.depthClampEnable = mRasterState.depthClampEnable;
-        rasterizationStateCI.depthBiasEnable = mDepthStencilState.depthBias != 0 || mDepthStencilState.
-                depthBiasSlopeScale != 0;
+        rasterizationStateCI.depthBiasEnable =
+                mDepthStencilState.depthBias != 0 || mDepthStencilState.depthBiasSlopeScale != 0;
         rasterizationStateCI.depthBiasConstantFactor = static_cast<float>(mDepthStencilState.depthBias);
         rasterizationStateCI.depthBiasSlopeFactor = mDepthStencilState.depthBiasSlopeScale;
         rasterizationStateCI.lineWidth = mRasterState.lineWidth;
@@ -379,16 +379,15 @@ namespace rhi::impl::vulkan
             blendState.blendEnable = mBlendState.colorAttachmentBlendStates[i].blendEnable;
             blendState.srcColorBlendFactor =
                     BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].srcColorBlend);
-            blendState.dstColorBlendFactor = BlendFactorConvert(
-                    mBlendState.colorAttachmentBlendStates[i].destColorBlend);
+            blendState.dstColorBlendFactor =
+                    BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].destColorBlend);
             blendState.colorBlendOp = BlendOpConvert(mBlendState.colorAttachmentBlendStates[i].colorBlendOp);
             blendState.srcAlphaBlendFactor =
                     BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].srcAlphaBlend);
-            blendState.dstAlphaBlendFactor = BlendFactorConvert(
-                    mBlendState.colorAttachmentBlendStates[i].destAlphaBlend);
+            blendState.dstAlphaBlendFactor =
+                    BlendFactorConvert(mBlendState.colorAttachmentBlendStates[i].destAlphaBlend);
             blendState.alphaBlendOp = BlendOpConvert(mBlendState.colorAttachmentBlendStates[i].alphaBlendOp);
             blendState.colorWriteMask = ColorMaskConvert(mBlendState.colorAttachmentBlendStates[i].colorWriteMask);
-
         }
         VkPipelineColorBlendStateCreateInfo colorBlendStateCI{};
         colorBlendStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -412,8 +411,7 @@ namespace rhi::impl::vulkan
         VkSampleMask sampleMask = mSampleState.mask;
         multisampleStateCI.pSampleMask = &sampleMask;
         multisampleStateCI.alphaToOneEnable = false;
-        VkDynamicState dynamicStates[] =
-        {
+        VkDynamicState dynamicStates[] = {
                 VK_DYNAMIC_STATE_VIEWPORT,
                 VK_DYNAMIC_STATE_SCISSOR,
                 /*VK_DYNAMIC_STATE_LINE_WIDTH, */
@@ -427,7 +425,7 @@ namespace rhi::impl::vulkan
         dynamicStateCI.pDynamicStates = dynamicStates;
 
         // Viewport state sets the number of viewports and scissor used in this pipeline
-        // Note: This is actually overridden by the dynamic states 
+        // Note: This is actually overridden by the dynamic states
         VkPipelineViewportStateCreateInfo viewportStateCI{};
         viewportStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewportStateCI.viewportCount = mViewportCount;
@@ -463,9 +461,9 @@ namespace rhi::impl::vulkan
         createInfo.pDynamicState = &dynamicStateCI;
         createInfo.pNext = &pipelineRenderingCI;
 
-        Device* device = checked_cast<Device>(mDevice.Get());
-        // todo: apply pipeline cache 
-        VkResult err = vkCreateGraphicsPipelines(device->GetHandle(), nullptr, 1, &createInfo, nullptr, &mHandle);
+        Device* device = checked_cast<Device>(mDevice);
+        VkPipelineCache vkPipelineCache = cache != nullptr ? checked_cast<PipelineCache>(cache)->GetHandle() : nullptr;
+        VkResult err = vkCreateGraphicsPipelines(device->GetHandle(), vkPipelineCache, 1, &createInfo, nullptr, &mHandle);
         CHECK_VK_RESULT_FALSE(err, "CreateGraphicsPipelines");
 
         SetDebugName(device, mHandle, "RenderPipeline", GetName());
@@ -475,7 +473,7 @@ namespace rhi::impl::vulkan
 
     void RenderPipeline::DestroyImpl()
     {
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         if (mHandle != VK_NULL_HANDLE)
         {
@@ -492,10 +490,11 @@ namespace rhi::impl::vulkan
     Ref<RenderPipeline> RenderPipeline::Create(Device* device, const RenderPipelineDesc& desc)
     {
         Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, desc));
-        if (!pipeline->Initialize())
+        if (!pipeline->Initialize(desc.cache))
         {
             return nullptr;
         }
+        pipeline->TrackResource();
         return pipeline;
     }
-}
+} // namespace rhi::impl::vulkan

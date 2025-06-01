@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/MutexProtected.hpp"
 #include <memory>
+#include "common/MutexProtected.hpp"
 
 namespace rhi::impl
 {
@@ -31,7 +31,7 @@ namespace rhi::impl
 
     class CallbackTaskManager
     {
-    public :
+    public:
         void AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask);
         bool IsEmpty();
         void HandleDeviceLoss();
@@ -47,4 +47,4 @@ namespace rhi::impl
 
         MutexProtected<StateAndQueue> mStateAndQueue;
     };
-}
+} // namespace rhi::impl

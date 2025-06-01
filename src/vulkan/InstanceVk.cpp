@@ -1,20 +1,20 @@
 #include "InstanceVk.h"
 #include "AdapterVk.h"
-#include "SurfaceVk.h"
 #include "ErrorsVk.h"
+#include "SurfaceVk.h"
 
-#include <vector>
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
+#include <vector>
 
 namespace rhi::impl::vulkan
 {
-    static VKAPI_ATTR VkBool32 VKAPI_CALL DebugMessageCallback(
-            VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-            VkDebugUtilsMessageTypeFlagsEXT messageType,
-            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-            void* pUserData)
+    static VKAPI_ATTR VkBool32 VKAPI_CALL
+    DebugMessageCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                         VkDebugUtilsMessageTypeFlagsEXT messageType,
+                         const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                         void* pUserData)
     {
         LoggingSeverity severity = LoggingSeverity::Info;
 
@@ -69,9 +69,10 @@ namespace rhi::impl::vulkan
         {
             std::cerr << debugMessage.str().c_str() << std::endl;
         }
-        // The return value of this callback controls whether the Vulkan call that caused the validation message will be aborted or not
-        // We return VK_FALSE as we DON'T want Vulkan calls that cause a validation message to abort
-        // If you instead want to have calls abort, pass in VK_TRUE and the function will return VK_ERROR_VALIDATION_FAILED_EXT
+        // The return value of this callback controls whether the Vulkan call that caused the validation message will be
+        // aborted or not We return VK_FALSE as we DON'T want Vulkan calls that cause a validation message to abort If
+        // you instead want to have calls abort, pass in VK_TRUE and the function will return
+        // VK_ERROR_VALIDATION_FAILED_EXT
         return VK_FALSE;
     }
 
@@ -144,10 +145,10 @@ namespace rhi::impl::vulkan
         {
             VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCI{};
             debugUtilsMessengerCI.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-            debugUtilsMessengerCI.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                    VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-            debugUtilsMessengerCI.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                    VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+            debugUtilsMessengerCI.messageSeverity =
+                    VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+            debugUtilsMessengerCI.messageType =
+                    VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
             debugUtilsMessengerCI.pfnUserCallback = DebugMessageCallback;
             debugUtilsMessengerCI.pUserData = nullptr;
             instanceCreateInfo.pNext = &debugUtilsMessengerCI;
@@ -182,50 +183,47 @@ namespace rhi::impl::vulkan
                 const VkBool32 setting_enable_message_limit = VK_TRUE;
                 const int32_t setting_duplicate_message_limit = 10;
 
-                const VkLayerSettingEXT settings[] = {
-                        {validationLayerName,
-                         "validate_core",
-                         VK_LAYER_SETTING_TYPE_BOOL32_EXT,
-                         1,
-                         &setting_validate_core},
-                        {validationLayerName,
-                         "validate_sync",
-                         VK_LAYER_SETTING_TYPE_BOOL32_EXT,
-                         1,
-                         &setting_validate_sync},
-                        {validationLayerName,
-                         "thread_safety",
-                         VK_LAYER_SETTING_TYPE_BOOL32_EXT,
-                         1,
-                         &setting_thread_safety},
-                        {validationLayerName,
-                         "debug_action",
-                         VK_LAYER_SETTING_TYPE_STRING_EXT,
-                         1,
-                         setting_debug_action},
-                        {validationLayerName,
-                         "report_flags",
-                         VK_LAYER_SETTING_TYPE_STRING_EXT,
-                         static_cast<uint32_t>(std::size(setting_report_flags)),
-                         setting_report_flags},
-                        {validationLayerName,
-                         "enable_message_limit",
-                         VK_LAYER_SETTING_TYPE_BOOL32_EXT,
-                         1,
-                         &setting_enable_message_limit},
-                        {validationLayerName,
-                         "duplicate_message_limit",
-                         VK_LAYER_SETTING_TYPE_INT32_EXT,
-                         1,
-                         &setting_duplicate_message_limit}};
+                const VkLayerSettingEXT settings[] = {{validationLayerName,
+                                                       "validate_core",
+                                                       VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+                                                       1,
+                                                       &setting_validate_core},
+                                                      {validationLayerName,
+                                                       "validate_sync",
+                                                       VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+                                                       1,
+                                                       &setting_validate_sync},
+                                                      {validationLayerName,
+                                                       "thread_safety",
+                                                       VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+                                                       1,
+                                                       &setting_thread_safety},
+                                                      {validationLayerName,
+                                                       "debug_action",
+                                                       VK_LAYER_SETTING_TYPE_STRING_EXT,
+                                                       1,
+                                                       setting_debug_action},
+                                                      {validationLayerName,
+                                                       "report_flags",
+                                                       VK_LAYER_SETTING_TYPE_STRING_EXT,
+                                                       static_cast<uint32_t>(std::size(setting_report_flags)),
+                                                       setting_report_flags},
+                                                      {validationLayerName,
+                                                       "enable_message_limit",
+                                                       VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+                                                       1,
+                                                       &setting_enable_message_limit},
+                                                      {validationLayerName,
+                                                       "duplicate_message_limit",
+                                                       VK_LAYER_SETTING_TYPE_INT32_EXT,
+                                                       1,
+                                                       &setting_duplicate_message_limit}};
 
-                const VkLayerSettingsCreateInfoEXT layerSettingsCreateInfo =
-                {
+                const VkLayerSettingsCreateInfoEXT layerSettingsCreateInfo = {
                         VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT,
                         nullptr,
                         static_cast<uint32_t>(std::size(settings)),
-                        settings
-                };
+                        settings};
                 debugUtilsMessengerCI.pNext = &layerSettingsCreateInfo;
 
                 instanceCreateInfo.ppEnabledLayerNames = &validationLayerName;
@@ -253,20 +251,18 @@ namespace rhi::impl::vulkan
     bool Instance::RegisterDebugUtils()
     {
         auto vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
-            vkGetInstanceProcAddr(mHandle, "vkCreateDebugUtilsMessengerEXT"));
+                vkGetInstanceProcAddr(mHandle, "vkCreateDebugUtilsMessengerEXT"));
 
         VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCI{};
         debugUtilsMessengerCI.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        debugUtilsMessengerCI.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        debugUtilsMessengerCI.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+        debugUtilsMessengerCI.messageSeverity =
+                VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        debugUtilsMessengerCI.messageType =
+                VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
         debugUtilsMessengerCI.pfnUserCallback = DebugMessageCallback;
         debugUtilsMessengerCI.pUserData = nullptr;
-        VkResult result = vkCreateDebugUtilsMessengerEXT(mHandle,
-                                                         &debugUtilsMessengerCI,
-                                                         nullptr,
-                                                         &mDebugUtilsMessenger);
+        VkResult result =
+                vkCreateDebugUtilsMessengerEXT(mHandle, &debugUtilsMessengerCI, nullptr, &mDebugUtilsMessenger);
         CHECK_VK_RESULT_FALSE(result, "Failed to create vulkan debugUtilsMessenger");
         mDebugLayerEnabled = true;
         return true;
@@ -308,7 +304,7 @@ namespace rhi::impl::vulkan
         if (mDebugUtilsMessenger)
         {
             auto vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
-                vkGetInstanceProcAddr(mHandle, "vkDestroyDebugUtilsMessengerEXT"));
+                    vkGetInstanceProcAddr(mHandle, "vkDestroyDebugUtilsMessengerEXT"));
             vkDestroyDebugUtilsMessengerEXT(mHandle, mDebugUtilsMessenger, nullptr);
             mDebugUtilsMessenger = VK_NULL_HANDLE;
         }
@@ -319,4 +315,4 @@ namespace rhi::impl::vulkan
         }
     }
 
-}
+} // namespace rhi::impl::vulkan

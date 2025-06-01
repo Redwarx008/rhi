@@ -15,8 +15,8 @@ namespace rhi::impl::vulkan
 
     private:
         explicit ComputePipeline(Device* device, const ComputePipelineDesc& desc);
-        ~ComputePipeline();
-        bool Initialize();
+        ~ComputePipeline() override;
+        bool Initialize(PipelineCacheBase* cache);
         void DestroyImpl() override;
 
         VkPipeline mHandle = VK_NULL_HANDLE;

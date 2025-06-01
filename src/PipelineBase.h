@@ -1,9 +1,9 @@
 #pragma once
 
+#include "PerShaderStage.hpp"
+#include "RHIStruct.h"
 #include "ResourceBase.h"
 #include "common/Ref.hpp"
-#include "RHIStruct.h"
-#include "PerShaderStage.hpp"
 
 namespace rhi::impl
 {
@@ -32,7 +32,7 @@ namespace rhi::impl
     protected:
         explicit PipelineBase(DeviceBase* device, const RenderPipelineDesc& desc);
         explicit PipelineBase(DeviceBase* device, const ComputePipelineDesc& desc);
-        ~PipelineBase();
+        ~PipelineBase() override;
         void AddShaderStageState(const ShaderState* shader, ShaderStage stage);
 
         Ref<PipelineLayoutBase> mPipelineLayout;
@@ -41,4 +41,4 @@ namespace rhi::impl
 
         PerShaderStage<ShaderStageState> mShaderStageStates;
     };
-}
+} // namespace rhi::impl

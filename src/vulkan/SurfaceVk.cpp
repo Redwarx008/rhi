@@ -1,9 +1,9 @@
 #include "SurfaceVk.h"
-#include "InstanceVk.h"
+#include "../common/Utils.h"
 #include "DeviceVk.h"
 #include "ErrorsVk.h"
+#include "InstanceVk.h"
 #include "SwapChainVk.h"
-#include "../common/Utils.h"
 
 
 namespace rhi::impl::vulkan
@@ -20,8 +20,8 @@ namespace rhi::impl::vulkan
         return surface;
     }
 
-    Surface::Surface(InstanceBase* instance) :
-        SurfaceBase(instance)
+    Surface::Surface(InstanceBase* instance)
+        : SurfaceBase(instance)
     {}
 
     Surface::~Surface()
@@ -57,4 +57,4 @@ namespace rhi::impl::vulkan
     {
         return mHandle;
     }
-}
+} // namespace rhi::impl::vulkan

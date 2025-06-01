@@ -4,14 +4,12 @@
 
 namespace rhi::impl
 {
-    AdapterBase::AdapterBase(InstanceBase* instance) :
-        mInstance(instance)
-    {
-    }
+    AdapterBase::AdapterBase(InstanceBase* instance)
+        : mInstance(instance)
+    {}
 
     AdapterBase::~AdapterBase()
-    {
-    }
+    {}
 
     void AdapterBase::APIGetInfo(AdapterInfo* info) const
     {
@@ -39,4 +37,4 @@ namespace rhi::impl
     {
         return mInstance;
     }
-}
+} // namespace rhi::impl

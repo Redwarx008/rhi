@@ -14,6 +14,7 @@
 #include "SamplerBase.h"
 #include "ShaderModuleBase.h"
 #include "TextureBase.h"
+#include "PipelineCacheBase.h"
 #include "common/Cached.hpp"
 
 namespace rhi::impl
@@ -45,14 +46,14 @@ namespace rhi::impl
         return result;
     }
 
-    DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDesc& desc) : mAdapter(adapter)
+    DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDesc& desc)
+        : mAdapter(adapter)
     {
         SetFeatures(desc);
         // Todo: create cache object.
     }
 
-    DeviceBase::~DeviceBase()
-    {}
+    DeviceBase::~DeviceBase() {}
 
     void DeviceBase::Initialize()
     {
@@ -103,6 +104,7 @@ namespace rhi::impl
                         ResourceType::RenderPipeline,
                         ResourceType::ComputePipeline,
                         ResourceType::PipelineLayout,
+                        ResourceType::PipelineCache,
                         ResourceType::BindSet,
                         ResourceType::BindSetLayout,
                         ResourceType::ShaderModule,
@@ -141,6 +143,12 @@ namespace rhi::impl
     {
         Ref<ComputePipelineBase> pipeline = CreateComputePipelineImpl(desc);
         return pipeline.Detach();
+    }
+
+    PipelineCacheBase* DeviceBase::APICreatePipelineCache(const PipelineCacheDesc& desc)
+    {
+        Ref<PipelineCacheBase> cache = CreatePipelineCacheImpl(desc);
+        return cache.Detach();
     }
 
     BindSetLayoutBase* DeviceBase::APICreateBindSetLayout(const BindSetLayoutDesc& desc)
@@ -266,8 +274,7 @@ namespace rhi::impl
                                                            &key,
                                                            [&]() -> Ref<SamplerBase>
                                                            {
-                                                               Ref<SamplerBase> sampler =
-                                                                       CreateSamplerImpl(desc);
+                                                               Ref<SamplerBase> sampler = CreateSamplerImpl(desc);
                                                                sampler->SetContentHash(hash);
                                                                return sampler;
                                                            });

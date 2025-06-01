@@ -1,9 +1,9 @@
 #include "PipelineBase.h"
-#include "PipelineLayoutBase.h"
 #include "BindSetLayoutBase.h"
+#include "PipelineLayoutBase.h"
 #include "ShaderModuleBase.h"
-#include "common/Utils.h"
 #include "common/Error.h"
+#include "common/Utils.h"
 
 namespace rhi::impl
 {
@@ -11,9 +11,9 @@ namespace rhi::impl
 
     ShaderStageState::~ShaderStageState() = default;
 
-    PipelineBase::PipelineBase(DeviceBase* device, const RenderPipelineDesc& desc) :
-        ResourceBase(device, desc.name),
-        mPipelineLayout(desc.pipelineLayout)
+    PipelineBase::PipelineBase(DeviceBase* device, const RenderPipelineDesc& desc)
+        : ResourceBase(device, desc.name)
+        , mPipelineLayout(desc.layout)
     {
 
         AddShaderStageState(desc.vertexShader, ShaderStage::Vertex);
@@ -23,9 +23,9 @@ namespace rhi::impl
         AddShaderStageState(desc.geometryShader, ShaderStage::Geometry);
     }
 
-    PipelineBase::PipelineBase(DeviceBase* device, const ComputePipelineDesc& desc) :
-        ResourceBase(device, desc.name),
-        mPipelineLayout(desc.pipelineLayout)
+    PipelineBase::PipelineBase(DeviceBase* device, const ComputePipelineDesc& desc)
+        : ResourceBase(device, desc.name)
+        , mPipelineLayout(desc.pipelineLayout)
     {
         AddShaderStageState(desc.computeShader, ShaderStage::Compute);
     }
@@ -79,4 +79,4 @@ namespace rhi::impl
     {
         return mShaderStageStates[stage];
     }
-}
+} // namespace rhi::impl

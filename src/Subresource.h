@@ -49,4 +49,4 @@ namespace rhi::impl
 
     Aspect ViewAspectConvert(TextureFormat format, TextureAspect aspect);
 
-}
+} // namespace rhi::impl

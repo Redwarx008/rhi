@@ -1,7 +1,7 @@
 #pragma once
 
-#include "RHIStruct.h"
 #include "PipelineBase.h"
+#include "RHIStruct.h"
 
 namespace rhi::impl
 {
@@ -9,7 +9,7 @@ namespace rhi::impl
     {
     public:
         explicit ComputePipelineBase(DeviceBase* device, const ComputePipelineDesc& desc);
-        ~ComputePipelineBase();
+        ~ComputePipelineBase() override;
         ResourceType GetType() const override;
     };
-}
+} // namespace rhi::impl

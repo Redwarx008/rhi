@@ -20,6 +20,7 @@ namespace rhi::impl
         PipelineLayoutBase* APICreatePipelineLayout2(const PipelineLayoutDesc2& desc);
         RenderPipelineBase* APICreateRenderPipeline(const RenderPipelineDesc& desc);
         ComputePipelineBase* APICreateComputePipeline(const ComputePipelineDesc& desc);
+        PipelineCacheBase* APICreatePipelineCache(const PipelineCacheDesc& desc);
         BindSetLayoutBase* APICreateBindSetLayout(const BindSetLayoutDesc& desc);
         BindSetBase* APICreateBindSet(const BindSetDesc& desc);
         TextureBase* APICreateTexture(const TextureDesc& desc);
@@ -43,10 +44,11 @@ namespace rhi::impl
         virtual Ref<PipelineLayoutBase> CreatePipelineLayout2Impl(const PipelineLayoutDesc2& desc) = 0;
         virtual Ref<RenderPipelineBase> CreateRenderPipelineImpl(const RenderPipelineDesc& desc) = 0;
         virtual Ref<ComputePipelineBase> CreateComputePipelineImpl(const ComputePipelineDesc& desc) = 0;
+        virtual Ref<PipelineCacheBase> CreatePipelineCacheImpl(const PipelineCacheDesc& desc) = 0;
         virtual Ref<BindSetLayoutBase> CreateBindSetLayoutImpl(const BindSetLayoutDesc& desc) = 0;
         virtual Ref<BindSetBase> CreateBindSetImpl(const BindSetDesc& desc) = 0;
         virtual Ref<TextureBase> CreateTextureImpl(const TextureDesc& desc) = 0;
-        virtual Ref<BufferBase> CreateBufferImpl(const BufferDesc& desc) = 0;
+        virtual Ref<BufferBase> CreateBufferImpl(const BufferDesc& desc, QueueType initialQueueOwner = QueueType::Undefined) = 0;
         virtual Ref<ShaderModuleBase> CreateShaderImpl(const ShaderModuleDesc& desc) = 0;
         virtual Ref<SamplerBase> CreateSamplerImpl(const SamplerDesc& desc) = 0;
         virtual Ref<CommandListBase> CreateCommandListImpl(CommandEncoder* encoder) = 0;
@@ -59,7 +61,7 @@ namespace rhi::impl
 
     protected:
         explicit DeviceBase(AdapterBase* adapter, const DeviceDesc& desc);
-        ~DeviceBase();
+        ~DeviceBase() override;
         void Initialize();
         bool HasRequiredFeature(FeatureName feature);
         void CreateEmptyBindSetLayout();

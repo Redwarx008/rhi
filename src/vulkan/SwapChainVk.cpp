@@ -1,12 +1,12 @@
 #include "SwapChainVk.h"
 
-#include "SurfaceVk.h"
-#include "InstanceVk.h"
-#include "DeviceVk.h"
-#include "QueueVk.h"
-#include "TextureVk.h"
-#include "ErrorsVk.h"
 #include "../common/Constants.h"
+#include "DeviceVk.h"
+#include "ErrorsVk.h"
+#include "InstanceVk.h"
+#include "QueueVk.h"
+#include "SurfaceVk.h"
+#include "TextureVk.h"
 
 #include <algorithm>
 
@@ -78,8 +78,8 @@ namespace rhi::impl::vulkan
         return swapChain;
     }
 
-    SwapChain::SwapChain(Device* device, SurfaceBase* surface, const SurfaceConfiguration& config) :
-        SwapChainBase(device, surface, config)
+    SwapChain::SwapChain(Device* device, SurfaceBase* surface, const SurfaceConfiguration& config)
+        : SwapChainBase(device, surface, config)
     {}
 
     SwapChain::~SwapChain()
@@ -100,21 +100,16 @@ namespace rhi::impl::vulkan
         ASSERT(surface->GetHandle());
         // Get list of supported surface formats
         uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device->GetVkPhysicalDevice(),
-                                             surface->GetHandle(),
-                                             &formatCount,
-                                             nullptr);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(
+                device->GetVkPhysicalDevice(), surface->GetHandle(), &formatCount, nullptr);
         ASSERT(formatCount > 0);
 
         std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device->GetVkPhysicalDevice(),
-                                             surface->GetHandle(),
-                                             &formatCount,
-                                             surfaceFormats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(
+                device->GetVkPhysicalDevice(), surface->GetHandle(), &formatCount, surfaceFormats.data());
 
         VkSurfaceFormatKHR selectedFormat = surfaceFormats[0];
-        std::vector<VkFormat> preferredImageFormats =
-        {
+        std::vector<VkFormat> preferredImageFormats = {
                 ToVkFormat(mFormat),
                 VK_FORMAT_R8G8B8A8_SRGB,
                 VK_FORMAT_B8G8R8A8_UNORM,
@@ -153,28 +148,24 @@ namespace rhi::impl::vulkan
 
         // Get available present modes
         uint32_t presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device->GetVkPhysicalDevice(),
-                                                  surface->GetHandle(),
-                                                  &presentModeCount,
-                                                  nullptr);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(
+                device->GetVkPhysicalDevice(), surface->GetHandle(), &presentModeCount, nullptr);
         assert(presentModeCount > 0);
 
         std::vector<VkPresentModeKHR> presentModes(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device->GetVkPhysicalDevice(),
-                                                  surface->GetHandle(),
-                                                  &presentModeCount,
-                                                  presentModes.data());
+        vkGetPhysicalDeviceSurfacePresentModesKHR(
+                device->GetVkPhysicalDevice(), surface->GetHandle(), &presentModeCount, presentModes.data());
 
         VkExtent2D swapchainExtent = {};
-        // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
+        // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the
+        // swapchain
         if (surfCaps.currentExtent.width == static_cast<uint32_t>(-1))
         {
             // If the surface size is undefined, the size is set to
             // the size of the images requested.
             swapchainExtent.width = std::clamp(mWidth, surfCaps.minImageExtent.width, surfCaps.maxImageExtent.width);
-            swapchainExtent.height = std::clamp(mHeight,
-                                                surfCaps.minImageExtent.height,
-                                                surfCaps.maxImageExtent.height);
+            swapchainExtent.height =
+                    std::clamp(mHeight, surfCaps.minImageExtent.height, surfCaps.maxImageExtent.height);
         }
         else
         {
@@ -193,13 +184,10 @@ namespace rhi::impl::vulkan
         // FIFO.
         {
             auto HasPresentMode = [](const std::vector<VkPresentModeKHR>& modes, VkPresentModeKHR target) -> bool
-            {
-                return std::find(modes.begin(), modes.end(), target) != modes.end();
-            };
+            { return std::find(modes.begin(), modes.end(), target) != modes.end(); };
 
             VkPresentModeKHR targetMode = ToVulkanPresentMode(mPresentMode);
-            const std::array<VkPresentModeKHR, 4> presentModeFallbacks =
-            {
+            const std::array<VkPresentModeKHR, 4> presentModeFallbacks = {
                     VK_PRESENT_MODE_IMMEDIATE_KHR,
                     VK_PRESENT_MODE_MAILBOX_KHR,
                     VK_PRESENT_MODE_FIFO_RELAXED_KHR,
@@ -230,8 +218,8 @@ namespace rhi::impl::vulkan
         }
 
         // Determine the number of images
-        uint32_t desiredNumberOfSwapchainImages = (std::max)(surfCaps.minImageCount,
-                                                             MinImageCountForPresentMode(presentMode));
+        uint32_t desiredNumberOfSwapchainImages =
+                (std::max)(surfCaps.minImageCount, MinImageCountForPresentMode(presentMode));
         if ((surfCaps.maxImageCount > 0) && (desiredNumberOfSwapchainImages > surfCaps.maxImageCount))
         {
             desiredNumberOfSwapchainImages = surfCaps.maxImageCount;
@@ -252,8 +240,7 @@ namespace rhi::impl::vulkan
         // Find a supported composite alpha format (not all devices support alpha opaque)
         VkCompositeAlphaFlagBitsKHR compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         // Simply select the first composite alpha format available
-        std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphaFlags =
-        {
+        std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphaFlags = {
                 VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
                 VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
                 VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
@@ -281,7 +268,8 @@ namespace rhi::impl::vulkan
         swapchainCI.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         swapchainCI.queueFamilyIndexCount = 0;
         swapchainCI.presentMode = presentMode;
-        // Setting oldSwapChain to the saved handle of the previous swapchain aids in resource reuse and makes sure that we can still present already acquired images
+        // Setting oldSwapChain to the saved handle of the previous swapchain aids in resource reuse and makes sure that
+        // we can still present already acquired images
         swapchainCI.oldSwapchain = oldSwapchain;
         // Setting clipped to VK_TRUE allows the implementation to discard rendering outside of the surface area
         swapchainCI.clipped = VK_TRUE;
@@ -372,7 +360,7 @@ namespace rhi::impl::vulkan
 
         if (mHandle != VK_NULL_HANDLE)
         {
-            //queue->GetDeleter()->DeleteWhenUnused(mHandle);
+            // queue->GetDeleter()->DeleteWhenUnused(mHandle);
             vkDestroySwapchainKHR(device->GetHandle(), mHandle, nullptr);
             mHandle = VK_NULL_HANDLE;
         }
@@ -402,47 +390,48 @@ namespace rhi::impl::vulkan
         switch (err)
         {
         case VK_SUCCESS:
-        {
-            status = SurfaceAcquireNextTextureStatus::Success;
-            break;
-        }
+            {
+                status = SurfaceAcquireNextTextureStatus::Success;
+                break;
+            }
         case VK_SUBOPTIMAL_KHR:
-        {
-            status = SurfaceAcquireNextTextureStatus::Suboptimal;
-            if (isReentrant)
             {
-                status = SurfaceAcquireNextTextureStatus::SurfaceLost;
-                break;
+                status = SurfaceAcquireNextTextureStatus::Suboptimal;
+                if (isReentrant)
+                {
+                    status = SurfaceAcquireNextTextureStatus::SurfaceLost;
+                    break;
+                }
+                // Re-initialize the VkSwapchain and try getting the texture again.
+                Initialize(this);
+                return AcquireNextTextureImpl(true);
             }
-            // Re-initialize the VkSwapchain and try getting the texture again.
-            Initialize(this);
-            return AcquireNextTextureImpl(true);
-        }
         case VK_ERROR_OUT_OF_DATE_KHR:
-        {
-            status = SurfaceAcquireNextTextureStatus::Outdated;
-            if (isReentrant)
             {
-                status = SurfaceAcquireNextTextureStatus::SurfaceLost;
-                break;
+                status = SurfaceAcquireNextTextureStatus::Outdated;
+                if (isReentrant)
+                {
+                    status = SurfaceAcquireNextTextureStatus::SurfaceLost;
+                    break;
+                }
+                // Re-initialize the VkSwapchain and try getting the texture again.
+                Initialize(this);
+                return AcquireNextTextureImpl(true);
             }
-            // Re-initialize the VkSwapchain and try getting the texture again.
-            Initialize(this);
-            return AcquireNextTextureImpl(true);
-        }
 
         case VK_ERROR_SURFACE_LOST_KHR:
-        {
-            status = SurfaceAcquireNextTextureStatus::SurfaceLost;
-            break;
-        }
+            {
+                status = SurfaceAcquireNextTextureStatus::SurfaceLost;
+                break;
+            }
         default:
             CHECK_VK_RESULT(err, "AcquireNextImage");
             break;
         }
 
-        VkSemaphoreSubmitInfo& waitInfo = checked_cast<Queue>(device->GetQueue(QueueType::Graphics))->
-                                          GetPendingRecordingContext()->waitSemaphoreSubmitInfos.emplace_back();
+        VkSemaphoreSubmitInfo& waitInfo = checked_cast<Queue>(device->GetQueue(QueueType::Graphics))
+                                                  ->GetPendingRecordingContext()
+                                                  ->waitSemaphoreSubmitInfos.emplace_back();
         waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
         waitInfo.pNext = nullptr;
         waitInfo.stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -469,18 +458,18 @@ namespace rhi::impl::vulkan
 
         VkSemaphore semaphore = mTextures[mImageIndex].renderingDoneSemaphore;
 
-        VkSemaphoreSubmitInfo& signalInfo = queue->GetPendingRecordingContext()->signalSemaphoreSubmitInfos.
-                                                   emplace_back();
+        VkSemaphoreSubmitInfo& signalInfo =
+                queue->GetPendingRecordingContext()->signalSemaphoreSubmitInfos.emplace_back();
         signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
         signalInfo.pNext = nullptr;
         signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         signalInfo.semaphore = semaphore;
         signalInfo.value = 0;
 
-        // to ensure that all commandBuffers on this queue have been executed to completion and transition the colorattchment layout.
-        mTextures[mImageIndex].texture->TransitionUsageNow(queue,
-                                                           cSwapChainImagePresentUsage,
-                                                           mTextures[mImageIndex].texture->GetAllSubresources());
+        // to ensure that all commandBuffers on this queue have been executed to completion and transition the
+        // colorattchment layout.
+        mTextures[mImageIndex].texture->TransitionUsageNow(
+                queue, cSwapChainImagePresentUsage, mTextures[mImageIndex].texture->GetAllSubresources());
 
         queue->SubmitPendingCommands();
 
@@ -509,4 +498,4 @@ namespace rhi::impl::vulkan
     {
         return mHandle;
     }
-}
+} // namespace rhi::impl::vulkan

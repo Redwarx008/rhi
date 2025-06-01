@@ -24,4 +24,4 @@ namespace rhi::impl
         std::vector<SyncScopeResourceUsage> mComputePassUsages;
         CommandAllocator mCommandAllocator;
     };
-}
+} // namespace rhi::impl

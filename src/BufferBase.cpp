@@ -11,13 +11,11 @@ namespace rhi::impl
     class MapAsyncCallbackTask : public CallbackTask
     {
     public:
-        MapAsyncCallbackTask(Ref<BufferBase> buffer,
-                             BufferMapCallback callback, void* userData) :
-            mBuffer(buffer),
-            mMapCallback(callback),
-            mMapUserdata(userData)
-        {
-        }
+        MapAsyncCallbackTask(Ref<BufferBase> buffer, BufferMapCallback callback, void* userData)
+            : mBuffer(buffer)
+            , mMapCallback(callback)
+            , mMapUserdata(userData)
+        {}
 
     private:
         void FinishImpl() override
@@ -52,24 +50,17 @@ namespace rhi::impl
         return usage;
     }
 
-    BufferBase::BufferBase(DeviceBase* device, const BufferDesc& desc):
-        mSize(desc.size),
-        mUsage(desc.usage),
-        mInternalUsage(AddInternalUsage(desc.usage)),
-        mShareMode(desc.shareMode),
-        ResourceBase(device, desc.name)
-    {
-
-    }
+    BufferBase::BufferBase(DeviceBase* device, const BufferDesc& desc, QueueType initialQueueOwner)
+        : mSize(desc.size)
+        , mUsage(desc.usage)
+        , mInternalUsage(AddInternalUsage(desc.usage))
+        , mShareMode(desc.shareMode)
+        , mLastUsedQueue(initialQueueOwner)
+        , ResourceBase(device, desc.name)
+    {}
 
     BufferBase::~BufferBase()
-    {
-    }
-
-    void BufferBase::Initialize()
-    {
-        ResourceBase::TrackResource();
-    }
+    {}
 
     BufferUsage BufferBase::APIGetUsage() const
     {
@@ -112,8 +103,7 @@ namespace rhi::impl
         MapAsyncImpl(queue, usage);
 
         uint64_t lastUsageSerial = GetTrackedUsagae(queue->GetType()).lastUsageSerial;
-        std::unique_ptr<MapAsyncCallbackTask> task
-                = std::make_unique<MapAsyncCallbackTask>(this, callback, userData);
+        std::unique_ptr<MapAsyncCallbackTask> task = std::make_unique<MapAsyncCallbackTask>(this, callback, userData);
         queue->TrackTask(std::move(task), lastUsageSerial);
     }
 
@@ -124,4 +114,4 @@ namespace rhi::impl
             mState = State::Mapped;
         }
     }
-}
+} // namespace rhi::impl

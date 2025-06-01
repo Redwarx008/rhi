@@ -1,14 +1,14 @@
 #include "BindSetVk.h"
 
-#include "../common/Error.h"
-#include "../common/Constants.h"
-#include "DeviceVk.h"
-#include "BindSetLayoutVk.h"
-#include "TextureVk.h"
-#include "BufferVk.h"
-#include "SamplerVk.h"
-#include <array>
 #include <absl/container/inlined_vector.h>
+#include <array>
+#include "../common/Constants.h"
+#include "../common/Error.h"
+#include "BindSetLayoutVk.h"
+#include "BufferVk.h"
+#include "DeviceVk.h"
+#include "SamplerVk.h"
+#include "TextureVk.h"
 
 namespace rhi::impl::vulkan
 {
@@ -17,9 +17,9 @@ namespace rhi::impl::vulkan
         return checked_cast<BindSetLayout>(desc.layout)->AllocateBindSet(desc);
     }
 
-    BindSet::BindSet(Device* device, const BindSetDesc& desc, DescriptorSetAllocation descriptorSetAllocation) :
-        BindSetBase(device, desc),
-        mDescriptorSetAllocation(descriptorSetAllocation)
+    BindSet::BindSet(Device* device, const BindSetDesc& desc, DescriptorSetAllocation descriptorSetAllocation)
+        : BindSetBase(device, desc)
+        , mDescriptorSetAllocation(descriptorSetAllocation)
     {
         BindSetBase::TrackResource();
 
@@ -39,55 +39,55 @@ namespace rhi::impl::vulkan
 
             BindingType bindingType = desc.layout->GetBindingType(desc.entries[i].binding);
 
-            write.descriptorType = ToVkDescriptorType(bindingType,
-                                                      desc.layout->HasDynamicOffset(desc.entries[i].binding));
+            write.descriptorType =
+                    ToVkDescriptorType(bindingType, desc.layout->HasDynamicOffset(desc.entries[i].binding));
 
             switch (bindingType)
             {
             case BindingType::SampledTexture:
-            {
-                VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
-                imageInfo.imageView = checked_cast<TextureView>(desc.entries[i].textureView)->GetHandle();
-                imageInfo.imageLayout = ImageLayoutConvert(TextureUsage::SampledBinding,
-                                                           desc.entries[i].textureView->GetTexture()->APIGetFormat());
-                write.pImageInfo = &imageInfo;
-                break;
-            }
+                {
+                    VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
+                    imageInfo.imageView = checked_cast<TextureView>(desc.entries[i].textureView)->GetHandle();
+                    imageInfo.imageLayout = ImageLayoutConvert(
+                            TextureUsage::SampledBinding, desc.entries[i].textureView->GetTexture()->APIGetFormat());
+                    write.pImageInfo = &imageInfo;
+                    break;
+                }
             case BindingType::StorageTexture:
-            {
-                VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
-                imageInfo.imageView = checked_cast<TextureView>(desc.entries[i].textureView)->GetHandle();
-                imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-                write.pImageInfo = &imageInfo;
-                break;
-            }
+                {
+                    VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
+                    imageInfo.imageView = checked_cast<TextureView>(desc.entries[i].textureView)->GetHandle();
+                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+                    write.pImageInfo = &imageInfo;
+                    break;
+                }
             case BindingType::StorageBuffer:
             case BindingType::UniformBuffer:
-            {
-                VkDescriptorBufferInfo& bufferInfo = writeBufferInfo[i];
-                bufferInfo.buffer = checked_cast<Buffer>(desc.entries[i].buffer)->GetHandle();
-                bufferInfo.offset = desc.entries[i].bufferOffset;
-                bufferInfo.range = desc.entries[i].bufferRange;
-                write.pBufferInfo = &bufferInfo;
-                break;
-            }
+                {
+                    VkDescriptorBufferInfo& bufferInfo = writeBufferInfo[i];
+                    bufferInfo.buffer = checked_cast<Buffer>(desc.entries[i].buffer)->GetHandle();
+                    bufferInfo.offset = desc.entries[i].bufferOffset;
+                    bufferInfo.range = desc.entries[i].bufferRange;
+                    write.pBufferInfo = &bufferInfo;
+                    break;
+                }
             case BindingType::Sampler:
-            {
-                VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
-                imageInfo.sampler = checked_cast<Sampler>(desc.entries[i].sampler)->GetHandle();
-                write.pImageInfo = &imageInfo;
-                break;
-            }
+                {
+                    VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
+                    imageInfo.sampler = checked_cast<Sampler>(desc.entries[i].sampler)->GetHandle();
+                    write.pImageInfo = &imageInfo;
+                    break;
+                }
             case BindingType::CombinedTextureSampler:
-            {
-                VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
-                imageInfo.imageView = checked_cast<TextureView>(desc.entries[i].textureView)->GetHandle();
-                imageInfo.imageLayout = ImageLayoutConvert(TextureUsage::StorageBinding,
-                                                           desc.entries[i].textureView->GetTexture()->APIGetFormat());
-                imageInfo.sampler = checked_cast<Sampler>(desc.entries[i].sampler)->GetHandle();
-                write.pImageInfo = &imageInfo;
-                break;
-            }
+                {
+                    VkDescriptorImageInfo& imageInfo = writeImageInfo[i];
+                    imageInfo.imageView = checked_cast<TextureView>(desc.entries[i].textureView)->GetHandle();
+                    imageInfo.imageLayout = ImageLayoutConvert(
+                            TextureUsage::StorageBinding, desc.entries[i].textureView->GetTexture()->APIGetFormat());
+                    imageInfo.sampler = checked_cast<Sampler>(desc.entries[i].sampler)->GetHandle();
+                    write.pImageInfo = &imageInfo;
+                    break;
+                }
             default:
                 break;
             }
@@ -96,8 +96,7 @@ namespace rhi::impl::vulkan
         vkUpdateDescriptorSets(device->GetHandle(), desc.entryCount, writes.data(), 0, nullptr);
     }
 
-    BindSet::~BindSet()
-    {}
+    BindSet::~BindSet() {}
 
     VkDescriptorSet BindSet::GetHandle() const
     {
@@ -106,8 +105,8 @@ namespace rhi::impl::vulkan
 
     void BindSet::MarkUsedInQueue(QueueType queueType)
     {
-        static_assert(static_cast<uint32_t>(QueueType::Graphics) == 0 && static_cast<uint32_t>(QueueType::Compute) == 1)
-                ;
+        static_assert(static_cast<uint32_t>(QueueType::Graphics) == 0 &&
+                      static_cast<uint32_t>(QueueType::Compute) == 1);
         ASSERT(queueType != QueueType::Transfer);
         ASSERT(mDevice->GetQueue(queueType) != nullptr);
         mUsedInQueues[static_cast<uint32_t>(queueType)] = true;
@@ -115,8 +114,8 @@ namespace rhi::impl::vulkan
 
     bool BindSet::IsUsedInQueue(QueueType queueType)
     {
-        static_assert(static_cast<uint32_t>(QueueType::Graphics) == 0 && static_cast<uint32_t>(QueueType::Compute) == 1)
-                ;
+        static_assert(static_cast<uint32_t>(QueueType::Graphics) == 0 &&
+                      static_cast<uint32_t>(QueueType::Compute) == 1);
         ASSERT(queueType != QueueType::Transfer);
 
         return mUsedInQueues[static_cast<uint32_t>(queueType)];
@@ -127,4 +126,4 @@ namespace rhi::impl::vulkan
         checked_cast<BindSetLayout>(GetLayout())->DeallocateBindSet(this, &mDescriptorSetAllocation);
     }
 
-}
+} // namespace rhi::impl::vulkan

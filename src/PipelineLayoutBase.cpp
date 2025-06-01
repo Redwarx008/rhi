@@ -64,8 +64,8 @@ namespace rhi::impl
         }
     }
 
-    PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDesc& desc) :
-        ResourceBase(device, desc.name)
+    PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDesc& desc)
+        : ResourceBase(device, desc.name)
     {
         ASSERT(desc.bindSetLayoutCount <= cMaxBindSets);
 
@@ -88,8 +88,8 @@ namespace rhi::impl
         }
     }
 
-    PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDesc2& desc) :
-        ResourceBase(device, desc.name)
+    PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDesc2& desc)
+        : ResourceBase(device, desc.name)
     {
         std::array<std::vector<BindSetLayoutEntry>, cMaxBindSets> bindSetLayoutEntriesPerSet;
 

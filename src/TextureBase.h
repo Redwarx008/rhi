@@ -1,8 +1,9 @@
 #pragma once
 
-#include "ResourceBase.h"
 #include "RHIStruct.h"
+#include "ResourceBase.h"
 #include "Subresource.h"
+#include "common/Ref.hpp"
 
 namespace rhi::impl
 {
@@ -23,17 +24,16 @@ namespace rhi::impl
         TextureViewBase* APICreateView(const TextureViewDesc* desc = nullptr);
         void APIDestroy();
         virtual Ref<TextureViewBase> CreateView(const TextureViewDesc& desc) = 0;
-        // internal 
+        // internal
         ResourceType GetType() const override;
         ResourceList* GetViewList();
         TextureUsage GetInternalUsage() const;
         SubresourceRange GetAllSubresources() const;
-        bool IsDestoryed() const;
+        bool IsDestroyed() const;
 
     protected:
         explicit TextureBase(DeviceBase* device, const TextureDesc& desc);
-        ~TextureBase();
-        void Initialize();
+        ~TextureBase() override;
 
         uint32_t mWidth;
         uint32_t mHeight;
@@ -50,7 +50,7 @@ namespace rhi::impl
             uint32_t mArraySize;
         };
 
-        bool mDestoryed = false;
+        bool mDestroyed = false;
 
         ResourceList mTextureViews;
     };
@@ -73,8 +73,7 @@ namespace rhi::impl
 
     protected:
         explicit TextureViewBase(TextureBase* texture, const TextureViewDesc& desc);
-        ~TextureViewBase();
-        void Initialize();
+        ~TextureViewBase() override;
         ResourceList* GetList() const override;
 
         Ref<TextureBase> mTexture;
@@ -129,4 +128,4 @@ namespace rhi::impl
 
 
     const FormatInfo& GetFormatInfo(TextureFormat format);
-}
+} // namespace rhi::impl

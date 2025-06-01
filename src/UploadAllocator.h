@@ -1,14 +1,14 @@
 #pragma once
 
-#include "RHIStruct.h"
-#include "common/Ref.hpp"
-#include "common/SerialQueue.hpp"
 #include <cstdint>
 #include <limits>
 #include <list>
 #include <memory>
+#include "RHIStruct.h"
+#include "common/Ref.hpp"
+#include "common/SerialQueue.hpp"
 
-#if defined (max)
+#if defined(max)
 #undef max
 #endif
 
@@ -24,7 +24,7 @@ namespace rhi::impl
     class UploadAllocator
     {
     public:
-        explicit UploadAllocator(DeviceBase* device);
+        explicit UploadAllocator(DeviceBase* device, QueueBase* queueOwner);
         ~UploadAllocator();
 
         UploadAllocation Allocate(uint64_t allocationSize, uint64_t serial, uint64_t offsetAlignment);
@@ -37,8 +37,8 @@ namespace rhi::impl
             explicit RingBuffer(uint64_t maxSize);
             ~RingBuffer();
 
-            // Sub-allocate the ring-buffer by requesting a chunk of the specified size. 
-            // return the starting offset. 
+            // Sub-allocate the ring-buffer by requesting a chunk of the specified size.
+            // return the starting offset.
             uint64_t Allocate(uint64_t allocationSize, uint64_t serial, uint64_t offsetAlignment = 1);
             void Deallocate(uint64_t lastCompletedSerial);
 
@@ -72,6 +72,6 @@ namespace rhi::impl
         SerialQueue<uint64_t, Ref<BufferBase>> mLargeStageBuffersToDelete;
 
         DeviceBase* mDevice;
-
+        QueueBase* mQueueOwner;
     };
-}
+} // namespace rhi::impl

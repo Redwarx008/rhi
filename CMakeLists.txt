@@ -163,13 +163,15 @@ set (src
 	 "src/ComputePipelineBase.h"
 	 "src/ComputePipelineBase.cpp" 
 	 "src/SwapChainBase.h"
-	 "src/SwapchainBase.cpp"
+	 "src/SwapChainBase.cpp"
 	 "src/SurfaceBase.h"
 	 "src/SurfaceBase.cpp"
 	 "src/ComputePassEncoder.h" 
 	 "src/ComputePassEncoder.cpp" 
 	 "src/PassResourceUsage.cpp" 
-	 "src/Commands.cpp"  )
+	 "src/Commands.cpp" 
+	 "src/PipelineCacheBase.h" 
+	 "src/PipelineCacheBase.cpp" )
 
 set(src_vk
 	"src/vulkan/VMA.cpp"
@@ -195,7 +197,6 @@ set(src_vk
 	"src/vulkan/VkResourceDeleter.h"
 	"src/vulkan/VkResourceDeleter.cpp" 
 	"src/vulkan/ResourceToDelete.h"
-	"src/vulkan/ResourceToDelete.cpp" 
 	"src/vulkan/VulkanUtils.h"
 	"src/vulkan/VulkanUtils.cpp" 
 	"src/vulkan/DescriptorSetAllocator.h"
@@ -218,7 +219,9 @@ set(src_vk
 	"src/vulkan/RefCountedHandle.h"  
 	"src/vulkan/SurfaceVk.h"
 	"src/vulkan/SurfaceVk.cpp" 
-	"src/vulkan/VulkanEXTFunctions.h")
+	"src/vulkan/VulkanEXTFunctions.h" 
+	"src/vulkan/PipelineCacheVk.h"
+	"src/vulkan/PipelineCacheVk.cpp")
 
 add_library(rhi "")
 

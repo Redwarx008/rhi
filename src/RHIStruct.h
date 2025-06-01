@@ -19,7 +19,7 @@ namespace rhi::impl
     class PipelineBase;
     class PipelineCacheBase;
     class PipelineLayoutBase;
-    //class QuerySetBase;
+    // class QuerySetBase;
     class QueueBase;
     class RenderPassEncoder;
     class RenderPipelineBase;
@@ -39,37 +39,45 @@ namespace rhi::impl
     constexpr uint32_t CMipLevelCountUndefined = uint32_t(-1);
 
 
-#define ENUM_CLASS_FLAG_OPERATORS(EnumName) \
-inline constexpr EnumName operator|(EnumName a, EnumName b) { \
-    using Underlying = std::underlying_type_t<EnumName>; \
-    return static_cast<EnumName>(static_cast<Underlying>(a) | static_cast<Underlying>(b)); \
-} \
-inline constexpr EnumName operator&(EnumName a, EnumName b) { \
-    using Underlying = std::underlying_type_t<EnumName>; \
-    return static_cast<EnumName>(static_cast<Underlying>(a) & static_cast<Underlying>(b)); \
-} \
-inline constexpr EnumName operator^(EnumName a, EnumName b) { \
-    using Underlying = std::underlying_type_t<EnumName>; \
-    return static_cast<EnumName>(static_cast<Underlying>(a) ^ static_cast<Underlying>(b)); \
-} \
-inline constexpr EnumName operator~(EnumName a) { \
-    using Underlying = std::underlying_type_t<EnumName>; \
-    return static_cast<EnumName>(~static_cast<Underlying>(a)); \
-} \
-inline constexpr EnumName& operator|=(EnumName& a, EnumName b) { \
-    a = a | b; \
-    return a; \
-} \
-inline constexpr EnumName& operator&=(EnumName& a, EnumName b) { \
-    a = a & b; \
-    return a; \
-} \
-inline constexpr bool operator==(EnumName a, uint32_t b) { \
-    return static_cast<uint32_t>(a) == b; \
-} \
-inline constexpr bool operator!=(EnumName a, uint32_t b) { \
-    return !(a == b); \
-}
+#define ENUM_CLASS_FLAG_OPERATORS(EnumName)                                                                            \
+    inline constexpr EnumName operator|(EnumName a, EnumName b)                                                        \
+    {                                                                                                                  \
+        using Underlying = std::underlying_type_t<EnumName>;                                                           \
+        return static_cast<EnumName>(static_cast<Underlying>(a) | static_cast<Underlying>(b));                         \
+    }                                                                                                                  \
+    inline constexpr EnumName operator&(EnumName a, EnumName b)                                                        \
+    {                                                                                                                  \
+        using Underlying = std::underlying_type_t<EnumName>;                                                           \
+        return static_cast<EnumName>(static_cast<Underlying>(a) & static_cast<Underlying>(b));                         \
+    }                                                                                                                  \
+    inline constexpr EnumName operator^(EnumName a, EnumName b)                                                        \
+    {                                                                                                                  \
+        using Underlying = std::underlying_type_t<EnumName>;                                                           \
+        return static_cast<EnumName>(static_cast<Underlying>(a) ^ static_cast<Underlying>(b));                         \
+    }                                                                                                                  \
+    inline constexpr EnumName operator~(EnumName a)                                                                    \
+    {                                                                                                                  \
+        using Underlying = std::underlying_type_t<EnumName>;                                                           \
+        return static_cast<EnumName>(~static_cast<Underlying>(a));                                                     \
+    }                                                                                                                  \
+    inline constexpr EnumName& operator|=(EnumName& a, EnumName b)                                                     \
+    {                                                                                                                  \
+        a = a | b;                                                                                                     \
+        return a;                                                                                                      \
+    }                                                                                                                  \
+    inline constexpr EnumName& operator&=(EnumName& a, EnumName b)                                                     \
+    {                                                                                                                  \
+        a = a & b;                                                                                                     \
+        return a;                                                                                                      \
+    }                                                                                                                  \
+    inline constexpr bool operator==(EnumName a, uint32_t b)                                                           \
+    {                                                                                                                  \
+        return static_cast<uint32_t>(a) == b;                                                                          \
+    }                                                                                                                  \
+    inline constexpr bool operator!=(EnumName a, uint32_t b)                                                           \
+    {                                                                                                                  \
+        return !(a == b);                                                                                              \
+    }
 
     enum class MapMode : uint32_t
     {
@@ -334,14 +342,14 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     enum class BindingType : uint32_t
     {
         None,
-        SampledTexture, //SRV
-        StorageTexture, //URV
+        SampledTexture, // SRV
+        StorageTexture, // URV
         ReadOnlyStorageTexture,
         UniformBuffer, // CBV
         StorageBuffer, // UAV
         ReadOnlyStorageBuffer,
-        //UniformBufferDynamic,
-        //StorageBufferDynamic,
+        // UniformBufferDynamic,
+        // StorageBufferDynamic,
 
         Sampler,
         CombinedTextureSampler
@@ -514,8 +522,8 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     };
 
     using BufferMapCallback = void (*)(BufferMapAsyncStatus status, void* mappedAdress, void* userdata);
-    typedef void (_stdcall*LoggingCallback)(LoggingSeverity severity, const char* msg, void* userData);
-    //using DebugMessageCallbackFunc = std::function<void(MessageSeverity severity, const char* msg)>;
+    typedef void(_stdcall* LoggingCallback)(LoggingSeverity severity, const char* msg, void* userData);
+    // using DebugMessageCallbackFunc = std::function<void(MessageSeverity severity, const char* msg)>;
 
     struct Region3D
     {
@@ -690,7 +698,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         bool alphaToCoverageEnable = false;
 
         ColorAttachmentBlendState colorAttachmentBlendStates[CMaxColorAttachments];
-        //std::array<ColorAttachmentBlendState, CMaxColorAttachments> colorAttachmentBlendStates;
+        // std::array<ColorAttachmentBlendState, CMaxColorAttachments> colorAttachmentBlendStates;
     };
 
     struct StencilOpState
@@ -726,7 +734,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         FillMode fillMode = FillMode::Fill;
         CullMode cullMode = CullMode::Back;
         FrontFace frontFace = FrontFace::FrontCounterClockwise;
-        bool depthClampEnable = false; //must be false if this feature is not enabled
+        bool depthClampEnable = false; // must be false if this feature is not enabled
         float lineWidth = 1.0f;
     };
 
@@ -846,7 +854,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         SamplerBase* sampler = nullptr;
         BufferBase* buffer = nullptr;
 
-        //for buffer
+        // for buffer
         uint32_t bufferOffset = 0;
         uint64_t bufferRange = CWholeSize;
     };
@@ -857,8 +865,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         uint32_t size = 0;
         bool operator==(const PushConstantRange& other) const
         {
-            return this->visibility == other.visibility &&
-                this->size == other.size;
+            return this->visibility == other.visibility && this->size == other.size;
         }
         bool operator!=(const PushConstantRange& other) const
         {
@@ -980,6 +987,13 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         std::string_view name;
     };
 
+    struct PipelineCacheDesc
+    {
+        std::string_view name;
+        const void* data;
+        size_t dataSize;
+    };
+
     struct PipelineLayoutDesc
     {
         std::string_view name;
@@ -1005,7 +1019,8 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         ShaderState* tessEvaluationShader = nullptr;
         ShaderState* geometryShader = nullptr;
 
-        PipelineLayoutBase* pipelineLayout;
+        PipelineLayoutBase* layout = nullptr;
+        PipelineCacheBase* cache = nullptr;
 
         VertexInputAttribute const* vertexAttributes;
         uint32_t vertexAttributeCount = 0;
@@ -1028,7 +1043,9 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         std::string_view name;
         ShaderState* computeShader = nullptr;
 
-        PipelineLayoutBase* pipelineLayout;
+        PipelineLayoutBase* pipelineLayout = nullptr;
+
+        PipelineCacheBase* cache = nullptr;
     };
 
     struct RenderPassDesc
@@ -1135,4 +1152,4 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         uint32_t requiredFeatureCount = 0;
         FeatureName const* requiredFeatures;
     };
-}
+} // namespace rhi::impl

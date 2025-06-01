@@ -1,7 +1,7 @@
 #include "RenderPassEncoder.h"
+#include "BufferBase.h"
 #include "CommandEncoder.h"
 #include "RenderPipelinebase.h"
-#include "BufferBase.h"
 #include "common/Error.h"
 
 
@@ -9,17 +9,17 @@ namespace rhi::impl
 {
     RenderPassEncoder::RenderPassEncoder(CommandEncoder* encoder,
                                          EncodingContext& encodingContext,
-                                         SyncScopeUsageTracker&& usageTracker) :
-        PassEncoder(encoder, encodingContext),
-        mUsageTracker(std::move(usageTracker))
+                                         SyncScopeUsageTracker&& usageTracker)
+        : PassEncoder(encoder, encodingContext)
+        , mUsageTracker(std::move(usageTracker))
     {}
 
     Ref<RenderPassEncoder> RenderPassEncoder::Create(CommandEncoder* encoder,
                                                      EncodingContext& encodingContext,
                                                      SyncScopeUsageTracker&& usageTracker)
     {
-        Ref<RenderPassEncoder> renderPassEncoder = AcquireRef(
-                new RenderPassEncoder(encoder, encodingContext, std::move(usageTracker)));
+        Ref<RenderPassEncoder> renderPassEncoder =
+                AcquireRef(new RenderPassEncoder(encoder, encodingContext, std::move(usageTracker)));
         return renderPassEncoder;
     }
 
@@ -45,7 +45,7 @@ namespace rhi::impl
 
     void RenderPassEncoder::APISetVertexBuffers(uint32_t firstSlot,
                                                 uint32_t bufferCount,
-                                                BufferBase* const * buffers,
+                                                BufferBase* const* buffers,
                                                 uint64_t* offsets)
     {
         ASSERT(bufferCount <= cMaxVertexBuffers);
@@ -246,4 +246,4 @@ namespace rhi::impl
         mCommandEncoder->OnRenderPassEnd();
     }
 
-}
+} // namespace rhi::impl

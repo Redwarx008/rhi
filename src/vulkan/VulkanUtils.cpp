@@ -1,17 +1,14 @@
 #include "VulkanUtils.h"
 
+#include <sstream>
+#include "../common/Error.h"
 #include "DeviceVk.h"
 #include "TextureVk.h"
-#include "../common/Error.h"
-#include <sstream>
 
 namespace rhi::impl::vulkan
 {
-    void SetDebugNameInternal(Device* device,
-                              VkObjectType objectType,
-                              uint64_t objectHandle,
-                              const char* prefix,
-                              std::string_view name)
+    void SetDebugNameInternal(
+            Device* device, VkObjectType objectType, uint64_t objectHandle, const char* prefix, std::string_view name)
     {
         if (!objectHandle || !device)
         {
@@ -207,4 +204,4 @@ namespace rhi::impl::vulkan
     }
 
 
-}
+} // namespace rhi::impl::vulkan

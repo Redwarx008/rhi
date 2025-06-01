@@ -1,12 +1,11 @@
 #pragma once
 
 #include <mutex>
-#include <type_traits>
 #include <string>
-#include "common/Ref.hpp"
+#include <type_traits>
 #include "common/LinkedList.h"
-#include "common/RefCounted.h"
 #include "common/MutexProtected.hpp"
+#include "common/RefCounted.h"
 
 namespace rhi::impl
 {
@@ -18,7 +17,8 @@ namespace rhi::impl
         ComputePipeline,
         RenderPipeline,
         PipelineLayout,
-        //QuerySet,
+        PipelineCache,
+        // QuerySet,
         BindSet,
         BindSetLayout,
         Sampler,
@@ -39,14 +39,15 @@ namespace rhi::impl
         template <typename F>
         void ForEach(F fn) const
         {
-            mObjects.Use([&fn](const auto lockedObjects)
-            {
-                for (const auto* node = lockedObjects->head(); node != lockedObjects->end();
-                     node = node->next())
-                {
-                    fn(node->value());
-                }
-            });
+            mObjects.Use(
+                    [&fn](const auto lockedObjects)
+                    {
+                        for (const auto* node = lockedObjects->head(); node != lockedObjects->end();
+                             node = node->next())
+                        {
+                            fn(node->value());
+                        }
+                    });
         }
 
     private:
@@ -73,10 +74,10 @@ namespace rhi::impl
         virtual void DestroyImpl() = 0;
         virtual ResourceList* GetList() const;
 
-        Ref<DeviceBase> mDevice;
+        DeviceBase* mDevice;
 
     private:
         friend class ResourceList;
         std::string mName;
     };
-}
+} // namespace rhi::impl

@@ -66,7 +66,7 @@ namespace rhi::impl
 #define LOG_WARNING(...)                                                                                               \
     do                                                                                                                 \
     {                                                                                                                  \
-        LogMsg(LoggingSeverity::Warning, __FILE__, __FUNCTION__, __LINE__, absl::StrFormat(##__VA_ARGS__));            \
+        LogMsg(LoggingSeverity::Warning, __FILE__, __FUNCTION__, __LINE__, absl::StrFormat(__VA_ARGS__));            \
     }                                                                                                                  \
     while (false)
 

@@ -23,7 +23,7 @@ namespace rhi::impl
 
     protected:
         explicit SurfaceBase(InstanceBase* instance);
-        ~SurfaceBase();
+        ~SurfaceBase() override;
         Ref<DeviceBase> mDevice;
         InstanceBase* mInstance;
         Ref<SwapChainBase> mSwapChain;
@@ -32,4 +32,4 @@ namespace rhi::impl
         void* mHWND = nullptr;
         void* mHInstance = nullptr;
     };
-}
+} // namespace rhi::impl

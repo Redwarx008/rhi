@@ -20,11 +20,11 @@ namespace rhi::impl::vulkan
     private:
         explicit PipelineLayout(Device* device, const PipelineLayoutDesc& desc);
         explicit PipelineLayout(Device* device, const PipelineLayoutDesc2& desc);
-        ~PipelineLayout();
+        ~PipelineLayout() override;
         bool Initialize();
         void DestroyImpl() override;
 
         VkPipelineLayout mHandle = VK_NULL_HANDLE;
         VkShaderStageFlags mPushConstantVisibility = 0;
     };
-}
+} // namespace rhi::impl::vulkan

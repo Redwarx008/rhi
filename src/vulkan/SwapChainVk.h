@@ -17,7 +17,6 @@ namespace rhi::impl::vulkan
                                      SurfaceBase* surface,
                                      SwapChainBase* previous,
                                      const SurfaceConfiguration& config);
-        ~SwapChain();
         VkSwapchainKHR GetHandle() const;
         SurfaceAcquireNextTextureStatus AcquireNextTexture() override;
         Ref<TextureViewBase> GetCurrentTextureView() override;
@@ -27,6 +26,7 @@ namespace rhi::impl::vulkan
 
     private:
         SwapChain(Device* device, SurfaceBase* surface, const SurfaceConfiguration& config);
+        ~SwapChain() override;
         bool Initialize(SwapChainBase* previous);
         bool CreateSwapChainInternal(SwapChainBase* previous);
         SurfaceAcquireNextTextureStatus AcquireNextTextureImpl(bool isReentrant);
@@ -54,4 +54,4 @@ namespace rhi::impl::vulkan
 
         uint32_t mImageIndex = UINT32_MAX;
     };
-}
+} // namespace rhi::impl::vulkan

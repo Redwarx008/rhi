@@ -2,9 +2,9 @@
 
 #include "../common/Utils.h"
 
-#include "ErrorsVk.h"
-#include "DeviceVk.h"
 #include "BindSetVk.h"
+#include "DeviceVk.h"
+#include "ErrorsVk.h"
 #include "VulkanUtils.h"
 
 #include <unordered_map>
@@ -20,21 +20,21 @@ namespace rhi::impl::vulkan
         case rhi::impl::BindingType::StorageTexture:
             return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         case rhi::impl::BindingType::UniformBuffer:
-        {
-            if (hasDynamicOffset)
             {
-                return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                if (hasDynamicOffset)
+                {
+                    return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                }
+                return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             }
-            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        }
         case rhi::impl::BindingType::StorageBuffer:
-        {
-            if (hasDynamicOffset)
             {
-                return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+                if (hasDynamicOffset)
+                {
+                    return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+                }
+                return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             }
-            return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        }
         case rhi::impl::BindingType::Sampler:
             return VK_DESCRIPTOR_TYPE_SAMPLER;
         case rhi::impl::BindingType::CombinedTextureSampler:
@@ -46,8 +46,8 @@ namespace rhi::impl::vulkan
         }
     }
 
-    BindSetLayout::BindSetLayout(DeviceBase* device, const BindSetLayoutDesc& desc):
-        BindSetLayoutBase(device, desc)
+    BindSetLayout::BindSetLayout(DeviceBase* device, const BindSetLayoutDesc& desc)
+        : BindSetLayoutBase(device, desc)
     {}
 
     Ref<BindSetLayout> BindSetLayout::Create(DeviceBase* device, const BindSetLayoutDesc& desc)
@@ -57,6 +57,7 @@ namespace rhi::impl::vulkan
         {
             return nullptr;
         }
+        bindSetLayout->TrackResource();
         return bindSetLayout;
     }
 
@@ -65,8 +66,6 @@ namespace rhi::impl::vulkan
 
     bool BindSetLayout::Initialize(const BindSetLayoutDesc& desc)
     {
-        BindSetLayoutBase::TrackResource();
-
         std::vector<VkDescriptorSetLayoutBinding> vkBindings;
         vkBindings.reserve(desc.entryCount);
 
@@ -88,7 +87,8 @@ namespace rhi::impl::vulkan
         createInfo.bindingCount = vkBindings.size();
         createInfo.pBindings = vkBindings.data();
 
-        Device* device = checked_cast<Device>(mDevice.Get());
+        ASSERT(mDevice);
+        Device* device = checked_cast<Device>(mDevice);
 
         VkResult err = vkCreateDescriptorSetLayout(device->GetHandle(), &createInfo, nullptr, &mHandle);
         CHECK_VK_RESULT_FALSE(err, "CreateDescriptorSetLayout");
@@ -114,7 +114,8 @@ namespace rhi::impl::vulkan
     void BindSetLayout::DestroyImpl()
     {
         BindSetLayoutBase::DestroyImpl();
-        Device* device = checked_cast<Device>(mDevice.Get());
+
+        Device* device = checked_cast<Device>(mDevice);
 
         if (mHandle != VK_NULL_HANDLE)
         {
@@ -132,16 +133,16 @@ namespace rhi::impl::vulkan
 
     Ref<BindSet> BindSetLayout::AllocateBindSet(const BindSetDesc& desc)
     {
+        ASSERT(mDevice);
         DescriptorSetAllocation descriptorSetAllocation = mDescriptorSetAllocator->Allocate(this);
 
-        return AcquireRef(new BindSet(checked_cast<Device>(mDevice.Get()), desc, descriptorSetAllocation));
+        return AcquireRef(new BindSet(checked_cast<Device>(mDevice), desc, descriptorSetAllocation));
     }
 
-    void BindSetLayout::DeallocateBindSet(BindSet* bindSet,
-                                          DescriptorSetAllocation* descriptorSetAllocation)
+    void BindSetLayout::DeallocateBindSet(BindSet* bindSet, DescriptorSetAllocation* descriptorSetAllocation)
     {
         mDescriptorSetAllocator->Deallocate(descriptorSetAllocation,
                                             bindSet->IsUsedInQueue(QueueType::Graphics),
                                             bindSet->IsUsedInQueue(QueueType::Compute));
     }
-}
+} // namespace rhi::impl::vulkan

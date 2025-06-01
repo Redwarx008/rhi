@@ -10,7 +10,7 @@ namespace rhi::impl::vulkan
     {
     public:
         explicit Adapter(InstanceBase* instance, VkPhysicalDevice vulkanPhysicalDevice);
-        ~Adapter() = default;
+        ~Adapter() override = default;
         // api
         DeviceBase* APICreateDevice(const DeviceDesc& desc) override;
         // internal

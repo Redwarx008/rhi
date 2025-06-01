@@ -1,29 +1,30 @@
 #include "DeviceVk.h"
-#include "InstanceVk.h"
-#include "AdapterVk.h"
-#include "QueueVk.h"
-#include "SwapChainVk.h"
-#include "CommandListVk.h"
-#include "PipelineLayoutVk.h"
-#include "RenderPipelineVk.h"
-#include "ComputePipelineVk.h"
-#include "BindSetLayoutVk.h"
-#include "BindSetVk.h"
-#include "TextureVk.h"
-#include "BufferVk.h"
-#include "ShaderModuleVk.h"
-#include "SamplerVk.h"
-#include "ErrorsVk.h"
 #include "../common/Error.h"
 #include "../common/Utils.h"
+#include "AdapterVk.h"
+#include "BindSetLayoutVk.h"
+#include "BindSetVk.h"
+#include "BufferVk.h"
+#include "CommandListVk.h"
+#include "ComputePipelineVk.h"
+#include "ErrorsVk.h"
+#include "InstanceVk.h"
+#include "PipelineLayoutVk.h"
+#include "QueueVk.h"
+#include "RenderPipelineVk.h"
+#include "SamplerVk.h"
+#include "ShaderModuleVk.h"
+#include "SwapChainVk.h"
+#include "TextureVk.h"
+#include "PipelineCacheVk.h"
 
-#include <string>
-#include <sstream>
-#include <memory>
-#include <unordered_map>
 #include <algorithm>
 #include <iostream>
+#include <memory>
 #include <optional>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 
 
 namespace rhi::impl::vulkan
@@ -38,11 +39,9 @@ namespace rhi::impl::vulkan
         return device;
     }
 
-    Device::Device(Adapter* adapter, const DeviceDesc& desc) :
-        DeviceBase(adapter, desc)
-    {
-
-    }
+    Device::Device(Adapter* adapter, const DeviceDesc& desc)
+        : DeviceBase(adapter, desc)
+    {}
 
     bool Device::Initialize(const DeviceDesc& desc)
     {
@@ -57,8 +56,9 @@ namespace rhi::impl::vulkan
         if (extCount > 0)
         {
             std::vector<VkExtensionProperties> extensions(extCount);
-            if (vkEnumerateDeviceExtensionProperties(checked_cast<Adapter>(mAdapter)->GetHandle(),
-                                                     nullptr, &extCount, &extensions.front()) == VK_SUCCESS)
+            if (vkEnumerateDeviceExtensionProperties(
+                        checked_cast<Adapter>(mAdapter)->GetHandle(), nullptr, &extCount, &extensions.front()) ==
+                VK_SUCCESS)
             {
                 for (auto& ext : extensions)
                 {
@@ -69,8 +69,8 @@ namespace rhi::impl::vulkan
 
         for (auto extension : deviceExtensions)
         {
-            if (std::find(supportedExtensions.begin(), supportedExtensions.end(), extension) == supportedExtensions.
-                end())
+            if (std::find(supportedExtensions.begin(), supportedExtensions.end(), extension) ==
+                supportedExtensions.end())
             {
                 LOG_ERROR(extension, "is not supported.");
                 return false;
@@ -110,11 +110,11 @@ namespace rhi::impl::vulkan
         feature12.pNext = &feature13;
 
         uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(checked_cast<Adapter>(mAdapter)->GetHandle(), &queueFamilyCount,
-                                                 nullptr);
+        vkGetPhysicalDeviceQueueFamilyProperties(
+                checked_cast<Adapter>(mAdapter)->GetHandle(), &queueFamilyCount, nullptr);
         std::vector<VkQueueFamilyProperties> queueFamilyPropertieses(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(checked_cast<Adapter>(mAdapter)->GetHandle(), &queueFamilyCount,
-                                                 queueFamilyPropertieses.data());
+        vkGetPhysicalDeviceQueueFamilyProperties(
+                checked_cast<Adapter>(mAdapter)->GetHandle(), &queueFamilyCount, queueFamilyPropertieses.data());
 
         std::array<std::optional<uint32_t>, 3> queueFamlies;
         for (uint32_t i = 0; i < queueFamilyPropertieses.size(); i++)
@@ -167,19 +167,19 @@ namespace rhi::impl::vulkan
         deviceCreateInfo.pQueueCreateInfos = queueCIs.data();
         deviceCreateInfo.pNext = &feature12;
 
-        VkResult err = vkCreateDevice(checked_cast<Adapter>(mAdapter)->GetHandle(), &deviceCreateInfo, nullptr,
-                                      &mHandle);
-        CHECK_VK_RESULT_FALSE(err);
+        VkResult err =
+                vkCreateDevice(checked_cast<Adapter>(mAdapter)->GetHandle(), &deviceCreateInfo, nullptr, &mHandle);
+        CHECK_VK_RESULT_FALSE(err, "CreateDevice");
 
         VmaAllocatorCreateInfo allocatorCreateInfo{};
         allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
         allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_3;
         allocatorCreateInfo.physicalDevice = checked_cast<Adapter>(mAdapter)->GetHandle();
         allocatorCreateInfo.device = mHandle;
-        allocatorCreateInfo.instance = checked_cast<Instance>(checked_cast<Adapter>(mAdapter)->APIGetInstance())->
-                GetHandle();
+        allocatorCreateInfo.instance =
+                checked_cast<Instance>(checked_cast<Adapter>(mAdapter)->APIGetInstance())->GetHandle();
         err = vmaCreateAllocator(&allocatorCreateInfo, &mMemoryAllocator);
-        CHECK_VK_RESULT_FALSE(err);
+        CHECK_VK_RESULT_FALSE(err, "CreateAllocator");
 
         // create queues
         for (uint32_t i = 0; i < mQueues.size(); ++i)
@@ -203,12 +203,12 @@ namespace rhi::impl::vulkan
         Instance* instance = checked_cast<Instance>(checked_cast<Adapter>(APIGetAdapter())->APIGetInstance());
         if (instance->IsDebugLayerEnabled())
         {
-            Fn.vkCmdBeginDebugUtilsLabelEXT = reinterpret_cast<PFN_vkCmdBeginDebugUtilsLabelEXT>(vkGetInstanceProcAddr(
-                    instance->GetHandle(), "vkCmdBeginDebugUtilsLabelEXT"));
-            Fn.vkCmdEndDebugUtilsLabelEXT = reinterpret_cast<PFN_vkCmdEndDebugUtilsLabelEXT>(vkGetInstanceProcAddr(
-                    instance->GetHandle(), "vkCmdBeginDebugUtilsLabelEXT"));
-            Fn.vkSetDebugUtilsObjectNameEXT = reinterpret_cast<PFN_vkSetDebugUtilsObjectNameEXT>(vkGetInstanceProcAddr(
-                    instance->GetHandle(), "vkSetDebugUtilsObjectNameEXT"));
+            Fn.vkCmdBeginDebugUtilsLabelEXT = reinterpret_cast<PFN_vkCmdBeginDebugUtilsLabelEXT>(
+                    vkGetInstanceProcAddr(instance->GetHandle(), "vkCmdBeginDebugUtilsLabelEXT"));
+            Fn.vkCmdEndDebugUtilsLabelEXT = reinterpret_cast<PFN_vkCmdEndDebugUtilsLabelEXT>(
+                    vkGetInstanceProcAddr(instance->GetHandle(), "vkCmdBeginDebugUtilsLabelEXT"));
+            Fn.vkSetDebugUtilsObjectNameEXT = reinterpret_cast<PFN_vkSetDebugUtilsObjectNameEXT>(
+                    vkGetInstanceProcAddr(instance->GetHandle(), "vkSetDebugUtilsObjectNameEXT"));
         }
     }
 
@@ -248,17 +248,20 @@ namespace rhi::impl::vulkan
 
         vkDeviceWaitIdle(mHandle);
 
-        for (auto& queue : mQueues)
+        DestroyObjects();
+
+        for (uint32_t i = 0; i < mQueues.size(); ++i)
         {
+            Ref<QueueBase>& queue = mQueues[i];
             if (queue)
             {
                 queue->AssumeCommandsComplete();
                 ASSERT(queue->GetCompletedSerial() == queue->GetLastSubmittedSerial());
                 queue->Tick();
+                queue->Destroy();
                 queue = nullptr;
             }
         }
-        DestroyObjects();
 
         vmaDestroyAllocator(mMemoryAllocator);
 
@@ -270,8 +273,9 @@ namespace rhi::impl::vulkan
         return mMemoryAllocator;
     }
 
-    Ref<SwapChainBase> Device::CreateSwapChainImpl(SurfaceBase* surface, SwapChainBase* previous,
-                                               const SurfaceConfiguration& config)
+    Ref<SwapChainBase> Device::CreateSwapChainImpl(SurfaceBase* surface,
+                                                   SwapChainBase* previous,
+                                                   const SurfaceConfiguration& config)
     {
         return SwapChain::Create(this, surface, previous, config);
     }
@@ -296,6 +300,11 @@ namespace rhi::impl::vulkan
         return ComputePipeline::Create(this, desc);
     }
 
+    Ref<PipelineCacheBase> Device::CreatePipelineCacheImpl(const PipelineCacheDesc& desc)
+    {
+        return PipelineCache::Create(this, desc);
+    }
+
     Ref<BindSetLayoutBase> Device::CreateBindSetLayoutImpl(const BindSetLayoutDesc& desc)
     {
         return BindSetLayout::Create(this, desc);
@@ -312,9 +321,9 @@ namespace rhi::impl::vulkan
     }
 
 
-    Ref<BufferBase> Device::CreateBufferImpl(const BufferDesc& desc)
+    Ref<BufferBase> Device::CreateBufferImpl(const BufferDesc& desc, QueueType initialQueueOwner)
     {
-        return Buffer::Create(this, desc);
+        return Buffer::Create(this, desc, initialQueueOwner);
     }
 
     Ref<ShaderModuleBase> Device::CreateShaderImpl(const ShaderModuleDesc& desc)
@@ -332,4 +341,4 @@ namespace rhi::impl::vulkan
         return CommandList::Create(this, encoder);
     }
 
-}
+} // namespace rhi::impl::vulkan

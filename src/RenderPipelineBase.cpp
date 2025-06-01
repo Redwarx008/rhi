@@ -95,17 +95,17 @@ namespace rhi::impl
         return TextureFormat::Undefined;
     }
 
-    RenderPipelineBase::RenderPipelineBase(DeviceBase* device, const RenderPipelineDesc& desc) :
-        PipelineBase(device, desc),
-        mRasterState(desc.rasterState),
-        mBlendState(desc.blendState),
-        mSampleState(desc.sampleState),
-        mDepthStencilState(desc.depthStencilState),
-        mViewportCount(desc.viewportCount),
-        mPatchControlPoints(desc.patchControlPoints),
-        mDepthStencilFormat(desc.depthStencilFormat),
-        mVertexInputAttributes(desc.vertexAttributeCount),
-        mColorAttachmentFormats(desc.colorAttachmentCount)
+    RenderPipelineBase::RenderPipelineBase(DeviceBase* device, const RenderPipelineDesc& desc)
+        : PipelineBase(device, desc)
+        , mRasterState(desc.rasterState)
+        , mBlendState(desc.blendState)
+        , mSampleState(desc.sampleState)
+        , mDepthStencilState(desc.depthStencilState)
+        , mViewportCount(desc.viewportCount)
+        , mPatchControlPoints(desc.patchControlPoints)
+        , mDepthStencilFormat(desc.depthStencilFormat)
+        , mVertexInputAttributes(desc.vertexAttributeCount)
+        , mColorAttachmentFormats(desc.colorAttachmentCount)
 
     {
         for (uint32_t i = 0; i < desc.vertexAttributeCount; ++i)
@@ -177,4 +177,4 @@ namespace rhi::impl
     }
 
     RenderPipelineBase::~RenderPipelineBase() = default;
-}
+} // namespace rhi::impl

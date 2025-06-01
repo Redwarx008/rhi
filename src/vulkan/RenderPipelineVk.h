@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../RenderPipelinebase.h"
 #include <vulkan/vulkan.h>
+#include "../RenderPipelinebase.h"
 
 namespace rhi::impl::vulkan
 {
@@ -15,10 +15,10 @@ namespace rhi::impl::vulkan
 
     private:
         explicit RenderPipeline(Device* device, const RenderPipelineDesc& desc);
-        ~RenderPipeline();
-        bool Initialize();
+        ~RenderPipeline() override;
+        bool Initialize(PipelineCacheBase* cache);
         void DestroyImpl() override;
 
         VkPipeline mHandle = VK_NULL_HANDLE;
     };
-}
+} // namespace rhi::impl::vulkan

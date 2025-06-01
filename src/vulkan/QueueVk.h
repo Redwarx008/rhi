@@ -22,7 +22,6 @@ namespace rhi::impl::vulkan
     {
     public:
         static Ref<Queue> Create(Device* device, uint32_t family, QueueType type);
-        ~Queue();
         // internal 
         CommandRecordContext* GetPendingRecordingContext();
         MutexProtected<VkResourceDeleter>& GetDeleter();
@@ -32,9 +31,11 @@ namespace rhi::impl::vulkan
         VkSemaphore GetTrackingSubmitSemaphore() const;
         void EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator);
         void SubmitPendingCommands();
+        void Destroy() override;
 
     private:
         explicit Queue(Device* device, uint32_t family, QueueType type);
+        ~Queue() override;
         void Initialize();
         void TickImpl(uint64_t completedSerial) override;
         uint64_t SubmitImpl(CommandListBase* const* commands,

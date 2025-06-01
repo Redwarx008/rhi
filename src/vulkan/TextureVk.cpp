@@ -1,20 +1,20 @@
 #include "TextureVk.h"
-#include "DeviceVk.h"
-#include "QueueVk.h"
-#include "ErrorsVk.h"
-#include "VulkanUtils.h"
-#include "RefCountedHandle.h"
-#include "../common/EnumFlagIterator.hpp"
-#include "../common/Constants.h"
 #include "../PassResourceUsage.h"
+#include "../common/Constants.h"
+#include "../common/EnumFlagIterator.hpp"
+#include "DeviceVk.h"
+#include "ErrorsVk.h"
+#include "QueueVk.h"
+#include "RefCountedHandle.h"
+#include "VulkanUtils.h"
 
 namespace rhi::impl::vulkan
 {
-    constexpr TextureUsage cShaderTextureUsages = TextureUsage::SampledBinding | TextureUsage::StorageBinding |
-            cReadOnlyStorageTexture;
+    constexpr TextureUsage cShaderTextureUsages =
+            TextureUsage::SampledBinding | TextureUsage::StorageBinding | cReadOnlyStorageTexture;
 
-    constexpr TextureUsage cReadOnlyTextureUsages = TextureUsage::CopySrc | TextureUsage::SampledBinding |
-            cReadOnlyStorageTexture;
+    constexpr TextureUsage cReadOnlyTextureUsages =
+            TextureUsage::CopySrc | TextureUsage::SampledBinding | cReadOnlyStorageTexture;
 
     struct TexFmtToVkFmtMapping
     {
@@ -23,144 +23,143 @@ namespace rhi::impl::vulkan
     };
 
     //clang-format off
-    static const std::array<TexFmtToVkFmtMapping, size_t(TextureFormat::COUNT)> _texFmtToVkFmtMap = { {
-        { TextureFormat::Undefined,         VK_FORMAT_UNDEFINED                },
-        { TextureFormat::R8_UINT,           VK_FORMAT_R8_UINT                  },
-        { TextureFormat::R8_SINT,           VK_FORMAT_R8_SINT                  },
-        { TextureFormat::R8_UNORM,          VK_FORMAT_R8_UNORM                 },
-        { TextureFormat::R8_SNORM,          VK_FORMAT_R8_SNORM                 },
-        { TextureFormat::RG8_UINT,          VK_FORMAT_R8G8_UINT                },
-        { TextureFormat::RG8_SINT,          VK_FORMAT_R8G8_SINT                },
-        { TextureFormat::RG8_UNORM,         VK_FORMAT_R8G8_UNORM               },
-        { TextureFormat::RG8_SNORM,         VK_FORMAT_R8G8_SNORM               },
-        { TextureFormat::R16_UINT,          VK_FORMAT_R16_UINT                 },
-        { TextureFormat::R16_SINT,          VK_FORMAT_R16_SINT                 },
-        { TextureFormat::R16_UNORM,         VK_FORMAT_R16_UNORM                },
-        { TextureFormat::R16_SNORM,         VK_FORMAT_R16_SNORM                },
-        { TextureFormat::R16_FLOAT,         VK_FORMAT_R16_SFLOAT               },
-        { TextureFormat::BGRA4_UNORM,       VK_FORMAT_B4G4R4A4_UNORM_PACK16    },
-        { TextureFormat::B5G6R5_UNORM,      VK_FORMAT_B5G6R5_UNORM_PACK16      },
-        { TextureFormat::B5G5R5A1_UNORM,    VK_FORMAT_B5G5R5A1_UNORM_PACK16    },
-        { TextureFormat::RGBA8_UINT,        VK_FORMAT_R8G8B8A8_UINT            },
-        { TextureFormat::RGBA8_SINT,        VK_FORMAT_R8G8B8A8_SINT            },
-        { TextureFormat::RGBA8_UNORM,       VK_FORMAT_R8G8B8A8_UNORM           },
-        { TextureFormat::RGBA8_SNORM,       VK_FORMAT_R8G8B8A8_SNORM           },
-        { TextureFormat::BGRA8_UNORM,       VK_FORMAT_B8G8R8A8_UNORM           },
-        { TextureFormat::RGBA8_SRGB,        VK_FORMAT_R8G8B8A8_SRGB            },
-        { TextureFormat::BGRA8_SRGB,        VK_FORMAT_B8G8R8A8_SRGB            },
-        { TextureFormat::R10G10B10A2_UNORM, VK_FORMAT_A2B10G10R10_UNORM_PACK32 },
-        { TextureFormat::R11G11B10_FLOAT,   VK_FORMAT_B10G11R11_UFLOAT_PACK32  },
-        { TextureFormat::RG16_UINT,         VK_FORMAT_R16G16_UINT              },
-        { TextureFormat::RG16_SINT,         VK_FORMAT_R16G16_SINT              },
-        { TextureFormat::RG16_UNORM,        VK_FORMAT_R16G16_UNORM             },
-        { TextureFormat::RG16_SNORM,        VK_FORMAT_R16G16_SNORM             },
-        { TextureFormat::RG16_FLOAT,        VK_FORMAT_R16G16_SFLOAT            },
-        { TextureFormat::R32_UINT,          VK_FORMAT_R32_UINT                 },
-        { TextureFormat::R32_SINT,          VK_FORMAT_R32_SINT                 },
-        { TextureFormat::R32_FLOAT,         VK_FORMAT_R32_SFLOAT               },
-        { TextureFormat::RGBA16_UINT,       VK_FORMAT_R16G16B16A16_UINT        },
-        { TextureFormat::RGBA16_SINT,       VK_FORMAT_R16G16B16A16_SINT        },
-        { TextureFormat::RGBA16_FLOAT,      VK_FORMAT_R16G16B16A16_SFLOAT      },
-        { TextureFormat::RGBA16_UNORM,      VK_FORMAT_R16G16B16A16_UNORM       },
-        { TextureFormat::RGBA16_SNORM,      VK_FORMAT_R16G16B16A16_SNORM       },
-        { TextureFormat::RG32_UINT,         VK_FORMAT_R32G32_UINT              },
-        { TextureFormat::RG32_SINT,         VK_FORMAT_R32G32_SINT              },
-        { TextureFormat::RG32_FLOAT,        VK_FORMAT_R32G32_SFLOAT            },
-        { TextureFormat::RGB32_UINT,        VK_FORMAT_R32G32B32_UINT           },
-        { TextureFormat::RGB32_SINT,        VK_FORMAT_R32G32B32_SINT           },
-        { TextureFormat::RGB32_FLOAT,       VK_FORMAT_R32G32B32_SFLOAT         },
-        { TextureFormat::RGBA32_UINT,       VK_FORMAT_R32G32B32A32_UINT        },
-        { TextureFormat::RGBA32_SINT,       VK_FORMAT_R32G32B32A32_SINT        },
-        { TextureFormat::RGBA32_FLOAT,      VK_FORMAT_R32G32B32A32_SFLOAT      },
-        { TextureFormat::D16_UNORM,         VK_FORMAT_D16_UNORM                },
-        { TextureFormat::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT        },
-        { TextureFormat::D32_UNORM,         VK_FORMAT_D32_SFLOAT               },
-        { TextureFormat::D32_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT       },
-        { TextureFormat::BC1_UNORM,         VK_FORMAT_BC1_RGBA_UNORM_BLOCK     },
-        { TextureFormat::BC1_UNORM_SRGB,    VK_FORMAT_BC1_RGBA_SRGB_BLOCK      },
-        { TextureFormat::BC2_UNORM,         VK_FORMAT_BC2_UNORM_BLOCK          },
-        { TextureFormat::BC2_UNORM_SRGB,    VK_FORMAT_BC2_SRGB_BLOCK           },
-        { TextureFormat::BC3_UNORM,         VK_FORMAT_BC3_UNORM_BLOCK          },
-        { TextureFormat::BC3_UNORM_SRGB,    VK_FORMAT_BC3_SRGB_BLOCK           },
-        { TextureFormat::BC4_UNORM,         VK_FORMAT_BC4_UNORM_BLOCK          },
-        { TextureFormat::BC4_SNORM,         VK_FORMAT_BC4_SNORM_BLOCK          },
-        { TextureFormat::BC5_UNORM,         VK_FORMAT_BC5_UNORM_BLOCK          },
-        { TextureFormat::BC5_SNORM,         VK_FORMAT_BC5_SNORM_BLOCK          },
-        { TextureFormat::BC6H_UFLOAT,       VK_FORMAT_BC6H_UFLOAT_BLOCK        },
-        { TextureFormat::BC6H_SFLOAT,       VK_FORMAT_BC6H_SFLOAT_BLOCK        },
-        { TextureFormat::BC7_UNORM,         VK_FORMAT_BC7_UNORM_BLOCK          },
-        { TextureFormat::BC7_UNORM_SRGB,    VK_FORMAT_BC7_SRGB_BLOCK           },
+    static const std::array<TexFmtToVkFmtMapping, size_t(TextureFormat::COUNT)> _texFmtToVkFmtMap = {{
+            {TextureFormat::Undefined, VK_FORMAT_UNDEFINED},
+            {TextureFormat::R8_UINT, VK_FORMAT_R8_UINT},
+            {TextureFormat::R8_SINT, VK_FORMAT_R8_SINT},
+            {TextureFormat::R8_UNORM, VK_FORMAT_R8_UNORM},
+            {TextureFormat::R8_SNORM, VK_FORMAT_R8_SNORM},
+            {TextureFormat::RG8_UINT, VK_FORMAT_R8G8_UINT},
+            {TextureFormat::RG8_SINT, VK_FORMAT_R8G8_SINT},
+            {TextureFormat::RG8_UNORM, VK_FORMAT_R8G8_UNORM},
+            {TextureFormat::RG8_SNORM, VK_FORMAT_R8G8_SNORM},
+            {TextureFormat::R16_UINT, VK_FORMAT_R16_UINT},
+            {TextureFormat::R16_SINT, VK_FORMAT_R16_SINT},
+            {TextureFormat::R16_UNORM, VK_FORMAT_R16_UNORM},
+            {TextureFormat::R16_SNORM, VK_FORMAT_R16_SNORM},
+            {TextureFormat::R16_FLOAT, VK_FORMAT_R16_SFLOAT},
+            {TextureFormat::BGRA4_UNORM, VK_FORMAT_B4G4R4A4_UNORM_PACK16},
+            {TextureFormat::B5G6R5_UNORM, VK_FORMAT_B5G6R5_UNORM_PACK16},
+            {TextureFormat::B5G5R5A1_UNORM, VK_FORMAT_B5G5R5A1_UNORM_PACK16},
+            {TextureFormat::RGBA8_UINT, VK_FORMAT_R8G8B8A8_UINT},
+            {TextureFormat::RGBA8_SINT, VK_FORMAT_R8G8B8A8_SINT},
+            {TextureFormat::RGBA8_UNORM, VK_FORMAT_R8G8B8A8_UNORM},
+            {TextureFormat::RGBA8_SNORM, VK_FORMAT_R8G8B8A8_SNORM},
+            {TextureFormat::BGRA8_UNORM, VK_FORMAT_B8G8R8A8_UNORM},
+            {TextureFormat::RGBA8_SRGB, VK_FORMAT_R8G8B8A8_SRGB},
+            {TextureFormat::BGRA8_SRGB, VK_FORMAT_B8G8R8A8_SRGB},
+            {TextureFormat::R10G10B10A2_UNORM, VK_FORMAT_A2B10G10R10_UNORM_PACK32},
+            {TextureFormat::R11G11B10_FLOAT, VK_FORMAT_B10G11R11_UFLOAT_PACK32},
+            {TextureFormat::RG16_UINT, VK_FORMAT_R16G16_UINT},
+            {TextureFormat::RG16_SINT, VK_FORMAT_R16G16_SINT},
+            {TextureFormat::RG16_UNORM, VK_FORMAT_R16G16_UNORM},
+            {TextureFormat::RG16_SNORM, VK_FORMAT_R16G16_SNORM},
+            {TextureFormat::RG16_FLOAT, VK_FORMAT_R16G16_SFLOAT},
+            {TextureFormat::R32_UINT, VK_FORMAT_R32_UINT},
+            {TextureFormat::R32_SINT, VK_FORMAT_R32_SINT},
+            {TextureFormat::R32_FLOAT, VK_FORMAT_R32_SFLOAT},
+            {TextureFormat::RGBA16_UINT, VK_FORMAT_R16G16B16A16_UINT},
+            {TextureFormat::RGBA16_SINT, VK_FORMAT_R16G16B16A16_SINT},
+            {TextureFormat::RGBA16_FLOAT, VK_FORMAT_R16G16B16A16_SFLOAT},
+            {TextureFormat::RGBA16_UNORM, VK_FORMAT_R16G16B16A16_UNORM},
+            {TextureFormat::RGBA16_SNORM, VK_FORMAT_R16G16B16A16_SNORM},
+            {TextureFormat::RG32_UINT, VK_FORMAT_R32G32_UINT},
+            {TextureFormat::RG32_SINT, VK_FORMAT_R32G32_SINT},
+            {TextureFormat::RG32_FLOAT, VK_FORMAT_R32G32_SFLOAT},
+            {TextureFormat::RGB32_UINT, VK_FORMAT_R32G32B32_UINT},
+            {TextureFormat::RGB32_SINT, VK_FORMAT_R32G32B32_SINT},
+            {TextureFormat::RGB32_FLOAT, VK_FORMAT_R32G32B32_SFLOAT},
+            {TextureFormat::RGBA32_UINT, VK_FORMAT_R32G32B32A32_UINT},
+            {TextureFormat::RGBA32_SINT, VK_FORMAT_R32G32B32A32_SINT},
+            {TextureFormat::RGBA32_FLOAT, VK_FORMAT_R32G32B32A32_SFLOAT},
+            {TextureFormat::D16_UNORM, VK_FORMAT_D16_UNORM},
+            {TextureFormat::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+            {TextureFormat::D32_UNORM, VK_FORMAT_D32_SFLOAT},
+            {TextureFormat::D32_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT},
+            {TextureFormat::BC1_UNORM, VK_FORMAT_BC1_RGBA_UNORM_BLOCK},
+            {TextureFormat::BC1_UNORM_SRGB, VK_FORMAT_BC1_RGBA_SRGB_BLOCK},
+            {TextureFormat::BC2_UNORM, VK_FORMAT_BC2_UNORM_BLOCK},
+            {TextureFormat::BC2_UNORM_SRGB, VK_FORMAT_BC2_SRGB_BLOCK},
+            {TextureFormat::BC3_UNORM, VK_FORMAT_BC3_UNORM_BLOCK},
+            {TextureFormat::BC3_UNORM_SRGB, VK_FORMAT_BC3_SRGB_BLOCK},
+            {TextureFormat::BC4_UNORM, VK_FORMAT_BC4_UNORM_BLOCK},
+            {TextureFormat::BC4_SNORM, VK_FORMAT_BC4_SNORM_BLOCK},
+            {TextureFormat::BC5_UNORM, VK_FORMAT_BC5_UNORM_BLOCK},
+            {TextureFormat::BC5_SNORM, VK_FORMAT_BC5_SNORM_BLOCK},
+            {TextureFormat::BC6H_UFLOAT, VK_FORMAT_BC6H_UFLOAT_BLOCK},
+            {TextureFormat::BC6H_SFLOAT, VK_FORMAT_BC6H_SFLOAT_BLOCK},
+            {TextureFormat::BC7_UNORM, VK_FORMAT_BC7_UNORM_BLOCK},
+            {TextureFormat::BC7_UNORM_SRGB, VK_FORMAT_BC7_SRGB_BLOCK},
 
-    } };
+    }};
 
-    static const std::unordered_map<VkFormat, TextureFormat> _VkFmtToTexFmtMap =
-    {
-        { VK_FORMAT_UNDEFINED                ,TextureFormat::Undefined        },
-        { VK_FORMAT_R8_UINT                  ,TextureFormat::R8_UINT          },
-        { VK_FORMAT_R8_SINT                  ,TextureFormat::R8_SINT          },
-        { VK_FORMAT_R8_UNORM                 ,TextureFormat::R8_UNORM         },
-        { VK_FORMAT_R8_SNORM                 ,TextureFormat::R8_SNORM         },
-        { VK_FORMAT_R8G8_UINT                ,TextureFormat::RG8_UINT         },
-        { VK_FORMAT_R8G8_SINT                ,TextureFormat::RG8_SINT         },
-        { VK_FORMAT_R8G8_UNORM               ,TextureFormat::RG8_UNORM        },
-        { VK_FORMAT_R8G8_SNORM               ,TextureFormat::RG8_SNORM        },
-        { VK_FORMAT_R16_UINT                 ,TextureFormat::R16_UINT         },
-        { VK_FORMAT_R16_SINT                 ,TextureFormat::R16_SINT         },
-        { VK_FORMAT_R16_UNORM                ,TextureFormat::R16_UNORM        },
-        { VK_FORMAT_R16_SNORM                ,TextureFormat::R16_SNORM        },
-        { VK_FORMAT_R16_SFLOAT               ,TextureFormat::R16_FLOAT        },
-        { VK_FORMAT_B4G4R4A4_UNORM_PACK16    ,TextureFormat::BGRA4_UNORM      },
-        { VK_FORMAT_B5G6R5_UNORM_PACK16      ,TextureFormat::B5G6R5_UNORM     },
-        { VK_FORMAT_B5G5R5A1_UNORM_PACK16    ,TextureFormat::B5G5R5A1_UNORM   },
-        { VK_FORMAT_R8G8B8A8_UINT            ,TextureFormat::RGBA8_UINT       },
-        { VK_FORMAT_R8G8B8A8_SINT            ,TextureFormat::RGBA8_SINT       },
-        { VK_FORMAT_R8G8B8A8_UNORM           ,TextureFormat::RGBA8_UNORM      },
-        { VK_FORMAT_R8G8B8A8_SNORM           ,TextureFormat::RGBA8_SNORM      },
-        { VK_FORMAT_B8G8R8A8_UNORM           ,TextureFormat::BGRA8_UNORM      },
-        { VK_FORMAT_R8G8B8A8_SRGB            ,TextureFormat::RGBA8_SRGB       },
-        { VK_FORMAT_B8G8R8A8_SRGB            ,TextureFormat::BGRA8_SRGB       },
-        { VK_FORMAT_A2B10G10R10_UNORM_PACK32 ,TextureFormat::R10G10B10A2_UNORM},
-        { VK_FORMAT_B10G11R11_UFLOAT_PACK32  ,TextureFormat::R11G11B10_FLOAT  },
-        { VK_FORMAT_R16G16_UINT              ,TextureFormat::RG16_UINT        },
-        { VK_FORMAT_R16G16_SINT              ,TextureFormat::RG16_SINT        },
-        { VK_FORMAT_R16G16_UNORM             ,TextureFormat::RG16_UNORM       },
-        { VK_FORMAT_R16G16_SNORM             ,TextureFormat::RG16_SNORM       },
-        { VK_FORMAT_R16G16_SFLOAT            ,TextureFormat::RG16_FLOAT       },
-        { VK_FORMAT_R32_UINT                 ,TextureFormat::R32_UINT         },
-        { VK_FORMAT_R32_SINT                 ,TextureFormat::R32_SINT         },
-        { VK_FORMAT_R32_SFLOAT               ,TextureFormat::R32_FLOAT        },
-        { VK_FORMAT_R16G16B16A16_UINT        ,TextureFormat::RGBA16_UINT      },
-        { VK_FORMAT_R16G16B16A16_SINT        ,TextureFormat::RGBA16_SINT      },
-        { VK_FORMAT_R16G16B16A16_SFLOAT      ,TextureFormat::RGBA16_FLOAT     },
-        { VK_FORMAT_R16G16B16A16_UNORM       ,TextureFormat::RGBA16_UNORM     },
-        { VK_FORMAT_R16G16B16A16_SNORM       ,TextureFormat::RGBA16_SNORM     },
-        { VK_FORMAT_R32G32_UINT              ,TextureFormat::RG32_UINT        },
-        { VK_FORMAT_R32G32_SINT              ,TextureFormat::RG32_SINT        },
-        { VK_FORMAT_R32G32_SFLOAT            ,TextureFormat::RG32_FLOAT       },
-        { VK_FORMAT_R32G32B32_UINT           ,TextureFormat::RGB32_UINT       },
-        { VK_FORMAT_R32G32B32_SINT           ,TextureFormat::RGB32_SINT       },
-        { VK_FORMAT_R32G32B32_SFLOAT         ,TextureFormat::RGB32_FLOAT      },
-        { VK_FORMAT_R32G32B32A32_UINT        ,TextureFormat::RGBA32_UINT      },
-        { VK_FORMAT_R32G32B32A32_SINT        ,TextureFormat::RGBA32_SINT      },
-        { VK_FORMAT_R32G32B32A32_SFLOAT      ,TextureFormat::RGBA32_FLOAT     },
-        { VK_FORMAT_D16_UNORM                ,TextureFormat::D16_UNORM        },
-        { VK_FORMAT_D24_UNORM_S8_UINT        ,TextureFormat::D24_UNORM_S8_UINT},
-        { VK_FORMAT_D32_SFLOAT               ,TextureFormat::D32_UNORM        },
-        { VK_FORMAT_D32_SFLOAT_S8_UINT       ,TextureFormat::D32_UNORM_S8_UINT},
-        { VK_FORMAT_BC1_RGBA_UNORM_BLOCK     ,TextureFormat::BC1_UNORM        },
-        { VK_FORMAT_BC1_RGBA_SRGB_BLOCK      ,TextureFormat::BC1_UNORM_SRGB   },
-        { VK_FORMAT_BC2_UNORM_BLOCK          ,TextureFormat::BC2_UNORM        },
-        { VK_FORMAT_BC2_SRGB_BLOCK           ,TextureFormat::BC2_UNORM_SRGB   },
-        { VK_FORMAT_BC3_UNORM_BLOCK          ,TextureFormat::BC3_UNORM        },
-        { VK_FORMAT_BC3_SRGB_BLOCK           ,TextureFormat::BC3_UNORM_SRGB   },
-        { VK_FORMAT_BC4_UNORM_BLOCK          ,TextureFormat::BC4_UNORM        },
-        { VK_FORMAT_BC4_SNORM_BLOCK          ,TextureFormat::BC4_SNORM        },
-        { VK_FORMAT_BC5_UNORM_BLOCK          ,TextureFormat::BC5_UNORM        },
-        { VK_FORMAT_BC5_SNORM_BLOCK          ,TextureFormat::BC5_SNORM        },
-        { VK_FORMAT_BC6H_UFLOAT_BLOCK        ,TextureFormat::BC6H_UFLOAT      },
-        { VK_FORMAT_BC6H_SFLOAT_BLOCK        ,TextureFormat::BC6H_SFLOAT      },
-        { VK_FORMAT_BC7_UNORM_BLOCK          ,TextureFormat::BC7_UNORM        },
-        { VK_FORMAT_BC7_SRGB_BLOCK           ,TextureFormat::BC7_UNORM_SRGB   },
+    static const std::unordered_map<VkFormat, TextureFormat> _VkFmtToTexFmtMap = {
+            {VK_FORMAT_UNDEFINED, TextureFormat::Undefined},
+            {VK_FORMAT_R8_UINT, TextureFormat::R8_UINT},
+            {VK_FORMAT_R8_SINT, TextureFormat::R8_SINT},
+            {VK_FORMAT_R8_UNORM, TextureFormat::R8_UNORM},
+            {VK_FORMAT_R8_SNORM, TextureFormat::R8_SNORM},
+            {VK_FORMAT_R8G8_UINT, TextureFormat::RG8_UINT},
+            {VK_FORMAT_R8G8_SINT, TextureFormat::RG8_SINT},
+            {VK_FORMAT_R8G8_UNORM, TextureFormat::RG8_UNORM},
+            {VK_FORMAT_R8G8_SNORM, TextureFormat::RG8_SNORM},
+            {VK_FORMAT_R16_UINT, TextureFormat::R16_UINT},
+            {VK_FORMAT_R16_SINT, TextureFormat::R16_SINT},
+            {VK_FORMAT_R16_UNORM, TextureFormat::R16_UNORM},
+            {VK_FORMAT_R16_SNORM, TextureFormat::R16_SNORM},
+            {VK_FORMAT_R16_SFLOAT, TextureFormat::R16_FLOAT},
+            {VK_FORMAT_B4G4R4A4_UNORM_PACK16, TextureFormat::BGRA4_UNORM},
+            {VK_FORMAT_B5G6R5_UNORM_PACK16, TextureFormat::B5G6R5_UNORM},
+            {VK_FORMAT_B5G5R5A1_UNORM_PACK16, TextureFormat::B5G5R5A1_UNORM},
+            {VK_FORMAT_R8G8B8A8_UINT, TextureFormat::RGBA8_UINT},
+            {VK_FORMAT_R8G8B8A8_SINT, TextureFormat::RGBA8_SINT},
+            {VK_FORMAT_R8G8B8A8_UNORM, TextureFormat::RGBA8_UNORM},
+            {VK_FORMAT_R8G8B8A8_SNORM, TextureFormat::RGBA8_SNORM},
+            {VK_FORMAT_B8G8R8A8_UNORM, TextureFormat::BGRA8_UNORM},
+            {VK_FORMAT_R8G8B8A8_SRGB, TextureFormat::RGBA8_SRGB},
+            {VK_FORMAT_B8G8R8A8_SRGB, TextureFormat::BGRA8_SRGB},
+            {VK_FORMAT_A2B10G10R10_UNORM_PACK32, TextureFormat::R10G10B10A2_UNORM},
+            {VK_FORMAT_B10G11R11_UFLOAT_PACK32, TextureFormat::R11G11B10_FLOAT},
+            {VK_FORMAT_R16G16_UINT, TextureFormat::RG16_UINT},
+            {VK_FORMAT_R16G16_SINT, TextureFormat::RG16_SINT},
+            {VK_FORMAT_R16G16_UNORM, TextureFormat::RG16_UNORM},
+            {VK_FORMAT_R16G16_SNORM, TextureFormat::RG16_SNORM},
+            {VK_FORMAT_R16G16_SFLOAT, TextureFormat::RG16_FLOAT},
+            {VK_FORMAT_R32_UINT, TextureFormat::R32_UINT},
+            {VK_FORMAT_R32_SINT, TextureFormat::R32_SINT},
+            {VK_FORMAT_R32_SFLOAT, TextureFormat::R32_FLOAT},
+            {VK_FORMAT_R16G16B16A16_UINT, TextureFormat::RGBA16_UINT},
+            {VK_FORMAT_R16G16B16A16_SINT, TextureFormat::RGBA16_SINT},
+            {VK_FORMAT_R16G16B16A16_SFLOAT, TextureFormat::RGBA16_FLOAT},
+            {VK_FORMAT_R16G16B16A16_UNORM, TextureFormat::RGBA16_UNORM},
+            {VK_FORMAT_R16G16B16A16_SNORM, TextureFormat::RGBA16_SNORM},
+            {VK_FORMAT_R32G32_UINT, TextureFormat::RG32_UINT},
+            {VK_FORMAT_R32G32_SINT, TextureFormat::RG32_SINT},
+            {VK_FORMAT_R32G32_SFLOAT, TextureFormat::RG32_FLOAT},
+            {VK_FORMAT_R32G32B32_UINT, TextureFormat::RGB32_UINT},
+            {VK_FORMAT_R32G32B32_SINT, TextureFormat::RGB32_SINT},
+            {VK_FORMAT_R32G32B32_SFLOAT, TextureFormat::RGB32_FLOAT},
+            {VK_FORMAT_R32G32B32A32_UINT, TextureFormat::RGBA32_UINT},
+            {VK_FORMAT_R32G32B32A32_SINT, TextureFormat::RGBA32_SINT},
+            {VK_FORMAT_R32G32B32A32_SFLOAT, TextureFormat::RGBA32_FLOAT},
+            {VK_FORMAT_D16_UNORM, TextureFormat::D16_UNORM},
+            {VK_FORMAT_D24_UNORM_S8_UINT, TextureFormat::D24_UNORM_S8_UINT},
+            {VK_FORMAT_D32_SFLOAT, TextureFormat::D32_UNORM},
+            {VK_FORMAT_D32_SFLOAT_S8_UINT, TextureFormat::D32_UNORM_S8_UINT},
+            {VK_FORMAT_BC1_RGBA_UNORM_BLOCK, TextureFormat::BC1_UNORM},
+            {VK_FORMAT_BC1_RGBA_SRGB_BLOCK, TextureFormat::BC1_UNORM_SRGB},
+            {VK_FORMAT_BC2_UNORM_BLOCK, TextureFormat::BC2_UNORM},
+            {VK_FORMAT_BC2_SRGB_BLOCK, TextureFormat::BC2_UNORM_SRGB},
+            {VK_FORMAT_BC3_UNORM_BLOCK, TextureFormat::BC3_UNORM},
+            {VK_FORMAT_BC3_SRGB_BLOCK, TextureFormat::BC3_UNORM_SRGB},
+            {VK_FORMAT_BC4_UNORM_BLOCK, TextureFormat::BC4_UNORM},
+            {VK_FORMAT_BC4_SNORM_BLOCK, TextureFormat::BC4_SNORM},
+            {VK_FORMAT_BC5_UNORM_BLOCK, TextureFormat::BC5_UNORM},
+            {VK_FORMAT_BC5_SNORM_BLOCK, TextureFormat::BC5_SNORM},
+            {VK_FORMAT_BC6H_UFLOAT_BLOCK, TextureFormat::BC6H_UFLOAT},
+            {VK_FORMAT_BC6H_SFLOAT_BLOCK, TextureFormat::BC6H_SFLOAT},
+            {VK_FORMAT_BC7_UNORM_BLOCK, TextureFormat::BC7_UNORM},
+            {VK_FORMAT_BC7_SRGB_BLOCK, TextureFormat::BC7_UNORM_SRGB},
 
     };
     //clang-format on
@@ -235,7 +234,7 @@ namespace rhi::impl::vulkan
             return VK_SAMPLE_COUNT_64_BIT;
 
         default:
-            assert(!"Invalid Enumeration Value");
+            ASSERT(!"Invalid Enumeration Value");
             return VK_SAMPLE_COUNT_1_BIT;
         }
     }
@@ -259,7 +258,7 @@ namespace rhi::impl::vulkan
 
         case TextureDimension::Undefined:
         default:
-            assert(!"Invalid Enumeration Value");
+            ASSERT(!"Invalid Enumeration Value");
             return VK_IMAGE_TYPE_2D;
         }
     }
@@ -291,7 +290,7 @@ namespace rhi::impl::vulkan
 
         case TextureDimension::Undefined:
         default:
-            assert(!"Invalid Enumeration Value");
+            ASSERT(!"Invalid Enumeration Value");
             return VK_IMAGE_VIEW_TYPE_2D;
         }
     }
@@ -317,8 +316,8 @@ namespace rhi::impl::vulkan
 
     VkFormat ToVkFormat(TextureFormat format)
     {
-        assert(format < TextureFormat::COUNT);
-        assert(_texFmtToVkFmtMap[uint32_t(format)].rhiFormat == format);
+        ASSERT(format < TextureFormat::COUNT);
+        ASSERT(_texFmtToVkFmtMap[uint32_t(format)].rhiFormat == format);
 
         return _texFmtToVkFmtMap[uint32_t(format)].vkFormat;
     }
@@ -336,15 +335,15 @@ namespace rhi::impl::vulkan
         }
     }
 
-    //bool IsSampleCountSupported(Device* device, const VkImageCreateInfo& imageCreateInfo)
+    // bool IsSampleCountSupported(Device* device, const VkImageCreateInfo& imageCreateInfo)
     //{
-    //    VkPhysicalDevice physicalDevice = device->GetVkPhysicalDevice();
-    //    VkImageFormatProperties properties;
-    //    VkResult res = vkGetPhysicalDeviceImageFormatProperties(physicalDevice, imageCreateInfo.format,
-    //        imageCreateInfo.imageType, imageCreateInfo.tiling,
-    //        imageCreateInfo.usage, imageCreateInfo.flags,
-    //        &properties);
-    //    CHECK_VK_RESULT(res);
+    //     VkPhysicalDevice physicalDevice = device->GetVkPhysicalDevice();
+    //     VkImageFormatProperties properties;
+    //     VkResult res = vkGetPhysicalDeviceImageFormatProperties(physicalDevice, imageCreateInfo.format,
+    //         imageCreateInfo.imageType, imageCreateInfo.tiling,
+    //         imageCreateInfo.usage, imageCreateInfo.flags,
+    //         &properties);
+    //     CHECK_VK_RESULT(res);
 
     //    return properties.sampleCounts & imageCreateInfo.samples;
     //}
@@ -355,7 +354,7 @@ namespace rhi::impl::vulkan
 
         if (usage == TextureUsage::None)
         {
-            return VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT; //todo: use VK_PIPELINE_STAGE_2_NONE instead.
+            return VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT; // todo: use VK_PIPELINE_STAGE_2_NONE instead.
         }
 
         if ((usage & (TextureUsage::CopySrc | TextureUsage::CopyDst)) != 0)
@@ -412,13 +411,13 @@ namespace rhi::impl::vulkan
         {
             // The usage is only used internally by the swapchain and is never used in
             // combination with other usages.
-            assert(usage == cSwapChainImageAcquireUsage);
+            ASSERT(usage == cSwapChainImageAcquireUsage);
             flags |= VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
         }
 
         if (HasFlag(usage, cSwapChainImagePresentUsage))
         {
-            assert(usage == cSwapChainImagePresentUsage);
+            ASSERT(usage == cSwapChainImagePresentUsage);
             flags |= VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT; // todo: use VK_PIPELINE_STAGE_2_NONE instead.
         }
 
@@ -427,7 +426,7 @@ namespace rhi::impl::vulkan
 
     VkAccessFlags2 AccessFlagsConvert(TextureUsage usage, TextureFormat format)
     {
-        assert(HasOneFlag(usage));
+        ASSERT(HasOneFlag(usage));
 
         VkAccessFlags2 flags = 0;
 
@@ -465,7 +464,7 @@ namespace rhi::impl::vulkan
 
         if (HasFlag(usage, cSwapChainImageAcquireUsage) || HasFlag(usage, cSwapChainImagePresentUsage))
         {
-            assert(usage == cSwapChainImageAcquireUsage || usage == cSwapChainImagePresentUsage);
+            ASSERT(usage == cSwapChainImageAcquireUsage || usage == cSwapChainImagePresentUsage);
             flags |= 0;
         }
 
@@ -497,16 +496,16 @@ namespace rhi::impl::vulkan
         case cReadOnlyStorageTexture:
             return VK_IMAGE_LAYOUT_GENERAL;
         case TextureUsage::RenderAttachment:
-        {
-            if (GetFormatInfo(format).IsDeepStencil())
             {
-                return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+                if (GetFormatInfo(format).IsDeepStencil())
+                {
+                    return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+                }
+                else
+                {
+                    return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                }
             }
-            else
-            {
-                return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            }
-        }
         case cSwapChainImageAcquireUsage:
             return VK_IMAGE_LAYOUT_UNDEFINED;
         case cSwapChainImagePresentUsage:
@@ -524,6 +523,7 @@ namespace rhi::impl::vulkan
         {
             return nullptr;
         }
+        texture->TrackResource();
         return texture;
     }
 
@@ -532,24 +532,22 @@ namespace rhi::impl::vulkan
         return TextureView::Create(this, desc);
     }
 
-    Texture::Texture(Device* device, const TextureDesc& desc) :
-        TextureBase(device, desc),
-        mVkFormat(ToVkFormat(mFormat)),
-        mSubresourceLastSyncInfos(GetAspectFromFormat(mFormat), mArraySize, mMipLevelCount)
+    Texture::Texture(Device* device, const TextureDesc& desc)
+        : TextureBase(device, desc)
+        , mVkFormat(ToVkFormat(mFormat))
+        , mSubresourceLastSyncInfos(GetAspectFromFormat(mFormat), mArraySize, mMipLevelCount)
     {}
 
-    Texture::~Texture()
-    {}
+    Texture::~Texture() = default;
 
     bool Texture::Initialize()
     {
-        TextureBase::Initialize();
         // If this triggers, it means it's time to add tests and implement support for readonly
         // depth-stencil attachments that are also used as readonly storage bindings in the pass.
         // Have fun! :)
-        assert(!(GetFormatInfo(mFormat).IsDeepStencil() && (mUsage & TextureUsage::StorageBinding) != 0));
+        ASSERT(!(GetFormatInfo(mFormat).IsDeepStencil() && (mUsage & TextureUsage::StorageBinding) != 0));
 
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         VkImageCreateInfo imageCreateInfo{};
         imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -581,12 +579,8 @@ namespace rhi::impl::vulkan
         allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
         allocCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
         allocCreateInfo.priority = 1.0f;
-        VkResult err = vmaCreateImage(device->GetMemoryAllocator(),
-                                      &imageCreateInfo,
-                                      &allocCreateInfo,
-                                      &mHandle,
-                                      &mAllocation,
-                                      nullptr);
+        VkResult err = vmaCreateImage(
+                device->GetMemoryAllocator(), &imageCreateInfo, &allocCreateInfo, &mHandle, &mAllocation, nullptr);
         CHECK_VK_RESULT_FALSE(err, "Could not to create vkImage");
 
         SetDebugName(device, mHandle, "Texture", GetName());
@@ -615,183 +609,162 @@ namespace rhi::impl::vulkan
             usage &= ~cShaderTextureUsages;
         }
 
-        mSubresourceLastSyncInfos.Update(range,
-                                         [&](const SubresourceRange& range, TextureSyncInfo& lastSyncInfo)
-                                         {
+        mSubresourceLastSyncInfos.Update(
+                range,
+                [&](const SubresourceRange& range, TextureSyncInfo& lastSyncInfo)
+                {
+                    bool needTransferOwnership =
+                            lastSyncInfo.queue != QueueType::Undefined && lastSyncInfo.queue != queue->GetType();
 
-                                             bool needTransferOwnership = lastSyncInfo.queue != QueueType::Undefined &&
-                                                     lastSyncInfo.queue != queue->GetType();
+                    if (!needTransferOwnership &&
+                        CanReuseWithoutBarrier(lastSyncInfo.usage, usage, lastSyncInfo.shaderStages, shaderStages))
+                    {
+                        return;
+                    }
 
-                                             if (!needTransferOwnership && CanReuseWithoutBarrier(
-                                                     lastSyncInfo.usage,
-                                                     usage,
-                                                     lastSyncInfo.shaderStages,
-                                                     shaderStages))
-                                             {
-                                                 return;
-                                             }
+                    VkImageMemoryBarrier2 barrier{};
+                    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+                    barrier.pNext = nullptr;
+                    barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat);
+                    // todo: use 0 when we need transfer ownership.
+                    barrier.srcStageMask = PiplineStageConvert(lastSyncInfo.usage, lastSyncInfo.shaderStages, mFormat);
+                    barrier.dstAccessMask = AccessFlagsConvert(usage, mFormat);
+                    barrier.dstStageMask = PiplineStageConvert(usage, shaderStages, mFormat);
+                    barrier.oldLayout = ImageLayoutConvert(lastSyncInfo.usage, mFormat);
+                    barrier.newLayout = ImageLayoutConvert(usage, mFormat);
+                    barrier.image = mHandle;
+                    barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(range.aspects);
+                    barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
+                    barrier.subresourceRange.levelCount = range.levelCount;
+                    barrier.subresourceRange.baseArrayLayer = range.baseArrayLayer;
+                    barrier.subresourceRange.layerCount = range.layerCount;
 
-                                             VkImageMemoryBarrier2 barrier{};
-                                             barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-                                             barrier.pNext = nullptr;
-                                             barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat);
-                                             //todo: use 0 when we need transfer ownership.
-                                             barrier.srcStageMask = PiplineStageConvert(
-                                                     lastSyncInfo.usage,
-                                                     lastSyncInfo.shaderStages,
-                                                     mFormat);
-                                             barrier.dstAccessMask = AccessFlagsConvert(usage, mFormat);
-                                             barrier.dstStageMask = PiplineStageConvert(usage, shaderStages, mFormat);
-                                             barrier.oldLayout = ImageLayoutConvert(lastSyncInfo.usage, mFormat);
-                                             barrier.newLayout = ImageLayoutConvert(usage, mFormat);
-                                             barrier.image = mHandle;
-                                             barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(
-                                                     range.aspects);
-                                             barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
-                                             barrier.subresourceRange.levelCount = range.levelCount;
-                                             barrier.subresourceRange.baseArrayLayer = range.baseArrayLayer;
-                                             barrier.subresourceRange.layerCount = range.layerCount;
+                    if (needTransferOwnership)
+                    {
+                        barrier.srcQueueFamilyIndex =
+                                checked_cast<Queue>(checked_cast<Device>(mDevice)->GetQueue(lastSyncInfo.queue))
+                                        ->GetQueueFamilyIndex();
+                        barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();
+                        ;
+                    }
 
-                                             if (needTransferOwnership)
-                                             {
-                                                 barrier.srcQueueFamilyIndex = checked_cast<Queue>(
-                                                         checked_cast<Device>(mDevice.Get())->GetQueue(
-                                                                 lastSyncInfo.queue))->GetQueueFamilyIndex();
-                                                 barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();;
-                                             }
+                    queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
 
-                                             queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
-
-                                             if (lastSyncInfo.usage == usage && IsSubset(usage, cReadOnlyTextureUsages))
-                                             {
-                                                 // Read only usage and no layout transition. We can keep previous shader stages so
-                                                 // future uses in those stages don't insert barriers.
-                                                 lastSyncInfo.shaderStages |= shaderStages;
-                                             }
-                                             else
-                                             {
-                                                 // Image was altered by write or layout transition. We need to clear previous shader
-                                                 // stages so future uses in those stages will insert barriers.
-                                                 lastSyncInfo.shaderStages = shaderStages;
-                                             }
-                                             lastSyncInfo.usage = usage;
-                                             lastSyncInfo.queue = queue->GetType();
-                                         });
-
+                    if (lastSyncInfo.usage == usage && IsSubset(usage, cReadOnlyTextureUsages))
+                    {
+                        // Read only usage and no layout transition. We can keep previous shader stages so
+                        // future uses in those stages don't insert barriers.
+                        lastSyncInfo.shaderStages |= shaderStages;
+                    }
+                    else
+                    {
+                        // Image was altered by write or layout transition. We need to clear previous shader
+                        // stages so future uses in those stages will insert barriers.
+                        lastSyncInfo.shaderStages = shaderStages;
+                    }
+                    lastSyncInfo.usage = usage;
+                    lastSyncInfo.queue = queue->GetType();
+                });
     }
 
     void Texture::TransitionUsageForMultiRange(Queue* queue, const SubresourceStorage<TextureSyncInfo>& syncInfos)
     {
-        mSubresourceLastSyncInfos.Merge(syncInfos,
-                                        [&](const SubresourceRange& range,
-                                            TextureSyncInfo& lastSyncInfo,
-                                            const TextureSyncInfo& newSyncInfo)
-                                        {
-                                            TextureUsage newUsage = newSyncInfo.usage;
-                                            if (newSyncInfo.shaderStages == ShaderStage::None)
-                                            {
-                                                // If the image isn't used in any shader stages, ignore shader usages. Eg. ignore a
-                                                // texture binding that isn't actually sampled in any shader.
-                                                newUsage &= ~cShaderTextureUsages;
-                                            }
+        mSubresourceLastSyncInfos.Merge(
+                syncInfos,
+                [&](const SubresourceRange& range, TextureSyncInfo& lastSyncInfo, const TextureSyncInfo& newSyncInfo)
+                {
+                    TextureUsage newUsage = newSyncInfo.usage;
+                    if (newSyncInfo.shaderStages == ShaderStage::None)
+                    {
+                        // If the image isn't used in any shader stages, ignore shader usages. Eg. ignore a
+                        // texture binding that isn't actually sampled in any shader.
+                        newUsage &= ~cShaderTextureUsages;
+                    }
 
-                                            bool needTransferOwnership = lastSyncInfo.queue != QueueType::Undefined &&
-                                                    lastSyncInfo.queue != queue->GetType();
+                    bool needTransferOwnership =
+                            lastSyncInfo.queue != QueueType::Undefined && lastSyncInfo.queue != queue->GetType();
 
-                                            if (newUsage == TextureUsage::None ||
-                                                (!needTransferOwnership && CanReuseWithoutBarrier(
-                                                        lastSyncInfo.usage,
-                                                        newUsage,
-                                                        lastSyncInfo.shaderStages,
-                                                        newSyncInfo.shaderStages)))
-                                            {
-                                                return;
-                                            }
+                    if (newUsage == TextureUsage::None ||
+                        (!needTransferOwnership &&
+                         CanReuseWithoutBarrier(
+                                 lastSyncInfo.usage, newUsage, lastSyncInfo.shaderStages, newSyncInfo.shaderStages)))
+                    {
+                        return;
+                    }
 
-                                            VkImageMemoryBarrier2 barrier{};
-                                            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-                                            barrier.pNext = nullptr;
-                                            barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat);
-                                            //todo: use 0 when we need transfer ownership.
-                                            barrier.srcStageMask = PiplineStageConvert(
-                                                    lastSyncInfo.usage,
-                                                    lastSyncInfo.shaderStages,
-                                                    mFormat);
-                                            barrier.dstAccessMask = AccessFlagsConvert(newUsage, mFormat);
-                                            barrier.dstStageMask = PiplineStageConvert(
-                                                    newUsage,
-                                                    newSyncInfo.shaderStages,
-                                                    mFormat);
-                                            barrier.oldLayout = ImageLayoutConvert(lastSyncInfo.usage, mFormat);
-                                            barrier.newLayout = ImageLayoutConvert(newUsage, mFormat);
-                                            barrier.image = mHandle;
-                                            barrier.subresourceRange.aspectMask =
-                                                    ImageAspectFlagsConvert(range.aspects);
-                                            barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
-                                            barrier.subresourceRange.levelCount = range.levelCount;
-                                            barrier.subresourceRange.baseArrayLayer = range.baseArrayLayer;
-                                            barrier.subresourceRange.layerCount = range.layerCount;
+                    VkImageMemoryBarrier2 barrier{};
+                    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+                    barrier.pNext = nullptr;
+                    barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat);
+                    // todo: use 0 when we need transfer ownership.
+                    barrier.srcStageMask = PiplineStageConvert(lastSyncInfo.usage, lastSyncInfo.shaderStages, mFormat);
+                    barrier.dstAccessMask = AccessFlagsConvert(newUsage, mFormat);
+                    barrier.dstStageMask = PiplineStageConvert(newUsage, newSyncInfo.shaderStages, mFormat);
+                    barrier.oldLayout = ImageLayoutConvert(lastSyncInfo.usage, mFormat);
+                    barrier.newLayout = ImageLayoutConvert(newUsage, mFormat);
+                    barrier.image = mHandle;
+                    barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(range.aspects);
+                    barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
+                    barrier.subresourceRange.levelCount = range.levelCount;
+                    barrier.subresourceRange.baseArrayLayer = range.baseArrayLayer;
+                    barrier.subresourceRange.layerCount = range.layerCount;
 
-                                            if (needTransferOwnership)
-                                            {
-                                                barrier.srcQueueFamilyIndex = checked_cast<Queue>(
-                                                        checked_cast<Device>(mDevice.Get())->GetQueue(
-                                                                lastSyncInfo.queue))->GetQueueFamilyIndex();
-                                                barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();;
-                                            }
+                    if (needTransferOwnership)
+                    {
+                        barrier.srcQueueFamilyIndex =
+                                checked_cast<Queue>(checked_cast<Device>(mDevice)->GetQueue(lastSyncInfo.queue))
+                                        ->GetQueueFamilyIndex();
+                        barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();
+                        ;
+                    }
 
-                                            queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
+                    queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
 
-                                            if (lastSyncInfo.usage == newUsage && IsSubset(
-                                                    newUsage,
-                                                    cReadOnlyTextureUsages))
-                                            {
-                                                // Read only usage and no layout transition. We can keep previous shader stages so
-                                                // future uses in those stages don't insert barriers.
-                                                lastSyncInfo.shaderStages |= newSyncInfo.shaderStages;
-                                            }
-                                            else
-                                            {
-                                                // Image was altered by write or layout transition. We need to clear previous shader
-                                                // stages so future uses in those stages will insert barriers.
-                                                lastSyncInfo.shaderStages = newSyncInfo.shaderStages;
-                                            }
-                                            lastSyncInfo.usage = newUsage;
-                                            lastSyncInfo.queue = queue->GetType();
-                                        });
+                    if (lastSyncInfo.usage == newUsage && IsSubset(newUsage, cReadOnlyTextureUsages))
+                    {
+                        // Read only usage and no layout transition. We can keep previous shader stages so
+                        // future uses in those stages don't insert barriers.
+                        lastSyncInfo.shaderStages |= newSyncInfo.shaderStages;
+                    }
+                    else
+                    {
+                        // Image was altered by write or layout transition. We need to clear previous shader
+                        // stages so future uses in those stages will insert barriers.
+                        lastSyncInfo.shaderStages = newSyncInfo.shaderStages;
+                    }
+                    lastSyncInfo.usage = newUsage;
+                    lastSyncInfo.queue = queue->GetType();
+                });
     }
 
     void Texture::TransitionOwnership(Queue* queue, const SubresourceRange& range, Queue* recevingQueue)
     {
-        mSubresourceLastSyncInfos.Update(range,
-                                         [&](const SubresourceRange& syncRange, const TextureSyncInfo& lastSyncInfo)
-                                         {
-                                             assert(lastSyncInfo.queue == queue->GetType());
+        mSubresourceLastSyncInfos.Update(
+                range,
+                [&](const SubresourceRange& syncRange, const TextureSyncInfo& lastSyncInfo)
+                {
+                    assert(lastSyncInfo.queue == queue->GetType());
 
-                                             VkImageMemoryBarrier2 barrier{};
-                                             barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-                                             barrier.pNext = nullptr;
-                                             barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat);
-                                             //todo: use 0 when we need transfer ownership.
-                                             barrier.srcStageMask = PiplineStageConvert(
-                                                     lastSyncInfo.usage,
-                                                     lastSyncInfo.shaderStages,
-                                                     mFormat);
-                                             barrier.image = mHandle;
-                                             barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(
-                                                     syncRange.aspects);
-                                             barrier.subresourceRange.baseMipLevel = syncRange.baseMipLevel;
-                                             barrier.subresourceRange.levelCount = syncRange.levelCount;
-                                             barrier.subresourceRange.baseArrayLayer = syncRange.baseArrayLayer;
-                                             barrier.subresourceRange.layerCount = syncRange.layerCount;
-                                             barrier.srcQueueFamilyIndex = checked_cast<Queue>(
-                                                             checked_cast<Device>(mDevice.Get())->GetQueue(
-                                                                     lastSyncInfo.queue))
-                                                     ->GetQueueFamilyIndex();
-                                             barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();;
+                    VkImageMemoryBarrier2 barrier{};
+                    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+                    barrier.pNext = nullptr;
+                    barrier.srcAccessMask = AccessFlagsConvert(lastSyncInfo.usage, mFormat);
+                    // todo: use 0 when we need transfer ownership.
+                    barrier.srcStageMask = PiplineStageConvert(lastSyncInfo.usage, lastSyncInfo.shaderStages, mFormat);
+                    barrier.image = mHandle;
+                    barrier.subresourceRange.aspectMask = ImageAspectFlagsConvert(syncRange.aspects);
+                    barrier.subresourceRange.baseMipLevel = syncRange.baseMipLevel;
+                    barrier.subresourceRange.levelCount = syncRange.levelCount;
+                    barrier.subresourceRange.baseArrayLayer = syncRange.baseArrayLayer;
+                    barrier.subresourceRange.layerCount = syncRange.layerCount;
+                    barrier.srcQueueFamilyIndex =
+                            checked_cast<Queue>(checked_cast<Device>(mDevice)->GetQueue(lastSyncInfo.queue))
+                                    ->GetQueueFamilyIndex();
+                    barrier.dstQueueFamilyIndex = queue->GetQueueFamilyIndex();
+                    ;
 
-                                             queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
-                                         });
+                    queue->GetPendingRecordingContext()->AddTextureBarrier(barrier);
+                });
     }
 
     void Texture::TransitionUsageNow(Queue* queue,
@@ -816,54 +789,51 @@ namespace rhi::impl::vulkan
 
         mSubresourceLastSyncInfos.Iterate(
                 [&isUsedInQueue](const SubresourceRange& syncRange, const TextureSyncInfo& lastSyncInfo)
-                {
-                    isUsedInQueue[static_cast<uint32_t>(lastSyncInfo.queue)] = true;
-                });
+                { isUsedInQueue[static_cast<uint32_t>(lastSyncInfo.queue)] = true; });
 
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
-        Ref<RefCountedHandle<ImageAllocation>> imageAllocation = AcquireRef(new RefCountedHandle<ImageAllocation>(device, { mHandle, mAllocation },
-            [](Device* device, ImageAllocation handle)
-            {
-                vmaDestroyImage(device->GetMemoryAllocator(), handle.image, handle.allocation);
-            }
-        ));
+        Ref<RefCountedHandle<ImageAllocation>> imageAllocation = AcquireRef(new RefCountedHandle<ImageAllocation>(
+                device,
+                {mHandle, mAllocation},
+                [](Device* device, ImageAllocation handle)
+                { vmaDestroyImage(device->GetMemoryAllocator(), handle.image, handle.allocation); }));
 
         for (uint32_t i = 0; i < isUsedInQueue.size(); ++i)
         {
             if (isUsedInQueue[i])
             {
-                checked_cast<Queue>(device->GetQueue(static_cast<QueueType>(i)))->GetDeleter()->DeleteWhenUnused(imageAllocation);
+                checked_cast<Queue>(device->GetQueue(static_cast<QueueType>(i)))
+                        ->GetDeleter()
+                        ->DeleteWhenUnused(imageAllocation);
             }
         }
 
         mHandle = VK_NULL_HANDLE;
         mAllocation = VK_NULL_HANDLE;
-        mDestoryed = true;
+        mDestroyed = true;
     }
 
     Ref<SwapChainTexture> SwapChainTexture::Create(Device* device, const TextureDesc& desc, VkImage nativeImage)
     {
         Ref<SwapChainTexture> texture = AcquireRef(new SwapChainTexture(device, desc));
         texture->Initialize(nativeImage);
+        texture->TrackResource();
         return texture;
     }
 
-    SwapChainTexture::SwapChainTexture(Device* device, const TextureDesc& desc) :
-        Texture(device, desc)
+    SwapChainTexture::SwapChainTexture(Device* device, const TextureDesc& desc)
+        : Texture(device, desc)
     {}
 
-    SwapChainTexture::~SwapChainTexture()
-    {}
+    SwapChainTexture::~SwapChainTexture() = default;
 
     void SwapChainTexture::Initialize(VkImage nativeImage)
     {
-        TextureBase::Initialize();
-
         mHandle = nativeImage;
         mSubresourceLastSyncInfos.Fill({cSwapChainImageAcquireUsage, ShaderStage::None});
 
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         SetDebugName(device, mHandle, "Texture", GetName());
     }
@@ -872,7 +842,7 @@ namespace rhi::impl::vulkan
     {
         mTextureViews.Destroy();
         mHandle = VK_NULL_HANDLE;
-        mDestoryed = true;
+        mDestroyed = true;
     }
 
     Ref<TextureView> TextureView::Create(TextureBase* texture, const TextureViewDesc& desc)
@@ -882,18 +852,16 @@ namespace rhi::impl::vulkan
         {
             return nullptr;
         }
-
+        textureView->TrackResource();
         return textureView;
     }
 
-    TextureView::TextureView(TextureBase* texture, const TextureViewDesc& desc) :
-        TextureViewBase(texture, desc)
+    TextureView::TextureView(TextureBase* texture, const TextureViewDesc& desc)
+        : TextureViewBase(texture, desc)
     {}
 
     bool TextureView::Initialize()
     {
-        TextureViewBase::Initialize();
-
         if ((mInternalUsage & ~(TextureUsage::CopySrc | TextureUsage::CopyDst)) == 0)
         {
             // If the texture view has no other usage than CopySrc and CopyDst, then it can't
@@ -902,7 +870,7 @@ namespace rhi::impl::vulkan
             return false;
         }
 
-        if (mTexture->IsDestoryed())
+        if (mTexture->IsDestroyed())
         {
             return false;
         }
@@ -914,10 +882,8 @@ namespace rhi::impl::vulkan
         createInfo.image = checked_cast<Texture>(mTexture)->GetHandle();
         createInfo.viewType = GetVkImageViewType(mDimension);
         createInfo.format = ToVkFormat(mFormat);
-        createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R,
-                                                   VK_COMPONENT_SWIZZLE_G,
-                                                   VK_COMPONENT_SWIZZLE_B,
-                                                   VK_COMPONENT_SWIZZLE_A};
+        createInfo.components = VkComponentMapping{
+                VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
         createInfo.subresourceRange.aspectMask = ImageAspectFlagsConvert(mRange.aspects);
         createInfo.subresourceRange.baseArrayLayer = mRange.baseArrayLayer;
         createInfo.subresourceRange.layerCount = mRange.layerCount;
@@ -945,16 +911,16 @@ namespace rhi::impl::vulkan
 
     void TextureView::DestroyImpl()
     {
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         // SubresourceStorage<T>::Get does not accept combined enum, separate it.
         for (Aspect aspect : IterateEnumFlags(mRange.aspects))
         {
-            QueueType lastQueue = checked_cast<Texture>(mTexture.Get())->mSubresourceLastSyncInfos.Get(
-                    aspect,
-                    mRange.baseArrayLayer,
-                    mRange.baseMipLevel).queue;
-            assert(lastQueue != QueueType::Undefined);
+            QueueType lastQueue =
+                    checked_cast<Texture>(mTexture.Get())
+                            ->mSubresourceLastSyncInfos.Get(aspect, mRange.baseArrayLayer, mRange.baseMipLevel)
+                            .queue;
+            ASSERT(lastQueue != QueueType::Undefined);
 
             checked_cast<Queue>(device->GetQueue(lastQueue))->GetDeleter()->DeleteWhenUnused(mHandle);
 
@@ -962,4 +928,4 @@ namespace rhi::impl::vulkan
             break;
         }
     }
-}
+} // namespace rhi::impl::vulkan

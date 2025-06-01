@@ -1,7 +1,6 @@
 #include "CommandAllocator.h"
 #include "common/Utils.h"
-
-#include <cassert>
+#include "common/Error.h"
 
 namespace rhi::impl
 {
@@ -13,8 +12,9 @@ namespace rhi::impl
 
     CommandAllocator::~CommandAllocator() = default;
 
-    CommandAllocator::CommandAllocator(CommandAllocator&& other) :
-        mBlocks(std::move(other.mBlocks)), mLastAllocationSize(other.mLastAllocationSize)
+    CommandAllocator::CommandAllocator(CommandAllocator&& other)
+        : mBlocks(std::move(other.mBlocks))
+        , mLastAllocationSize(other.mLastAllocationSize)
     {
         mCurrentPtr = other.mCurrentPtr;
         mEndPtr = other.mEndPtr;
@@ -35,14 +35,14 @@ namespace rhi::impl
 
     char* CommandAllocator::Allocate(uint32_t commandId, size_t commandSize, size_t commandAlignment)
     {
-        assert(mCurrentPtr != nullptr);
-        assert(mEndPtr != nullptr);
-        assert(commandId != cEndOfBlock);
+        ASSERT(mCurrentPtr != nullptr);
+        ASSERT(mEndPtr != nullptr);
+        ASSERT(commandId != cEndOfBlock);
 
         // It should always be possible to allocate one id, for kEndOfBlock tagging,
-        assert(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
-        assert(mEndPtr >= mCurrentPtr);
-        assert(static_cast<size_t>(mEndPtr - mCurrentPtr) >= sizeof(uint32_t));
+        ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
+        ASSERT(mEndPtr >= mCurrentPtr);
+        ASSERT(static_cast<size_t>(mEndPtr - mCurrentPtr) >= sizeof(uint32_t));
 
         // The memory after the ID will contain the following:
         //   - the current ID
@@ -57,8 +57,7 @@ namespace rhi::impl
 
         // The good case were we have enough space for the command data and upper bound of the
         // extra required space.
-        if ((remainingSize >= cWorstCaseAdditionalSize) &&
-            (remainingSize - cWorstCaseAdditionalSize >= commandSize))
+        if ((remainingSize >= cWorstCaseAdditionalSize) && (remainingSize - cWorstCaseAdditionalSize >= commandSize))
         {
             uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
             *idAlloc = commandId;
@@ -113,7 +112,7 @@ namespace rhi::impl
         // Allocate blocks doubling sizes each time, to a maximum of 16k (or at least minimumSize).
         mLastAllocationSize = std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
 
-        auto block = std::unique_ptr<char[]>(new(std::nothrow) char[mLastAllocationSize]);
+        auto block = std::unique_ptr<char[]>(new (std::nothrow) char[mLastAllocationSize]);
         if (block == nullptr)
         {
             return false;
@@ -141,9 +140,9 @@ namespace rhi::impl
 
     CommandBlocks&& CommandAllocator::AcquireCurrentBlocks()
     {
-        assert(mCurrentPtr != nullptr && mEndPtr != nullptr);
-        assert(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
-        assert(mCurrentPtr + sizeof(uint32_t) <= mEndPtr);
+        ASSERT(mCurrentPtr != nullptr && mEndPtr != nullptr);
+        ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
+        ASSERT(mCurrentPtr + sizeof(uint32_t) <= mEndPtr);
         *reinterpret_cast<uint32_t*>(mCurrentPtr) = cEndOfBlock;
 
         Clear();
@@ -155,9 +154,9 @@ namespace rhi::impl
         mBlocksPool.push_back(std::move(blocks));
     }
 
-    CommandIterator::CommandIterator(CommandAllocator& allocator) :
-        mBlocks(allocator.AcquireCurrentBlocks()),
-        mAllocator(allocator)
+    CommandIterator::CommandIterator(CommandAllocator& allocator)
+        : mBlocks(allocator.AcquireCurrentBlocks())
+        , mAllocator(allocator)
     {
         Reset();
     }
@@ -170,9 +169,8 @@ namespace rhi::impl
     bool CommandIterator::NextCommandId(uint32_t* commandId)
     {
         char* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
-        assert(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
-                idPtr + sizeof(uint32_t) <=
-                mBlocks[mCurrentBlockIndex].data.get() + mBlocks[mCurrentBlockIndex].size);
+        ASSERT(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
+               idPtr + sizeof(uint32_t) <= mBlocks[mCurrentBlockIndex].data.get() + mBlocks[mCurrentBlockIndex].size);
 
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
 
@@ -229,8 +227,8 @@ namespace rhi::impl
     void* CommandIterator::NextCommand(size_t commandSize, size_t commandAlignment)
     {
         char* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
-        assert(commandPtr + sizeof(commandSize) <=
-                mBlocks[mCurrentBlockIndex].data.get() + mBlocks[mCurrentBlockIndex].size);
+        ASSERT(commandPtr + sizeof(commandSize) <=
+               mBlocks[mCurrentBlockIndex].data.get() + mBlocks[mCurrentBlockIndex].size);
 
         mCurrentPtr = commandPtr + commandSize;
         return commandPtr;
@@ -240,9 +238,9 @@ namespace rhi::impl
     {
         uint32_t id;
         bool hasId = NextCommandId(&id);
-        assert(hasId);
-        assert(id == cAdditionalData);
+        ASSERT(hasId);
+        ASSERT(id == cAdditionalData);
 
         return NextCommand(dataSize, dataAlignment);
     }
-}
+} // namespace rhi::impl

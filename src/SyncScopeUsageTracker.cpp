@@ -1,16 +1,14 @@
 #include "SyncScopeUsageTracker.h"
 
-#include "TextureBase.h"
 #include "BindSetBase.h"
 #include "BindSetLayoutBase.h"
+#include "TextureBase.h"
 #include "common/Constants.h"
 #include "common/Error.h"
 
 namespace rhi::impl
 {
-    void SyncScopeUsageTracker::BufferUsedAs(BufferBase* buffer,
-                                             BufferUsage usage,
-                                             ShaderStage shaderStages)
+    void SyncScopeUsageTracker::BufferUsedAs(BufferBase* buffer, BufferUsage usage, ShaderStage shaderStages)
     {
         BufferSyncInfo& bufferSyncInfo = mBufferSyncInfos[buffer];
 
@@ -24,10 +22,8 @@ namespace rhi::impl
                                                    ShaderStage shaderStages)
     {
         Aspect formatAspects = GetAspectFromFormat(texture->APIGetFormat());
-        auto it = mTextureSyncInfos.try_emplace(texture,
-                                                formatAspects,
-                                                texture->APIGetDepthOrArrayLayers(),
-                                                texture->APIGetMipLevelCount());
+        auto it = mTextureSyncInfos.try_emplace(
+                texture, formatAspects, texture->APIGetDepthOrArrayLayers(), texture->APIGetMipLevelCount());
 
         SubresourceStorage<TextureSyncInfo>& textureSyncInfo = it.first->second;
         textureSyncInfo.Update(range,
@@ -38,9 +34,7 @@ namespace rhi::impl
                                });
     }
 
-    void SyncScopeUsageTracker::TextureViewUsedAs(TextureViewBase* view,
-                                                  TextureUsage usage,
-                                                  ShaderStage shaderStages)
+    void SyncScopeUsageTracker::TextureViewUsedAs(TextureViewBase* view, TextureUsage usage, ShaderStage shaderStages)
     {
         TextureRangeUsedAs(view->GetTexture(), view->GetSubresourceRange(), usage, shaderStages);
     }
@@ -55,35 +49,35 @@ namespace rhi::impl
             {
             case BindingType::CombinedTextureSampler:
             case BindingType::SampledTexture:
-            {
-                TextureViewUsedAs(bindingEntry.textureView, TextureUsage::SampledBinding, visibility);
-                break;
-            }
+                {
+                    TextureViewUsedAs(bindingEntry.textureView, TextureUsage::SampledBinding, visibility);
+                    break;
+                }
             case BindingType::StorageTexture:
-            {
-                TextureViewUsedAs(bindingEntry.textureView, TextureUsage::StorageBinding, visibility);
-                break;
-            }
+                {
+                    TextureViewUsedAs(bindingEntry.textureView, TextureUsage::StorageBinding, visibility);
+                    break;
+                }
             case BindingType::ReadOnlyStorageTexture:
-            {
-                TextureViewUsedAs(bindingEntry.textureView, cReadOnlyStorageTexture, visibility);
-                break;
-            }
+                {
+                    TextureViewUsedAs(bindingEntry.textureView, cReadOnlyStorageTexture, visibility);
+                    break;
+                }
             case BindingType::UniformBuffer:
-            {
-                BufferUsedAs(bindingEntry.buffer, BufferUsage::Uniform, visibility);
-                break;
-            }
+                {
+                    BufferUsedAs(bindingEntry.buffer, BufferUsage::Uniform, visibility);
+                    break;
+                }
             case BindingType::StorageBuffer:
-            {
-                BufferUsedAs(bindingEntry.buffer, BufferUsage::Storage, visibility);
-                break;
-            }
+                {
+                    BufferUsedAs(bindingEntry.buffer, BufferUsage::Storage, visibility);
+                    break;
+                }
             case BindingType::ReadOnlyStorageBuffer:
-            {
-                BufferUsedAs(bindingEntry.buffer, cReadOnlyStorageBuffer, visibility);
-                break;
-            }
+                {
+                    BufferUsedAs(bindingEntry.buffer, cReadOnlyStorageBuffer, visibility);
+                    break;
+                }
             case BindingType::Sampler:
                 break;
             case BindingType::None:
@@ -119,4 +113,4 @@ namespace rhi::impl
 
         return usages;
     }
-}
+} // namespace rhi::impl

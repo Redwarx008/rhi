@@ -1,21 +1,19 @@
 #include "CommandEncoder.h"
-#include "Commands.h"
-#include "common/Utils.h"
-#include "common/Error.h"
 #include "BufferBase.h"
-#include "TextureBase.h"
-#include "RenderPassEncoder.h"
+#include "Commands.h"
 #include "ComputePassEncoder.h"
 #include "DeviceBase.h"
+#include "RenderPassEncoder.h"
 #include "Subresource.h"
+#include "TextureBase.h"
+#include "common/Error.h"
+#include "common/Utils.h"
 
 namespace rhi::impl
 {
-    CommandEncoder::CommandEncoder(DeviceBase* device) :
-        mDevice(device)
-    {
-
-    }
+    CommandEncoder::CommandEncoder(DeviceBase* device)
+        : mDevice(device)
+    {}
 
     Ref<CommandEncoder> CommandEncoder::Create(DeviceBase* device)
     {
@@ -26,7 +24,7 @@ namespace rhi::impl
     void CommandEncoder::APIClearBuffer(BufferBase* buffer, uint32_t value, uint64_t offset, uint64_t size)
     {
         INVALID_IF(mState != State::OutsideOfPass, "The command must be outside of the compute pass and render pass.");
-        //ASSERT(HasFlag(buffer->APIGetUsage(), BufferUsage::CopyDst));
+        // ASSERT(HasFlag(buffer->APIGetUsage(), BufferUsage::CopyDst));
 
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
         ClearBufferCmd* cmd = allocator.Allocate<ClearBufferCmd>(Command::ClearBuffer);
@@ -36,11 +34,12 @@ namespace rhi::impl
         cmd->size = size;
     }
 
-    void CommandEncoder::APICopyBufferToBuffer(BufferBase* srcBuffer, uint64_t srcOffset, BufferBase* dstBuffer, uint64_t dstOffset, uint64_t dataSize)
+    void CommandEncoder::APICopyBufferToBuffer(
+            BufferBase* srcBuffer, uint64_t srcOffset, BufferBase* dstBuffer, uint64_t dstOffset, uint64_t dataSize)
     {
         INVALID_IF(mState != State::OutsideOfPass, "The command must be outside of the compute pass and render pass.");
         ASSERT(HasFlag(srcBuffer->APIGetUsage(), BufferUsage::CopySrc));
-        //ASSERT(HasFlag(srcBuffer->APIGetUsage(), BufferUsage::CopyDst));
+        // ASSERT(HasFlag(srcBuffer->APIGetUsage(), BufferUsage::CopyDst));
 
         CommandAllocator& allocator = mEncodingContext.GetCommandAllocator();
         CopyBufferToBufferCmd* cmd = allocator.Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
@@ -51,7 +50,9 @@ namespace rhi::impl
         cmd->size = dataSize;
     }
 
-    void CommandEncoder::APICopyBufferToTexture(BufferBase* srcBuffer, const TextureDataLayout& dataLayout, const TextureSlice& dstTextureSlice)
+    void CommandEncoder::APICopyBufferToTexture(BufferBase* srcBuffer,
+                                                const TextureDataLayout& dataLayout,
+                                                const TextureSlice& dstTextureSlice)
     {
         INVALID_IF(mState != State::OutsideOfPass, "The command must be outside of the compute pass and render pass.");
         ASSERT(HasFlag(srcBuffer->APIGetUsage(), BufferUsage::CopySrc));
@@ -70,7 +71,9 @@ namespace rhi::impl
         cmd->aspect = AspectConvert(cmd->dstTexture->APIGetFormat(), dstTextureSlice.aspect);
     }
 
-    void CommandEncoder::APICopyTextureToBuffer(const TextureSlice& srcTextureSlice, BufferBase* dstBuffer, const TextureDataLayout& dataLayout)
+    void CommandEncoder::APICopyTextureToBuffer(const TextureSlice& srcTextureSlice,
+                                                BufferBase* dstBuffer,
+                                                const TextureDataLayout& dataLayout)
     {
         INVALID_IF(mState != State::OutsideOfPass, "The command must be outside of the compute pass and render pass.");
         ASSERT(HasFlag(srcTextureSlice.texture->APIGetUsage(), TextureUsage::CopySrc));
@@ -87,7 +90,8 @@ namespace rhi::impl
         cmd->mipLevel = srcTextureSlice.mipLevel;
     }
 
-    void CommandEncoder::APICopyTextureToTexture(const TextureSlice& srcTextureSlice, const TextureSlice& dstTextureSlice)
+    void CommandEncoder::APICopyTextureToTexture(const TextureSlice& srcTextureSlice,
+                                                 const TextureSlice& dstTextureSlice)
     {
         INVALID_IF(mState != State::OutsideOfPass, "The command must be outside of the compute pass and render pass.");
         ASSERT(HasFlag(srcTextureSlice.texture->APIGetUsage(), TextureUsage::CopySrc));
@@ -109,7 +113,10 @@ namespace rhi::impl
     }
 
 
-    void CommandEncoder::APIMapBufferAsync(BufferBase* buffer, MapMode usage, BufferMapCallback callback, void* userData)
+    void CommandEncoder::APIMapBufferAsync(BufferBase* buffer,
+                                           MapMode usage,
+                                           BufferMapCallback callback,
+                                           void* userData)
     {
         INVALID_IF(mState != State::OutsideOfPass, "The command must be outside of the compute pass and render pass.");
         ASSERT(HasFlag(buffer->APIGetUsage(), BufferUsage::MapRead | BufferUsage::MapWrite));
@@ -181,9 +188,9 @@ namespace rhi::impl
         }
 
         mState = State::InRenderPass;
-        Ref<RenderPassEncoder> renderPassEncoder = RenderPassEncoder::Create(this, mEncodingContext, std::move(usageTracker));
+        Ref<RenderPassEncoder> renderPassEncoder =
+                RenderPassEncoder::Create(this, mEncodingContext, std::move(usageTracker));
         return renderPassEncoder;
-
     }
 
 
@@ -221,7 +228,8 @@ namespace rhi::impl
 
     CommandListResourceUsage CommandEncoder::AcquireResourceUsages()
     {
-        return CommandListResourceUsage{ mEncodingContext.AcquireRenderPassUsages(), mEncodingContext.AcquireComputePassUsages() };
+        return CommandListResourceUsage{mEncodingContext.AcquireRenderPassUsages(),
+                                        mEncodingContext.AcquireComputePassUsages()};
     }
 
     void CommandEncoder::OnRenderPassEnd()
@@ -233,5 +241,4 @@ namespace rhi::impl
     {
         mState = State::OutsideOfPass;
     }
-}
-
+} // namespace rhi::impl

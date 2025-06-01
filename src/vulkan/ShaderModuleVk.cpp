@@ -8,7 +8,8 @@
 
 namespace rhi::impl::vulkan
 {
-    ShaderModule::ShaderModule(Device* device, const ShaderModuleDesc& desc) : ShaderModuleBase(device, desc)
+    ShaderModule::ShaderModule(Device* device, const ShaderModuleDesc& desc)
+        : ShaderModuleBase(device, desc)
     {}
 
     ShaderModule::~ShaderModule() = default;
@@ -20,19 +21,18 @@ namespace rhi::impl::vulkan
         {
             return nullptr;
         }
+        shaderModule->TrackResource();
         return shaderModule;
     }
 
     bool ShaderModule::Initialize(const ShaderModuleDesc& desc)
     {
-        ShaderModuleBase::TrackResource();
-
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.pCode = mSpirvData.data();
         createInfo.codeSize = desc.code.size();
 
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         VkResult err = vkCreateShaderModule(device->GetHandle(), &createInfo, nullptr, &mHandle);
         CHECK_VK_RESULT_FALSE(err, "CreateShaderModule");
@@ -44,7 +44,7 @@ namespace rhi::impl::vulkan
 
     void ShaderModule::DestroyImpl()
     {
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         if (mHandle != VK_NULL_HANDLE)
         {

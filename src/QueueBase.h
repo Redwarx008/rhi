@@ -1,12 +1,12 @@
 #pragma once
 
+#include <atomic>
+#include <memory>
+#include "CallbackTaskManager.h"
 #include "RHIStruct.h"
+#include "UploadAllocator.h"
 #include "common/RefCounted.h"
 #include "common/SerialMap.hpp"
-#include "CallbackTaskManager.h"
-#include "UploadAllocator.h"
-#include <memory>
-#include <atomic>
 
 namespace rhi::impl
 {
@@ -24,7 +24,7 @@ namespace rhi::impl
                              size_t dataSize,
                              const TextureDataLayout& dataLayout);
         void APIWaitFor(QueueBase* queue, uint64_t submitSerial);
-        uint64_t APISubmit(CommandListBase* const * commands,
+        uint64_t APISubmit(CommandListBase* const* commands,
                            uint32_t commandListCount,
                            ResourceTransfer const* transfers = nullptr,
                            uint32_t transferCount = 0);
@@ -39,26 +39,21 @@ namespace rhi::impl
         bool HasScheduledCommands() const;
         void CheckAndUpdateCompletedSerial();
         void TrackTask(std::unique_ptr<CallbackTask>, uint64_t serial);
-        void CopyFromStagingToBuffer(BufferBase* src,
-                                     uint64_t srcOffset,
-                                     BufferBase* dst,
-                                     uint64_t dstOffset,
-                                     uint64_t size);
+        void CopyFromStagingToBuffer(
+                BufferBase* src, uint64_t srcOffset, BufferBase* dst, uint64_t dstOffset, uint64_t size);
+        virtual void Destroy() = 0;
 
     protected:
         explicit QueueBase(DeviceBase* device, QueueType type);
-        ~QueueBase();
+        ~QueueBase() override;
         virtual void TickImpl(uint64_t completedSerial) = 0;
         virtual uint64_t SubmitImpl(CommandListBase* const* commands,
                                     uint32_t commandListCount,
                                     ResourceTransfer const* transfers,
                                     uint32_t transferCount) = 0;
         virtual uint64_t QueryCompletedSerial() = 0;
-        virtual void CopyFromStagingToBufferImpl(BufferBase* src,
-                                                 uint64_t srcOffset,
-                                                 BufferBase* dst,
-                                                 uint64_t destOffset,
-                                                 uint64_t size) = 0;
+        virtual void CopyFromStagingToBufferImpl(
+                BufferBase* src, uint64_t srcOffset, BufferBase* dst, uint64_t destOffset, uint64_t size) = 0;
         virtual void CopyFromStagingToTextureImpl(BufferBase* src,
                                                   const TextureSlice& dst,
                                                   const TextureDataLayout& dataLayout) = 0;
@@ -76,4 +71,4 @@ namespace rhi::impl
         std::atomic<uint64_t> mCompletedSerial = 0;
         std::atomic<uint64_t> mLastSubmittedSerial = 0;
     };
-}
+} // namespace rhi::impl

@@ -3,6 +3,7 @@
 #include "PerShaderStage.hpp"
 #include "RHIStruct.h"
 #include "ResourceBase.h"
+#include "BindSetLayoutBase.h"
 #include "common/Cached.hpp"
 #include "common/Constants.h"
 #include "common/Ref.hpp"
@@ -18,7 +19,7 @@ namespace rhi::impl
     public:
         explicit PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDesc& desc);
         explicit PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDesc2& desc);
-        ~PipelineLayoutBase();
+        ~PipelineLayoutBase() override;
         BindSetLayoutBase* APIGetBindSetLayout(uint32_t bindSetIndex) const;
         BindSetLayoutBase* GetBindSetLayout(uint32_t bindSetIndex) const;
         const std::bitset<cMaxBindSets>& GetBindSetMask() const;

@@ -32,9 +32,8 @@ namespace rhi::impl
         void OnMapCallbackCompleted(BufferMapAsyncStatus status);
 
     protected:
-        explicit BufferBase(DeviceBase* device, const BufferDesc& desc);
-        ~BufferBase();
-        void Initialize();
+        explicit BufferBase(DeviceBase* device, const BufferDesc& desc, QueueType initialQueueOwner);
+        ~BufferBase() override;
         struct UsageTrackInQueue;
         UsageTrackInQueue& GetTrackedUsagae(QueueType queueType);
         virtual void MapAsyncImpl(QueueBase* queue, MapMode mode) = 0;
@@ -61,4 +60,4 @@ namespace rhi::impl
 
         std::array<UsageTrackInQueue, 3> mUsageTrackInQueues;
     };
-}
+} // namespace rhi::impl

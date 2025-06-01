@@ -5,8 +5,8 @@
 
 namespace rhi::impl
 {
-    SurfaceBase::SurfaceBase(InstanceBase* instance) :
-        mInstance(instance)
+    SurfaceBase::SurfaceBase(InstanceBase* instance)
+        : mInstance(instance)
     {}
 
     SurfaceBase::~SurfaceBase() = default;
@@ -71,4 +71,4 @@ namespace rhi::impl
     {
         return mHWND;
     }
-}
+} // namespace rhi::impl

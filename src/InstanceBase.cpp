@@ -6,4 +6,4 @@ namespace rhi::impl
     {
         return mDebugLayerEnabled;
     }
-}
+} // namespace rhi::impl

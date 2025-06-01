@@ -17,6 +17,7 @@ DEFINE_RHI_OBJECT(RenderPassEncoder);
 DEFINE_RHI_OBJECT(ComputePassEncoder);
 DEFINE_RHI_OBJECT(CommandList);
 DEFINE_RHI_OBJECT(PipelineLayout);
+DEFINE_RHI_OBJECT(PipelineCache);
 DEFINE_RHI_OBJECT(Sampler);
 DEFINE_RHI_OBJECT(ShaderModule);
 DEFINE_RHI_OBJECT(Buffer);
@@ -919,6 +920,13 @@ typedef struct RHIPipelineLayoutDesc2
 }RHIPipelineLayoutDesc2;
 
 
+typedef struct RHIPipelineCacheDesc
+{
+    RHIStringView name;
+    const void* data;
+    size_t dataSize;
+}RHIPipelineCacheDesc;
+
 typedef struct RHIRenderPipelineDesc
 {
     RHIStringView name;
@@ -928,7 +936,8 @@ typedef struct RHIRenderPipelineDesc
     RHIShaderState* tessEvaluationShader;
     RHIShaderState* geometryShader ;
 
-    RHIPipelineLayout pipelineLayout;
+    RHIPipelineLayout layout;
+    RHIPipelineCache cache;
 
     RHIVertexInputAttribute const* vertexAttributes;
     uint32_t vertexAttributeCount;
@@ -951,7 +960,8 @@ typedef struct RHIComputePipelineDesc
     RHIStringView name;
     RHIShaderState* computeShader;
 
-    RHIPipelineLayout pipelineLayout;
+    RHIPipelineLayout layout;
+    RHIPipelineCache cache;
 }RHIComputePipelineDesc;
 
 typedef struct RHIRenderPassDesc
@@ -991,8 +1001,9 @@ void rhiAdapterRelease(RHIAdapter adapter);
 // methods of Device
 RHIAdapter rhiDeviceGetAdapter(RHIDevice device);
 RHIQueue rhiDeviceGetQueue(RHIDevice device, RHIQueueType queueType);
-RHIPipelineLayout rhiCreatePipelineLayout(RHIDevice device, const RHIPipelineLayoutDesc* desc);
-RHIPipelineLayout rhiCreatePipelineLayout2(RHIDevice device, const RHIPipelineLayoutDesc2* desc);
+RHIPipelineLayout rhiDeviceCreatePipelineLayout(RHIDevice device, const RHIPipelineLayoutDesc* desc);
+RHIPipelineLayout rhiDeviceCreatePipelineLayout2(RHIDevice device, const RHIPipelineLayoutDesc2* desc);
+RHIPipelineCache rhiDeviceCreatePipelineCache(RHIDevice device, const RHIPipelineCacheDesc* desc);
 RHIRenderPipeline rhiDeviceCreateRenderPipeline(RHIDevice device, const RHIRenderPipelineDesc* desc);
 RHIComputePipeline rhiDeviceCreateComputePipeline(RHIDevice device, const RHIComputePipelineDesc* desc);
 RHIBindSetLayout rhiDeviceCreateBindSetLayout(RHIDevice device, const RHIBindSetLayoutDesc* desc);
@@ -1082,6 +1093,10 @@ void rhiRenderPipelineRelease(RHIRenderPipeline pipeline);
 RHIBindSetLayout rhiPipelineLayoutIGetBindSetLayout(RHIPipelineLayout pipelineLayout, uint32_t bindSetIndex);
 void rhiPipelineLayoutAddRef(RHIPipelineLayout pipelineLayout);
 void rhiPipelineLayoutRelease(RHIPipelineLayout pipelineLayout);
+// methods of PipelineCache
+void rhiPipelineCacheGetData(RHIPipelineCache pipelineCache, void* data, size_t* dataSize);
+void rhiPipelineCacheAddRef(RHIPipelineCache pipelineLayout);
+void rhiPipelineCacheRelease(RHIPipelineCache pipelineLayout);
 // methods of BindSetLayout
 void rhiBindSetLayoutAddRef(RHIBindSetLayout bindSetLayout);
 void rhiBindSetLayoutRelease(RHIBindSetLayout bindSetLayout);

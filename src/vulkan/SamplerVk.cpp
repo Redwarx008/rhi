@@ -1,9 +1,9 @@
 #include "SamplerVk.h"
 
-#include "DeviceVk.h"
-#include "VulkanUtils.h"
-#include "ErrorsVk.h"
 #include "../common/Utils.h"
+#include "DeviceVk.h"
+#include "ErrorsVk.h"
+#include "VulkanUtils.h"
 
 namespace rhi::impl::vulkan
 {
@@ -59,8 +59,8 @@ namespace rhi::impl::vulkan
     }
 
 
-    Sampler::Sampler(Device* device, const SamplerDesc& desc) :
-        SamplerBase(device, desc)
+    Sampler::Sampler(Device* device, const SamplerDesc& desc)
+        : SamplerBase(device, desc)
     {}
 
     Ref<Sampler> Sampler::Create(Device* device, const SamplerDesc& desc)
@@ -70,13 +70,12 @@ namespace rhi::impl::vulkan
         {
             return nullptr;
         }
+        sampler->TrackResource();
         return sampler;
     }
 
     bool Sampler::Initialize(const SamplerDesc& desc)
     {
-        SamplerBase::TrackResource();
-
         VkSamplerCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         createInfo.pNext = nullptr;
@@ -94,12 +93,12 @@ namespace rhi::impl::vulkan
         createInfo.compareEnable = desc.compareOp != CompareOp::Never ? true : false;
         createInfo.unnormalizedCoordinates = VK_FALSE;
 
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
         if (device->GetVkDeviceInfo().features.samplerAnisotropy == VK_TRUE && mMaxAnisotropy > 1)
         {
             createInfo.anisotropyEnable = true;
-            createInfo.maxAnisotropy = (std::min)(mMaxAnisotropy,
-                                                  device->GetVkDeviceInfo().properties.limits.maxSamplerAnisotropy);
+            createInfo.maxAnisotropy =
+                    (std::min)(mMaxAnisotropy, device->GetVkDeviceInfo().properties.limits.maxSamplerAnisotropy);
         }
         else
         {
@@ -119,17 +118,16 @@ namespace rhi::impl::vulkan
         // Usually there is no situation to destroy the sampler during use, so destroy it directly.
         if (mHandle != VK_NULL_HANDLE)
         {
-            Device* device = checked_cast<Device>(mDevice.Get());
+            Device* device = checked_cast<Device>(mDevice);
             vkDestroySampler(device->GetHandle(), mHandle, nullptr);
             mHandle = VK_NULL_HANDLE;
         }
     }
 
-    Sampler::~Sampler()
-    {}
+    Sampler::~Sampler() {}
 
     VkSampler Sampler::GetHandle() const
     {
         return mHandle;
     }
-}
+} // namespace rhi::impl::vulkan

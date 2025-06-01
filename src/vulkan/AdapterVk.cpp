@@ -1,6 +1,6 @@
 #include "AdapterVk.h"
-#include "DeviceVk.h"
 #include "../common/Constants.h"
+#include "DeviceVk.h"
 
 namespace rhi::impl::vulkan
 {
@@ -19,9 +19,9 @@ namespace rhi::impl::vulkan
         }
     }
 
-    Adapter::Adapter(InstanceBase* instance, VkPhysicalDevice vulkanPhysicalDevice) :
-        AdapterBase(instance),
-        mVulkanPhysicalDevice(vulkanPhysicalDevice)
+    Adapter::Adapter(InstanceBase* instance, VkPhysicalDevice vulkanPhysicalDevice)
+        : AdapterBase(instance)
+        , mVulkanPhysicalDevice(vulkanPhysicalDevice)
     {
 
         VkPhysicalDeviceVulkan13Properties properties13{};
@@ -70,8 +70,7 @@ namespace rhi::impl::vulkan
         mLimits.maxComputeWorkgroupSizeX = properties.limits.maxComputeWorkGroupSize[0];
         mLimits.maxComputeWorkgroupSizeY = properties.limits.maxComputeWorkGroupSize[1];
         mLimits.maxComputeWorkgroupSizeZ = properties.limits.maxComputeWorkGroupSize[2];
-        mLimits.maxComputeWorkgroupsPerDimension = (std::min)(
-        {
+        mLimits.maxComputeWorkgroupsPerDimension = (std::min)({
                 properties.limits.maxComputeWorkGroupCount[0],
                 properties.limits.maxComputeWorkGroupCount[1],
                 properties.limits.maxComputeWorkGroupCount[2],
@@ -96,4 +95,4 @@ namespace rhi::impl::vulkan
         return mVulkanPhysicalDevice;
     }
 
-}
+} // namespace rhi::impl::vulkan

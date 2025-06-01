@@ -556,6 +556,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     class Device;
     class Instance;
     class PipelineLayout;
+    class PipelineCache;
     //class QuerySet;
     class Queue;
     class RenderPassEncoder;
@@ -575,6 +576,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     struct InstanceDesc;
     struct PipelineLayoutDesc;
     struct PipelineLayoutDesc2;
+    struct PipelineCacheDesc;
     struct RenderPassDesc;
     struct RenderPipelineDesc;
     struct SamplerDesc;
@@ -829,6 +831,7 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         inline Queue GetQueue(QueueType queueType);
         inline PipelineLayout CreatePipelineLayout(const PipelineLayoutDesc& desc);
         inline PipelineLayout CreatePipelineLayout2(const PipelineLayoutDesc2& desc);
+        inline PipelineCache CreatePipelineCache(const PipelineCacheDesc& desc);
         inline RenderPipeline CreateRenderPipeline(const RenderPipelineDesc& desc);
         inline ComputePipeline CreateComputePipeline(const ComputePipelineDesc& desc);
         inline BindSetLayout CreateBindSetLayout(const BindSetLayoutDesc& desc);
@@ -869,6 +872,19 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         friend ObjectBase<PipelineLayout, RHIPipelineLayout>;
         static inline void AddRef(RHIPipelineLayout handle);
         static inline void Release(RHIPipelineLayout handle);
+    };
+
+    class PipelineCache : public ObjectBase<PipelineCache, RHIPipelineCache>
+    {
+    public:
+        using ObjectBase::ObjectBase;
+        using ObjectBase::operator=;
+        inline void GetData(void* data, size_t* dataSize) const;
+        inline std::vector<uint8_t> GetData() const;
+    private:
+        friend ObjectBase<PipelineCache, RHIPipelineCache>;
+        static inline void AddRef(RHIPipelineCache handle);
+        static inline void Release(RHIPipelineCache handle);
     };
 
     class Queue : public ObjectBase<Queue, RHIQueue>
@@ -1245,13 +1261,18 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     }
     PipelineLayout Device::CreatePipelineLayout(const PipelineLayoutDesc& desc)
     {
-        RHIPipelineLayout result = rhiCreatePipelineLayout(Get(), reinterpret_cast<const RHIPipelineLayoutDesc*>(&desc));
+        RHIPipelineLayout result = rhiDeviceCreatePipelineLayout(Get(), reinterpret_cast<const RHIPipelineLayoutDesc*>(&desc));
         return PipelineLayout::Acquire(result);
     }
     PipelineLayout Device::CreatePipelineLayout2(const PipelineLayoutDesc2& desc)
     {
-        RHIPipelineLayout result = rhiCreatePipelineLayout2(Get(), reinterpret_cast<const RHIPipelineLayoutDesc2*>(&desc));
+        RHIPipelineLayout result = rhiDeviceCreatePipelineLayout2(Get(), reinterpret_cast<const RHIPipelineLayoutDesc2*>(&desc));
         return PipelineLayout::Acquire(result);
+    }
+    PipelineCache Device::CreatePipelineCache(const PipelineCacheDesc& desc)
+    {
+        RHIPipelineCache result = rhiDeviceCreatePipelineCache(Get(), reinterpret_cast<const RHIPipelineCacheDesc*>(&desc));
+        return PipelineCache::Acquire(result);
     }
     RenderPipeline Device::CreateRenderPipeline(const RenderPipelineDesc& desc)
     {
@@ -1366,6 +1387,33 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         if (handle != nullptr)
         {
             rhiPipelineLayoutRelease(handle);
+        }
+    }
+    // PipelineCache implementations
+    void PipelineCache::GetData(void* data, size_t* dataSize) const
+    {
+        rhiPipelineCacheGetData(Get(), data, dataSize);
+    }
+    std::vector<uint8_t> PipelineCache::GetData() const
+    {
+        size_t dataSize = 0;
+        rhiPipelineCacheGetData(Get(), nullptr, &dataSize);
+        std::vector<uint8_t> data(dataSize);
+        rhiPipelineCacheGetData(Get(), &data, &dataSize);
+        return data;
+    }
+    void PipelineCache::AddRef(RHIPipelineCache handle)
+    {
+        if (handle != nullptr)
+        {
+            rhiPipelineCacheAddRef(handle);
+        }
+    }
+    void PipelineCache::Release(RHIPipelineCache handle)
+    {
+        if (handle != nullptr)
+        {
+            rhiPipelineCacheRelease(handle);
         }
     }
     // Queue implementations
@@ -2428,6 +2476,18 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     static_assert(offsetof(PipelineLayoutDesc2, shaders) == offsetof(RHIPipelineLayoutDesc2, shaders));
     static_assert(offsetof(PipelineLayoutDesc2, shaderCount) == offsetof(RHIPipelineLayoutDesc2, shaderCount));
 
+    struct PipelineCacheDesc
+    {
+        std::string_view name;
+        const void* data;
+        size_t dataSize;
+    };
+    static_assert(sizeof(PipelineCacheDesc) == sizeof(RHIPipelineCacheDesc), "sizeof mismatch for PipelineCacheDesc");
+    static_assert(alignof(PipelineCacheDesc) == alignof(RHIPipelineCacheDesc), "alignof mismatch for PipelineCacheDesc");
+    static_assert(offsetof(PipelineCacheDesc, name) == offsetof(RHIPipelineCacheDesc, name));
+    static_assert(offsetof(PipelineCacheDesc, data) == offsetof(RHIPipelineCacheDesc, data));
+    static_assert(offsetof(PipelineCacheDesc, dataSize) == offsetof(RHIPipelineCacheDesc, dataSize));
+
     struct RenderPipelineDesc
     {
         std::string_view name;
@@ -2437,7 +2497,8 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         ShaderState* tessEvaluationShader = nullptr;
         ShaderState* geometryShader = nullptr;
 
-        PipelineLayout pipelineLayout;
+        PipelineLayout layout;
+        PipelineCache cache;
 
         VertexInputAttribute const* vertexAttributes;
         uint32_t vertexAttributeCount = 0;
@@ -2462,7 +2523,8 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     static_assert(offsetof(RenderPipelineDesc, tessControlShader) == offsetof(RHIRenderPipelineDesc, tessControlShader));
     static_assert(offsetof(RenderPipelineDesc, tessEvaluationShader) == offsetof(RHIRenderPipelineDesc, tessEvaluationShader));
     static_assert(offsetof(RenderPipelineDesc, geometryShader) == offsetof(RHIRenderPipelineDesc, geometryShader));
-    static_assert(offsetof(RenderPipelineDesc, pipelineLayout) == offsetof(RHIRenderPipelineDesc, pipelineLayout));
+    static_assert(offsetof(RenderPipelineDesc, layout) == offsetof(RHIRenderPipelineDesc, layout));
+    static_assert(offsetof(RenderPipelineDesc, cache) == offsetof(RHIRenderPipelineDesc, cache));
     static_assert(offsetof(RenderPipelineDesc, vertexAttributes) == offsetof(RHIRenderPipelineDesc, vertexAttributes));
     static_assert(offsetof(RenderPipelineDesc, vertexAttributeCount) == offsetof(RHIRenderPipelineDesc, vertexAttributeCount));
     static_assert(offsetof(RenderPipelineDesc, blendState) == offsetof(RHIRenderPipelineDesc, blendState));
@@ -2480,13 +2542,16 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
         std::string_view name;
         ShaderState* computeShader = nullptr;
 
-        PipelineLayout pipelineLayout;
+        PipelineLayout layout;
+        PipelineCache cache;
     };
     static_assert(sizeof(ComputePipelineDesc) == sizeof(RHIComputePipelineDesc), "sizeof mismatch for ComputePipelineDesc");
     static_assert(alignof(ComputePipelineDesc) == alignof(RHIComputePipelineDesc), "alignof mismatch for ComputePipelineDesc");
     static_assert(offsetof(ComputePipelineDesc, name) == offsetof(RHIComputePipelineDesc, name));
     static_assert(offsetof(ComputePipelineDesc, computeShader) == offsetof(RHIComputePipelineDesc, computeShader));
-    static_assert(offsetof(ComputePipelineDesc, pipelineLayout) == offsetof(RHIComputePipelineDesc, pipelineLayout));
+    static_assert(offsetof(ComputePipelineDesc, layout) == offsetof(RHIComputePipelineDesc, layout));
+    static_assert(offsetof(ComputePipelineDesc, cache) == offsetof(RHIComputePipelineDesc, cache));
+
 
     struct RenderPassDesc
     {
@@ -2525,5 +2590,4 @@ inline constexpr bool operator!=(EnumName a, uint32_t b) { \
     static_assert(offsetof(DeviceDesc, name) == offsetof(RHIDeviceDesc, name));
     static_assert(offsetof(DeviceDesc, requiredFeatureCount) == offsetof(RHIDeviceDesc, requiredFeatureCount));
     static_assert(offsetof(DeviceDesc, requiredFeatures) == offsetof(RHIDeviceDesc, requiredFeatures));
-
 }

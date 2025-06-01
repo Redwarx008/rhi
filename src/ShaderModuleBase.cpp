@@ -1,12 +1,15 @@
 #include "ShaderModuleBase.h"
 
+#include <cstring>
+
 namespace rhi::impl
 {
-    ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc& desc) :
-        ResourceBase(device, desc.name), mEntry(desc.entry)
+    ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDesc& desc)
+        : ResourceBase(device, desc.name)
+        , mEntry(desc.entry)
     {
         mSpirvData.resize(desc.code.size() / sizeof(uint32_t));
-        memcpy_s(mSpirvData.data(), desc.code.size(), desc.code.data(), desc.code.size());
+        std::memcpy(mSpirvData.data(), desc.code.data(), desc.code.size());
     }
 
     ShaderModuleBase::~ShaderModuleBase() = default;

@@ -1,15 +1,11 @@
 #pragma once
 
 #include "RHIStruct.h"
-#include "SubresourceStorage.hpp"
 #include "Subresource.h"
+#include "SubresourceStorage.hpp"
 
 namespace rhi::impl
 {
-    class BufferBase;
-    class TextureBase;
-    class TextureViewBase;
-
     struct BufferSyncInfo
     {
         BufferUsage usage;
@@ -40,4 +36,4 @@ namespace rhi::impl
         std::vector<SyncScopeResourceUsage> renderPassUsages;
         std::vector<SyncScopeResourceUsage> computePassUsages;
     };
-}
+} // namespace rhi::impl

@@ -5,8 +5,8 @@
 #include "CommandRecordContextVk.h"
 #include "VulkanEXTFunctions.h"
 
-#include <vk_mem_alloc.h>
 #include <array>
+#include <vk_mem_alloc.h>
 
 namespace rhi::impl::vulkan
 {
@@ -23,18 +23,19 @@ namespace rhi::impl::vulkan
     public:
         static Ref<Device> Create(Adapter* adapter, const DeviceDesc& desc);
         // api implementation
-        //void WaitIdle() override;
+        // void WaitIdle() override;
         Ref<SwapChainBase> CreateSwapChainImpl(SurfaceBase* surface,
-                                           SwapChainBase* previous,
-                                           const SurfaceConfiguration& config) override;
+                                               SwapChainBase* previous,
+                                               const SurfaceConfiguration& config) override;
         Ref<PipelineLayoutBase> CreatePipelineLayoutImpl(const PipelineLayoutDesc& desc) override;
         Ref<PipelineLayoutBase> CreatePipelineLayout2Impl(const PipelineLayoutDesc2& desc) override;
         Ref<RenderPipelineBase> CreateRenderPipelineImpl(const RenderPipelineDesc& desc) override;
         Ref<ComputePipelineBase> CreateComputePipelineImpl(const ComputePipelineDesc& desc) override;
+        Ref<PipelineCacheBase> CreatePipelineCacheImpl(const PipelineCacheDesc& desc) override;
         Ref<BindSetLayoutBase> CreateBindSetLayoutImpl(const BindSetLayoutDesc& desc) override;
         Ref<BindSetBase> CreateBindSetImpl(const BindSetDesc& desc) override;
         Ref<TextureBase> CreateTextureImpl(const TextureDesc& desc) override;
-        Ref<BufferBase> CreateBufferImpl(const BufferDesc& desc) override;
+        Ref<BufferBase> CreateBufferImpl(const BufferDesc& desc, QueueType initialQueueOwner = QueueType::Undefined) override;
         Ref<ShaderModuleBase> CreateShaderImpl(const ShaderModuleDesc& desc) override;
         Ref<SamplerBase> CreateSamplerImpl(const SamplerDesc& desc) override;
         Ref<CommandListBase> CreateCommandListImpl(CommandEncoder* encoder) override;
@@ -50,7 +51,7 @@ namespace rhi::impl::vulkan
 
     private:
         explicit Device(Adapter* adapter, const DeviceDesc& desc);
-        ~Device();
+        ~Device() override;
         bool Initialize(const DeviceDesc& desc);
         void LoadExtFunctions();
 
@@ -60,4 +61,4 @@ namespace rhi::impl::vulkan
 
         VkDeviceInfo mVkDeviceInfo{};
     };
-}
+} // namespace rhi::impl::vulkan

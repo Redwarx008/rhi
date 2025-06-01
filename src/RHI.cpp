@@ -1,27 +1,29 @@
 #include "rhi/rhi.h"
 
-#include "InstanceBase.h"
+#include "AdapterBase.h"
 #include "BindSetBase.h"
 #include "BindSetLayoutBase.h"
-#include "QueueBase.h"
-#include "DeviceBase.h"
-#include "AdapterBase.h"
-#include "SurfaceBase.h"
-#include "RenderPipelineBase.h"
-#include "ComputePipelineBase.h"
+#include "BufferBase.h"
 #include "CommandEncoder.h"
-#include "RenderPassEncoder.h"
-#include "ComputePassEncoder.h"
 #include "CommandListBase.h"
+#include "ComputePassEncoder.h"
+#include "ComputePipelineBase.h"
+#include "DeviceBase.h"
+#include "InstanceBase.h"
 #include "PipelineLayoutBase.h"
+#include "QueueBase.h"
+#include "RenderPassEncoder.h"
+#include "RenderPipelineBase.h"
 #include "SamplerBase.h"
 #include "ShaderModuleBase.h"
-#include "BufferBase.h"
+#include "SurfaceBase.h"
 #include "TextureBase.h"
+#include "PipelineCacheBase.h"
 #include "vulkan/InstanceVk.h"
 
 using namespace rhi::impl;
 
+// clang-format off
 struct AdapterImpl : public AdapterBase {};
 struct BindSetImpl : public BindSetBase {};
 struct BindSetLayoutImpl : public BindSetLayoutBase {};
@@ -41,6 +43,9 @@ struct ShaderModuleImpl : public ShaderModuleBase {};
 struct BufferImpl : public BufferBase {};
 struct TextureImpl : public TextureBase {};
 struct TextureViewImpl : public TextureViewBase {};
+struct PipelineCacheImpl : public PipelineCacheBase {};
+
+// clang-format on
 
 RHIInstance rhiCreateInstance(const RHIInstanceDesc* desc)
 {
@@ -107,15 +112,20 @@ RHIQueue rhiDeviceGetQueue(RHIDevice device, RHIQueueType queueType)
     auto result = device->APIGetQueue(static_cast<QueueType>(queueType));
     return static_cast<RHIQueue>(result);
 }
-RHIPipelineLayout rhiCreatePipelineLayout(RHIDevice device, const RHIPipelineLayoutDesc* desc)
+RHIPipelineLayout rhiDeviceCreatePipelineLayout(RHIDevice device, const RHIPipelineLayoutDesc* desc)
 {
     auto result = device->APICreatePipelineLayout(*reinterpret_cast<const PipelineLayoutDesc*>(desc));
     return static_cast<RHIPipelineLayout>(result);
 }
-RHIPipelineLayout rhiCreatePipelineLayout2(RHIDevice device, const RHIPipelineLayoutDesc2* desc)
+RHIPipelineLayout rhiDeviceCreatePipelineLayout2(RHIDevice device, const RHIPipelineLayoutDesc2* desc)
 {
     auto result = device->APICreatePipelineLayout2(*reinterpret_cast<const PipelineLayoutDesc2*>(desc));
     return static_cast<RHIPipelineLayout>(result);
+}
+RHIPipelineCache rhiDeviceCreatePipelineCache(RHIDevice device, const RHIPipelineCacheDesc* desc)
+{
+    auto result = device->APICreatePipelineCache(*reinterpret_cast<const PipelineCacheDesc*>(desc));
+    return static_cast<RHIPipelineCache>(result);
 }
 RHIRenderPipeline rhiDeviceCreateRenderPipeline(RHIDevice device, const RHIRenderPipelineDesc* desc)
 {
@@ -179,17 +189,31 @@ void rhiQueueWriteBuffer(RHIQueue queue, RHIBuffer buffer, const void* data, uin
 {
     queue->APIWriteBuffer(buffer, data, dataSize, offset);
 }
-void rhiQueueWriteTexture(RHIQueue queue, const RHITextureSlice* dstTexture, const void* data, size_t dataSize, const RHITextureDataLayout* dataLayout)
+void rhiQueueWriteTexture(RHIQueue queue,
+                          const RHITextureSlice* dstTexture,
+                          const void* data,
+                          size_t dataSize,
+                          const RHITextureDataLayout* dataLayout)
 {
-    queue->APIWriteTexture(*reinterpret_cast<const TextureSlice*>(dstTexture), data, dataSize, *reinterpret_cast<const TextureDataLayout*>(dataLayout));
+    queue->APIWriteTexture(*reinterpret_cast<const TextureSlice*>(dstTexture),
+                           data,
+                           dataSize,
+                           *reinterpret_cast<const TextureDataLayout*>(dataLayout));
 }
 void rhiQueueWaitFor(RHIQueue queue, RHIQueue waitQueue, uint64_t submitSerial)
 {
     queue->APIWaitFor(waitQueue, submitSerial);
 }
-uint64_t rhiQueueSubmit(RHIQueue queue, RHICommandList const* commands, uint32_t commandListCount, RHIResourceTransfer const* transfers, uint32_t transferCount)
+uint64_t rhiQueueSubmit(RHIQueue queue,
+                        RHICommandList const* commands,
+                        uint32_t commandListCount,
+                        RHIResourceTransfer const* transfers,
+                        uint32_t transferCount)
 {
-    return queue->APISubmit(reinterpret_cast<CommandListBase* const*>(commands), commandListCount, reinterpret_cast<ResourceTransfer const*>(transfers), transferCount);
+    return queue->APISubmit(reinterpret_cast<CommandListBase* const*>(commands),
+                            commandListCount,
+                            reinterpret_cast<ResourceTransfer const*>(transfers),
+                            transferCount);
 }
 void rhiQueueAddRef(RHIQueue queue)
 {
@@ -246,33 +270,54 @@ void rhiSurfaceRelease(RHISurface surface)
     surface->Release();
 }
 // methods of CommandEncoder
-void rhiCommandEncoderClearBuffer(RHICommandEncoder encoder, RHIBuffer buffer, uint32_t value, uint64_t offset, uint64_t size)
+void rhiCommandEncoderClearBuffer(
+        RHICommandEncoder encoder, RHIBuffer buffer, uint32_t value, uint64_t offset, uint64_t size)
 {
     encoder->APIClearBuffer(buffer, value, offset, size);
 }
-void rhiCommandEncoderCopyBufferToBuffer(RHICommandEncoder encoder, RHIBuffer srcBuffer, uint64_t srcOffset, RHIBuffer dstBuffer, uint64_t dstOffset, uint64_t dataSize)
+void rhiCommandEncoderCopyBufferToBuffer(RHICommandEncoder encoder,
+                                         RHIBuffer srcBuffer,
+                                         uint64_t srcOffset,
+                                         RHIBuffer dstBuffer,
+                                         uint64_t dstOffset,
+                                         uint64_t dataSize)
 {
     encoder->APICopyBufferToBuffer(srcBuffer, srcOffset, dstBuffer, dstOffset, dataSize);
 }
-void rhiCommandEncoderCopyBufferToTexture(RHICommandEncoder encoder, RHIBuffer srcBuffer, const RHITextureDataLayout* dataLayout, const RHITextureSlice* dstTextureSlice)
+void rhiCommandEncoderCopyBufferToTexture(RHICommandEncoder encoder,
+                                          RHIBuffer srcBuffer,
+                                          const RHITextureDataLayout* dataLayout,
+                                          const RHITextureSlice* dstTextureSlice)
 {
-    encoder->APICopyBufferToTexture(srcBuffer, *reinterpret_cast<const TextureDataLayout*>(dataLayout), *reinterpret_cast<const TextureSlice*>(dstTextureSlice));
+    encoder->APICopyBufferToTexture(srcBuffer,
+                                    *reinterpret_cast<const TextureDataLayout*>(dataLayout),
+                                    *reinterpret_cast<const TextureSlice*>(dstTextureSlice));
 }
-void rhiCommandEncoderCopyTextureToBuffer(RHICommandEncoder encoder, const RHITextureSlice* srcTextureSlice, RHIBuffer dstBuffer, const RHITextureDataLayout* dataLayout)
+void rhiCommandEncoderCopyTextureToBuffer(RHICommandEncoder encoder,
+                                          const RHITextureSlice* srcTextureSlice,
+                                          RHIBuffer dstBuffer,
+                                          const RHITextureDataLayout* dataLayout)
 {
-    encoder->APICopyTextureToBuffer(*reinterpret_cast<const TextureSlice*>(srcTextureSlice), dstBuffer, *reinterpret_cast<const TextureDataLayout*>(dataLayout));
+    encoder->APICopyTextureToBuffer(*reinterpret_cast<const TextureSlice*>(srcTextureSlice),
+                                    dstBuffer,
+                                    *reinterpret_cast<const TextureDataLayout*>(dataLayout));
 }
-void rhiCommandEncoderCopyTextureToTexture(RHICommandEncoder encoder, const RHITextureSlice* srcTextureSlice, const RHITextureSlice* dstTextureSlice)
+void rhiCommandEncoderCopyTextureToTexture(RHICommandEncoder encoder,
+                                           const RHITextureSlice* srcTextureSlice,
+                                           const RHITextureSlice* dstTextureSlice)
 {
-    encoder->APICopyTextureToTexture(*reinterpret_cast<const TextureSlice*>(srcTextureSlice), *reinterpret_cast<const TextureSlice*>(dstTextureSlice));
+    encoder->APICopyTextureToTexture(*reinterpret_cast<const TextureSlice*>(srcTextureSlice),
+                                     *reinterpret_cast<const TextureSlice*>(dstTextureSlice));
 }
-void rhiCommandEncoderMapBufferAsync(RHICommandEncoder encoder, RHIBuffer buffer, RHIMapMode usage, RHIBufferMapCallback callback, void* userData)
+void rhiCommandEncoderMapBufferAsync(
+        RHICommandEncoder encoder, RHIBuffer buffer, RHIMapMode usage, RHIBufferMapCallback callback, void* userData)
 {
-    encoder->APIMapBufferAsync(buffer, static_cast<MapMode>(usage), reinterpret_cast<BufferMapCallback>(callback), userData);
+    encoder->APIMapBufferAsync(
+            buffer, static_cast<MapMode>(usage), reinterpret_cast<BufferMapCallback>(callback), userData);
 }
 void rhiCommandEncoderBeginDebugLabel(RHICommandEncoder encoder, RHIStringView label, const RHIColor* color)
 {
-    encoder->APIBeginDebugLabel({ label.data, label.length }, reinterpret_cast<const Color*>(color));
+    encoder->APIBeginDebugLabel({label.data, label.length}, reinterpret_cast<const Color*>(color));
 }
 void rhiCommandEncoderEndDebugLabel(RHICommandEncoder encoder)
 {
@@ -306,15 +351,23 @@ void rhiRenderPassEncoderSetPipeline(RHIRenderPassEncoder encoder, RHIRenderPipe
 {
     encoder->APISetPipeline(pipeline);
 }
-void rhiRenderPassEncoderSetVertexBuffers(RHIRenderPassEncoder encoder, uint32_t firstSlot, uint32_t bufferCount, RHIBuffer const* buffers, uint64_t* offsets)
+void rhiRenderPassEncoderSetVertexBuffers(RHIRenderPassEncoder encoder,
+                                          uint32_t firstSlot,
+                                          uint32_t bufferCount,
+                                          RHIBuffer const* buffers,
+                                          uint64_t* offsets)
 {
     encoder->APISetVertexBuffers(firstSlot, bufferCount, reinterpret_cast<BufferBase* const*>(buffers), offsets);
 }
-void rhiRenderPassEncoderSetIndexBuffer(RHIRenderPassEncoder encoder, RHIBuffer buffer, uint64_t offset, uint64_t size, RHIIndexFormat indexFormat)
+void rhiRenderPassEncoderSetIndexBuffer(
+        RHIRenderPassEncoder encoder, RHIBuffer buffer, uint64_t offset, uint64_t size, RHIIndexFormat indexFormat)
 {
     encoder->APISetIndexBuffer(buffer, static_cast<IndexFormat>(indexFormat), offset, size);
 }
-void rhiRenderPassEncoderSetScissorRect(RHIRenderPassEncoder encoder, uint32_t firstScissor, const RHIRect* scissors, uint32_t scissorCount)
+void rhiRenderPassEncoderSetScissorRect(RHIRenderPassEncoder encoder,
+                                        uint32_t firstScissor,
+                                        const RHIRect* scissors,
+                                        uint32_t scissorCount)
 {
     encoder->APISetScissorRect(firstScissor, reinterpret_cast<const Rect*>(scissors), scissorCount);
 }
@@ -326,19 +379,35 @@ void rhiRenderPassEncoderSetBlendConstant(RHIRenderPassEncoder encoder, const RH
 {
     encoder->APISetBlendConstant(*reinterpret_cast<const Color*>(blendConstants));
 }
-void rhiRenderPassEncoderSetViewport(RHIRenderPassEncoder encoder, uint32_t firstViewport, RHIViewport const* viewports, uint32_t viewportCount)
+void rhiRenderPassEncoderSetViewport(RHIRenderPassEncoder encoder,
+                                     uint32_t firstViewport,
+                                     RHIViewport const* viewports,
+                                     uint32_t viewportCount)
 {
     encoder->APISetViewport(firstViewport, reinterpret_cast<Viewport const*>(viewports), viewportCount);
 }
-void rhiRenderPassEncoderSetBindSet(RHIRenderPassEncoder encoder, RHIBindSet set, uint32_t setIndex, uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets)
+void rhiRenderPassEncoderSetBindSet(RHIRenderPassEncoder encoder,
+                                    RHIBindSet set,
+                                    uint32_t setIndex,
+                                    uint32_t dynamicOffsetCount,
+                                    const uint32_t* dynamicOffsets)
 {
     encoder->APISetBindSet(set, setIndex, dynamicOffsetCount, dynamicOffsets);
 }
-void rhiRenderPassEncoderDraw(RHIRenderPassEncoder encoder, uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
+void rhiRenderPassEncoderDraw(RHIRenderPassEncoder encoder,
+                              uint32_t vertexCount,
+                              uint32_t instanceCount,
+                              uint32_t firstVertex,
+                              uint32_t firstInstance)
 {
     encoder->APIDraw(vertexCount, instanceCount, firstVertex, firstInstance);
 }
-void rhiRenderPassEncoderDrawIndexed(RHIRenderPassEncoder encoder, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t baseVertex, uint32_t firstInstance)
+void rhiRenderPassEncoderDrawIndexed(RHIRenderPassEncoder encoder,
+                                     uint32_t indexCount,
+                                     uint32_t instanceCount,
+                                     uint32_t firstIndex,
+                                     int32_t baseVertex,
+                                     uint32_t firstInstance)
 {
     encoder->APIDrawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
 }
@@ -346,25 +415,39 @@ void rhiRenderPassEncoderDrawIndirect(RHIRenderPassEncoder encoder, RHIBuffer in
 {
     encoder->APIDrawIndirect(indirectBuffer, indirectOffset);
 }
-void rhiRenderPassEncoderDrawIndexedIndirect(RHIRenderPassEncoder encoder, RHIBuffer indirectBuffer, uint64_t indirectOffset)
+void rhiRenderPassEncoderDrawIndexedIndirect(RHIRenderPassEncoder encoder,
+                                             RHIBuffer indirectBuffer,
+                                             uint64_t indirectOffset)
 {
     encoder->APIDrawIndexedIndirect(indirectBuffer, indirectOffset);
 }
-void rhiRenderPassEncoderMultiDrawIndirect(RHIRenderPassEncoder encoder, RHIBuffer indirectBuffer, uint64_t indirectOffset, uint32_t maxDrawCount, RHIBuffer drawCountBuffer, uint64_t drawCountBufferOffset)
+void rhiRenderPassEncoderMultiDrawIndirect(RHIRenderPassEncoder encoder,
+                                           RHIBuffer indirectBuffer,
+                                           uint64_t indirectOffset,
+                                           uint32_t maxDrawCount,
+                                           RHIBuffer drawCountBuffer,
+                                           uint64_t drawCountBufferOffset)
 {
-    encoder->APIMultiDrawIndexedIndirect(indirectBuffer, indirectOffset, maxDrawCount, drawCountBuffer, drawCountBufferOffset);
+    encoder->APIMultiDrawIndexedIndirect(
+            indirectBuffer, indirectOffset, maxDrawCount, drawCountBuffer, drawCountBufferOffset);
 }
-void rhiRenderPassEncoderMultiDrawIndexedIndirect(RHIRenderPassEncoder encoder, RHIBuffer indirectBuffer, uint64_t indirectOffset, uint32_t maxDrawCount, RHIBuffer drawCountBuffer, uint64_t drawCountBufferOffset)
+void rhiRenderPassEncoderMultiDrawIndexedIndirect(RHIRenderPassEncoder encoder,
+                                                  RHIBuffer indirectBuffer,
+                                                  uint64_t indirectOffset,
+                                                  uint32_t maxDrawCount,
+                                                  RHIBuffer drawCountBuffer,
+                                                  uint64_t drawCountBufferOffset)
 {
     encoder->APIMultiDrawIndirect(indirectBuffer, indirectOffset, maxDrawCount, drawCountBuffer, drawCountBufferOffset);
 }
-void rhiRenderPassEncoderSetPushConstant(RHIRenderPassEncoder encoder, RHIShaderStage stage, const void* data, uint32_t size, uint32_t offset)
+void rhiRenderPassEncoderSetPushConstant(
+        RHIRenderPassEncoder encoder, RHIShaderStage stage, const void* data, uint32_t size, uint32_t offset)
 {
     encoder->APISetPushConstant(static_cast<ShaderStage>(stage), data, size, offset);
 }
 void rhiRenderPassEncoderBeginDebugLabel(RHIRenderPassEncoder encoder, RHIStringView label, const RHIColor* color)
 {
-    encoder->APIBeginDebugLabel({ label.data, label.length }, reinterpret_cast<const Color*>(color));
+    encoder->APIBeginDebugLabel({label.data, label.length}, reinterpret_cast<const Color*>(color));
 }
 void rhiRenderPassEncoderEndDebugLabel(RHIRenderPassEncoder encoder)
 {
@@ -387,25 +470,35 @@ void rhiComputePassEncoderSetPipeline(RHIComputePassEncoder encoder, RHIComputeP
 {
     encoder->APISetPipeline(pipeline);
 }
-void rhiComputePassEncoderDispatch(RHIComputePassEncoder encoder, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
+void rhiComputePassEncoderDispatch(RHIComputePassEncoder encoder,
+                                   uint32_t groupCountX,
+                                   uint32_t groupCountY,
+                                   uint32_t groupCountZ)
 {
     encoder->APIDispatch(groupCountX, groupCountY, groupCountZ);
 }
-void rhiComputePassEncoderDispatchIndirect(RHIComputePassEncoder encoder, RHIBuffer indirectBuffer, uint64_t indirectOffset)
+void rhiComputePassEncoderDispatchIndirect(RHIComputePassEncoder encoder,
+                                           RHIBuffer indirectBuffer,
+                                           uint64_t indirectOffset)
 {
     encoder->APIDispatchIndirect(indirectBuffer, indirectOffset);
 }
-void rhiComputePassEncoderSetBindSet(RHIComputePassEncoder encoder, RHIBindSet set, uint32_t setIndex, uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets)
+void rhiComputePassEncoderSetBindSet(RHIComputePassEncoder encoder,
+                                     RHIBindSet set,
+                                     uint32_t setIndex,
+                                     uint32_t dynamicOffsetCount,
+                                     const uint32_t* dynamicOffsets)
 {
     encoder->APISetBindSet(set, setIndex, dynamicOffsetCount, dynamicOffsets);
 }
-void rhiComputePassEncoderSetPushConstant(RHIComputePassEncoder encoder, RHIShaderStage stage, const void* data, uint32_t size, uint32_t offset)
+void rhiComputePassEncoderSetPushConstant(
+        RHIComputePassEncoder encoder, RHIShaderStage stage, const void* data, uint32_t size, uint32_t offset)
 {
     encoder->APISetPushConstant(static_cast<ShaderStage>(stage), data, size, offset);
 }
 void rhiComputePassEncoderBeginDebugLabel(RHIComputePassEncoder encoder, RHIStringView label, const RHIColor* color)
 {
-    encoder->APIBeginDebugLabel({ label.data, label.length }, reinterpret_cast<const Color*>(color));
+    encoder->APIBeginDebugLabel({label.data, label.length}, reinterpret_cast<const Color*>(color));
 }
 void rhiComputePassEncoderEndDebugLabel(RHIComputePassEncoder encoder)
 {
@@ -464,6 +557,20 @@ void rhiPipelineLayoutRelease(RHIPipelineLayout pipelineLayout)
 {
     pipelineLayout->Release();
 }
+// methods of PipelineCache
+void rhiPipelineCacheGetData(RHIPipelineCache pipelineCache, void* data, size_t* dataSize)
+{
+    pipelineCache->APIGetData(data, dataSize);
+}
+void rhiPipelineCacheAddRef(RHIPipelineCache pipelineLayout)
+{
+    pipelineLayout->AddRef();
+}
+void rhiPipelineCacheRelease(RHIPipelineCache pipelineLayout)
+{
+    pipelineLayout->Release();
+}
+
 // methods of BindSetLayout
 void rhiBindSetLayoutAddRef(RHIBindSetLayout bindSetLayout)
 {
@@ -575,7 +682,7 @@ void rhiTextureViewRelease(RHITextureView textureView)
     textureView->Release();
 }
 // methods of Sampler
-//void rhiSamplerDestroy(RHISampler sampler);
+// void rhiSamplerDestroy(RHISampler sampler);
 void rhiSamplerAddRef(RHISampler sampler)
 {
     sampler->AddRef();
@@ -597,4 +704,4 @@ namespace rhi::impl
 {
     LoggingCallback gDebugMessageCallback;
     void* gDebugMessageCallbackUserData;
-}
+} // namespace rhi::impl

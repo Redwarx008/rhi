@@ -16,8 +16,7 @@ namespace rhi::impl::vulkan
     class Buffer final : public BufferBase
     {
     public:
-        static Ref<Buffer> Create(DeviceBase* device, const BufferDesc& desc);
-        ~Buffer();
+        static Ref<Buffer> Create(DeviceBase* device, const BufferDesc& desc, QueueType initialQueueOwner);
         // interface
         void* APIGetMappedPointer() override;
         // internal
@@ -29,13 +28,14 @@ namespace rhi::impl::vulkan
         ResourceType GetType() const override;
 
     private:
-        explicit Buffer(DeviceBase* device, const BufferDesc& desc);
+        explicit Buffer(DeviceBase* device, const BufferDesc& desc, QueueType initialQueueOwner);
+        ~Buffer() override;
         bool Initialize();
         void DestroyImpl() override;
         void MarkUsedInPendingCommandList(Queue* queue);
         void MapAsyncImpl(QueueBase* queue, MapMode mode) override;
         VmaAllocationInfo mAllocationInfo{};
-        VmaAllocation mAllocation;
+        VmaAllocation mAllocation = VK_NULL_HANDLE;
         VkBuffer mHandle = VK_NULL_HANDLE;
     };
 }

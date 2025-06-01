@@ -1,7 +1,7 @@
 #pragma once
 
-#include "RHIStruct.h"
 #include "PassEncoder.h"
+#include "RHIStruct.h"
 #include "SyncScopeUsageTracker.h"
 
 namespace rhi::impl
@@ -14,7 +14,9 @@ namespace rhi::impl
         void APISetPipeline(ComputePipelineBase* pipeline);
         void APIDispatch(uint32_t groupCountX, uint32_t groupCountY = 1, uint32_t groupCountZ = 1);
         void APIDispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
-        void APISetBindSet(BindSetBase* set, uint32_t setIndex, uint32_t dynamicOffsetCount = 0,
+        void APISetBindSet(BindSetBase* set,
+                           uint32_t setIndex,
+                           uint32_t dynamicOffsetCount = 0,
                            const uint32_t* dynamicOffsets = nullptr);
         void APIEnd();
 
@@ -23,4 +25,4 @@ namespace rhi::impl
         ~ComputePassEncoder();
         SyncScopeUsageTracker mUsageTracker;
     };
-}
+} // namespace rhi::impl

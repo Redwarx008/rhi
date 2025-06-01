@@ -11,7 +11,7 @@ namespace rhi::impl
     class InstanceBase : public RefCounted
     {
     public:
-        //api
+        // api
         virtual SurfaceBase* APICreateSurface(void* hwnd, void* hinstance) = 0;
         virtual void APIEnumerateAdapters(AdapterBase** const adapters, uint32_t* adapterCount) = 0;
         // internal
@@ -19,8 +19,8 @@ namespace rhi::impl
 
     protected:
         InstanceBase() = default;
-        ~InstanceBase() = default;
+        ~InstanceBase() override = default;
 
         bool mDebugLayerEnabled = false;
     };
-}
+} // namespace rhi::impl

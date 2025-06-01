@@ -2,27 +2,25 @@
 
 #include "../common/Constants.h"
 #include "../common/Utils.h"
-#include "DeviceVk.h"
-#include "QueueVk.h"
-#include "ErrorsVk.h"
 #include "BindSetLayoutVk.h"
+#include "DeviceVk.h"
+#include "ErrorsVk.h"
+#include "QueueVk.h"
 
 namespace rhi::impl::vulkan
 {
 
     // Not a real GPU limit, but used to optimize parts of rhi which expect valid usage of the
     // API. There should never be more bindings than the max per stage, for each stage.
-    static constexpr uint32_t cMaxBindingsPerPipelineLayout =
-            cNumStages * (cMaxSampledTexturesPerShaderStage + cMaxSamplersPerShaderStage +
-                cMaxStorageBuffersPerShaderStage + cMaxStorageTexturesPerShaderStage +
-                cMaxUniformBuffersPerShaderStage);
+    static constexpr uint32_t cMaxBindingsPerPipelineLayout = cNumStages *
+            (cMaxSampledTexturesPerShaderStage + cMaxSamplersPerShaderStage + cMaxStorageBuffersPerShaderStage +
+             cMaxStorageTexturesPerShaderStage + cMaxUniformBuffersPerShaderStage);
 
     static constexpr uint32_t cMaxDescriptorsPerPool = 512;
 
-    DescriptorSetAllocator::DescriptorSetAllocator(Device* device,
-                                                   std::unordered_map<VkDescriptorType, uint32_t>&&
-                                                   descriptorCountPerType) :
-        mDevice(device)
+    DescriptorSetAllocator::DescriptorSetAllocator(
+            Device* device, std::unordered_map<VkDescriptorType, uint32_t>&& descriptorCountPerType)
+        : mDevice(device)
     {
         // Compute the total number of descriptors for this layout.
         uint32_t totalDescriptorCount = 0;
@@ -30,7 +28,7 @@ namespace rhi::impl::vulkan
 
         for (const auto& [type, count] : descriptorCountPerType)
         {
-            assert(count > 0);
+            ASSERT(count > 0);
             totalDescriptorCount += count;
             mPoolSizes.push_back(VkDescriptorPoolSize{type, count});
         }
@@ -39,15 +37,15 @@ namespace rhi::impl::vulkan
         {
             // Vulkan specs requires that valid usage of vkCreateDescriptorPool must have a non-zero
             // number of pools, each of which has non-zero descriptor counts.
-            mPoolSizes.push_back(VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 });
+            mPoolSizes.push_back(VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1});
             mMaxSets = 1;
         }
         else
         {
-            assert(totalDescriptorCount <= cMaxBindingsPerPipelineLayout);
+            ASSERT(totalDescriptorCount <= cMaxBindingsPerPipelineLayout);
             // Compute the total number of descriptors sets that fits given the max.
             mMaxSets = cMaxDescriptorsPerPool / totalDescriptorCount;
-            assert(mMaxSets > 0);
+            ASSERT(mMaxSets > 0);
 
             // Grow the number of desciptors in the pool to fit the computed |mMaxSets|.
             for (auto& poolSize : mPoolSizes)
@@ -61,7 +59,7 @@ namespace rhi::impl::vulkan
     {
         for (auto& pool : mDescriptorPools)
         {
-            assert(pool.freeSetIndices.size() == mMaxSets);
+            ASSERT(pool.freeSetIndices.size() == mMaxSets);
             if (pool.vkPool != VK_NULL_HANDLE)
             {
                 // todo: dstory whe unused?
@@ -70,12 +68,11 @@ namespace rhi::impl::vulkan
         }
     }
 
-    Ref<DescriptorSetAllocator> DescriptorSetAllocator::Create(Device* device,
-                                                               std::unordered_map<VkDescriptorType, uint32_t>&&
-                                                               descriptorCountPerType)
+    Ref<DescriptorSetAllocator> DescriptorSetAllocator::Create(
+            Device* device, std::unordered_map<VkDescriptorType, uint32_t>&& descriptorCountPerType)
     {
-        Ref<DescriptorSetAllocator> allocator = AcquireRef(
-                new DescriptorSetAllocator(device, std::move(descriptorCountPerType)));
+        Ref<DescriptorSetAllocator> allocator =
+                AcquireRef(new DescriptorSetAllocator(device, std::move(descriptorCountPerType)));
         return allocator;
     }
 
@@ -88,12 +85,12 @@ namespace rhi::impl::vulkan
             AllocateDescriptorPool(layout);
         }
 
-        assert(!mAvailableDescriptorPoolIndices.empty());
+        ASSERT(!mAvailableDescriptorPoolIndices.empty());
 
         const uint32_t poolIndex = mAvailableDescriptorPoolIndices.back();
         DescriptorPool* pool = &mDescriptorPools[poolIndex];
 
-        assert(!pool->freeSetIndices.empty());
+        ASSERT(!pool->freeSetIndices.empty());
 
         uint32_t setIndex = pool->freeSetIndices.back();
         pool->freeSetIndices.pop_back();
@@ -152,8 +149,7 @@ namespace rhi::impl::vulkan
         }
 
         mAvailableDescriptorPoolIndices.push_back(mDescriptorPools.size());
-        mDescriptorPools.emplace_back(
-                DescriptorPool{descriptorPool, std::move(sets), std::move(freeSetIndices)});
+        mDescriptorPools.emplace_back(DescriptorPool{descriptorPool, std::move(sets), std::move(freeSetIndices)});
     }
 
     void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo,
@@ -162,8 +158,8 @@ namespace rhi::impl::vulkan
     {
         std::lock_guard<std::mutex> lock(mMutex);
 
-        assert(allocationInfo != nullptr);
-        assert(allocationInfo->set != VK_NULL_HANDLE);
+        ASSERT(allocationInfo != nullptr);
+        ASSERT(allocationInfo->set != VK_NULL_HANDLE);
 
         // We can't reuse the descriptor set right away because the Vulkan spec says in the
         // documentation for vkCmdBindDescriptorSets that the set may be consumed any time between
@@ -222,11 +218,12 @@ namespace rhi::impl::vulkan
     {
         std::lock_guard<std::mutex> lock(mMutex);
 
-        for (Deallocation* dealloc : mDeallocationsInQueues[static_cast<uint32_t>(queue->GetType())].
-                                     pendingDeallocations.IterateUpTo(completedSerial))
+        for (Deallocation* dealloc :
+             mDeallocationsInQueues[static_cast<uint32_t>(queue->GetType())].pendingDeallocations.IterateUpTo(
+                     completedSerial))
         {
-            assert(dealloc->poolIndex < mDescriptorPools.size());
-            assert(dealloc->refQueueCount > 1);
+            ASSERT(dealloc->poolIndex < mDescriptorPools.size());
+            ASSERT(dealloc->refQueueCount >= 1);
             dealloc->refQueueCount -= 1;
 
             if (dealloc->refQueueCount == 0)
@@ -238,8 +235,7 @@ namespace rhi::impl::vulkan
                 }
                 freeSetIndices.emplace_back(dealloc->setIndex);
             }
-
         }
         mDeallocationsInQueues[static_cast<uint32_t>(queue->GetType())].pendingDeallocations.ClearUpTo(completedSerial);
     }
-}
+} // namespace rhi::impl::vulkan

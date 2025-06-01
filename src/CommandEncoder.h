@@ -1,9 +1,9 @@
 #pragma once
 
-#include "RHIStruct.h"
+#include "CommandListBase.h"
 #include "Commands.h"
 #include "EncodingContext.h"
-#include "CommandListBase.h"
+#include "RHIStruct.h"
 #include "common/Ref.hpp"
 #include "common/RefCounted.h"
 
@@ -14,12 +14,21 @@ namespace rhi::impl
     public:
         static Ref<CommandEncoder> Create(DeviceBase* device);
 
-        //void ClearColorTexture(TextureViewBase* textureView, const ClearColor& color);
-        //void ClearDepthStencil(TextureViewBase* textureView, ClearDepthStencilFlag flag, float depthVal, uint8_t stencilVal);
+        // void ClearColorTexture(TextureViewBase* textureView, const ClearColor& color);
+        // void ClearDepthStencil(TextureViewBase* textureView, ClearDepthStencilFlag flag, float depthVal, uint8_t
+        // stencilVal);
         void APIClearBuffer(BufferBase* buffer, uint32_t value, uint64_t offset = 0, uint64_t size = ~0ull);
-        void APICopyBufferToBuffer(BufferBase* srcBuffer, uint64_t srcOffset, BufferBase* dstBuffer, uint64_t dstOffset, uint64_t dataSize);
-        void APICopyBufferToTexture(BufferBase* srcBuffer, const TextureDataLayout& dataLayout, const TextureSlice& dstTextureSlice);
-        void APICopyTextureToBuffer(const TextureSlice& srcTextureSlice, BufferBase* dstBuffer, const TextureDataLayout& dataLayout);
+        void APICopyBufferToBuffer(BufferBase* srcBuffer,
+                                   uint64_t srcOffset,
+                                   BufferBase* dstBuffer,
+                                   uint64_t dstOffset,
+                                   uint64_t dataSize);
+        void APICopyBufferToTexture(BufferBase* srcBuffer,
+                                    const TextureDataLayout& dataLayout,
+                                    const TextureSlice& dstTextureSlice);
+        void APICopyTextureToBuffer(const TextureSlice& srcTextureSlice,
+                                    BufferBase* dstBuffer,
+                                    const TextureDataLayout& dataLayout);
         void APICopyTextureToTexture(const TextureSlice& srcTextureSlice, const TextureSlice& dstTextureSlice);
         void APIMapBufferAsync(BufferBase* buffer, MapMode usage, BufferMapCallback callback, void* userData);
         void APIBeginDebugLabel(std::string_view label, const Color* color);
@@ -34,6 +43,7 @@ namespace rhi::impl
         CommandListResourceUsage AcquireResourceUsages();
         void OnRenderPassEnd();
         void OnComputePassEnd();
+
     private:
         explicit CommandEncoder(DeviceBase* device);
         enum class State
@@ -47,4 +57,4 @@ namespace rhi::impl
         uint64_t mDebugLabelCount = 0;
         State mState = State::OutsideOfPass;
     };
-}
+} // namespace rhi::impl

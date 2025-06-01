@@ -1,16 +1,16 @@
-#include "SwapchainBase.h"
+#include "SwapChainBase.h"
 #include "DeviceBase.h"
 #include "TextureBase.h"
 
 namespace rhi::impl
 {
-    SwapChainBase::SwapChainBase(DeviceBase* device, SurfaceBase* surface, const SurfaceConfiguration& config) :
-        mDevice(device),
-        mSurface(surface),
-        mWidth(config.width),
-        mHeight(config.height),
-        mFormat(config.format),
-        mPresentMode(config.presentMode)
+    SwapChainBase::SwapChainBase(DeviceBase* device, SurfaceBase* surface, const SurfaceConfiguration& config)
+        : mDevice(device)
+        , mSurface(surface)
+        , mWidth(config.width)
+        , mHeight(config.height)
+        , mFormat(config.format)
+        , mPresentMode(config.presentMode)
     {}
 
     SwapChainBase::~SwapChainBase() = default;
@@ -19,4 +19,4 @@ namespace rhi::impl
     {
         return mFormat;
     }
-}
+} // namespace rhi::impl

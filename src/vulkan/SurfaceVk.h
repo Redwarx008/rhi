@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../SurfaceBase.h"
 #include <vulkan/vulkan.h>
+#include "../SurfaceBase.h"
 
 namespace rhi::impl::vulkan
 {
@@ -9,15 +9,15 @@ namespace rhi::impl::vulkan
     {
     public:
         static Ref<Surface> CreateFromWindowsHWND(InstanceBase* instance, void* hwnd, void* hinstance);
-        //static Ref<Surface> CreateFromWaylandSurface(InstanceBase* instance, void* display, void* surface);
+        // static Ref<Surface> CreateFromWaylandSurface(InstanceBase* instance, void* display, void* surface);
 
         VkSurfaceKHR GetHandle() const;
 
     private:
         explicit Surface(InstanceBase* instance);
-        ~Surface();
+        ~Surface() override;
         bool Initialize();
 
         VkSurfaceKHR mHandle = VK_NULL_HANDLE;
     };
-}
+} // namespace rhi::impl::vulkan

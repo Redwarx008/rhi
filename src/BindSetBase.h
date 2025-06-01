@@ -1,15 +1,12 @@
 #pragma once
 
+#include <vector>
 #include "RHIStruct.h"
 #include "ResourceBase.h"
 #include "common/Ref.hpp"
-#include <vector>
 
 namespace rhi::impl
 {
-    class DeviceBase;
-    class BindSetLayoutBase;
-
     class BindSetBase : public ResourceBase
     {
     public:
@@ -20,10 +17,10 @@ namespace rhi::impl
 
     protected:
         explicit BindSetBase(DeviceBase* device, const BindSetDesc& desc);
-        ~BindSetBase();
+        ~BindSetBase() override;
 
     private:
         Ref<BindSetLayoutBase> mLayout;
         std::vector<BindSetEntry> mEntries;
     };
-}
+} // namespace rhi::impl

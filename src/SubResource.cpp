@@ -8,12 +8,12 @@ namespace rhi::impl
                                        uint32_t _baseArrayLayer,
                                        uint32_t _layerCount,
                                        uint32_t _baseMipLevel,
-                                       uint32_t _levelCount) :
-        aspects(_aspects),
-        baseArrayLayer(_baseArrayLayer),
-        layerCount(_layerCount),
-        baseMipLevel(_baseMipLevel),
-        levelCount(_levelCount)
+                                       uint32_t _levelCount)
+        : aspects(_aspects)
+        , baseArrayLayer(_baseArrayLayer)
+        , layerCount(_layerCount)
+        , baseMipLevel(_baseMipLevel)
+        , levelCount(_levelCount)
     {}
 
     SubresourceRange SubresourceRange::MakeSingle(Aspect aspect, uint32_t baseArrayLayer, uint32_t baseMipLevel)
@@ -193,4 +193,4 @@ namespace rhi::impl
 
         return AspectConvert(format, aspect);
     }
-}
+} // namespace rhi::impl

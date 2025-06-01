@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include "ResourceToDelete.h"
-#include "RefCountedHandle.h"
 #include "../common/Ref.hpp"
 #include "../common/SerialQueue.hpp"
+#include "RefCountedHandle.h"
+#include "ResourceToDelete.h"
 
 namespace rhi::impl::vulkan
 {
@@ -24,7 +24,7 @@ namespace rhi::impl::vulkan
         void DeleteWhenUnused(VkDescriptorPool pool);
         void DeleteWhenUnused(VkPipelineLayout layout);
         void DeleteWhenUnused(VkPipeline pipeline);
-        //void DeleteWhenUnused(VkQueryPool querypool);
+        // void DeleteWhenUnused(VkQueryPool querypool);
         void DeleteWhenUnused(VkSampler sampler);
         void DeleteWhenUnused(VkSemaphore semaphore);
         void DeleteWhenUnused(VkFence fence);
@@ -42,7 +42,7 @@ namespace rhi::impl::vulkan
         SerialQueue<uint64_t, VkImageView> mImageViewsToDelete;
         SerialQueue<uint64_t, VkPipeline> mPipelinesToDelete;
         SerialQueue<uint64_t, VkPipelineLayout> mPipelineLayoutsToDelete;
-        //SerialQueue<uint64_t, VkQueryPool> mQueryPoolsToDelete;
+        // SerialQueue<uint64_t, VkQueryPool> mQueryPoolsToDelete;
         SerialQueue<uint64_t, VkSampler> mSamplersToDelete;
         SerialQueue<uint64_t, VkSemaphore> mSemaphoresToDelete;
         SerialQueue<uint64_t, VkShaderModule> mShaderModulesToDelete;
@@ -51,4 +51,4 @@ namespace rhi::impl::vulkan
         SerialQueue<uint64_t, Ref<RefCountedHandle<ImageAllocation>>> mImageAllocationToDelete;
         SerialQueue<uint64_t, Ref<RefCountedHandle<BufferAllocation>>> mBufferAllocationToDelete;
     };
-}
+} // namespace rhi::impl::vulkan

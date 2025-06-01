@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../common/RefCounted.h"
 #include <functional>
+#include "../common/RefCounted.h"
 
 namespace rhi::impl::vulkan
 {
@@ -11,10 +11,10 @@ namespace rhi::impl::vulkan
     class RefCountedHandle : public RefCounted
     {
     public:
-        RefCountedHandle(Device* device, Handle handle, std::function<void(Device*, Handle)> deleteMethod) :
-            mDevice(device),
-            mHandle(handle),
-            mDeleteMethod(deleteMethod)
+        RefCountedHandle(Device* device, Handle handle, std::function<void(Device*, Handle)> deleteMethod)
+            : mDevice(device)
+            , mHandle(handle)
+            , mDeleteMethod(deleteMethod)
         {}
 
         ~RefCountedHandle()
@@ -32,4 +32,4 @@ namespace rhi::impl::vulkan
         Handle mHandle;
         std::function<void(Device*, Handle)> mDeleteMethod;
     };
-}
+} // namespace rhi::impl::vulkan

@@ -1,32 +1,33 @@
 #include "ComputePipelineVk.h"
-#include "ShaderModuleVk.h"
 #include "DeviceVk.h"
-#include "PipelineLayoutVk.h"
 #include "ErrorsVk.h"
+#include "PipelineLayoutVk.h"
+#include "PipelineCacheVk.h"
+#include "ShaderModuleVk.h"
 #include "VulkanUtils.h"
 
 namespace rhi::impl::vulkan
 {
-    ComputePipeline::ComputePipeline(Device* device, const ComputePipelineDesc& desc) :
-        ComputePipelineBase(device, desc)
+    ComputePipeline::ComputePipeline(Device* device, const ComputePipelineDesc& desc)
+        : ComputePipelineBase(device, desc)
     {}
 
-    ComputePipeline::~ComputePipeline()
-    {}
+    ComputePipeline::~ComputePipeline() {}
 
     Ref<ComputePipeline> ComputePipeline::Create(Device* device, const ComputePipelineDesc& desc)
     {
         Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, desc));
-        if (!pipeline->Initialize())
+        if (!pipeline->Initialize(desc.cache))
         {
             return nullptr;
         }
+        pipeline->TrackResource();
         return pipeline;
     }
 
     void ComputePipeline::DestroyImpl()
     {
-        Device* device = checked_cast<Device>(mDevice.Get());
+        Device* device = checked_cast<Device>(mDevice);
 
         if (mHandle != VK_NULL_HANDLE)
         {
@@ -35,7 +36,7 @@ namespace rhi::impl::vulkan
         }
     }
 
-    bool ComputePipeline::Initialize()
+    bool ComputePipeline::Initialize(PipelineCacheBase* cache)
     {
         ASSERT(HasShaderStage(ShaderStage::Compute));
 
@@ -52,13 +53,13 @@ namespace rhi::impl::vulkan
             specMapEntry.offset = dataOffset;
             specMapEntry.size = sizeof(uint32_t);
             specDatas[i] = constant.value.u;
-            dataOffset += specMapEntry.size;
+            dataOffset += static_cast<uint32_t>(specMapEntry.size);
         }
         VkSpecializationInfo specInfo{};
         specInfo.dataSize = stageState.constants.size() * sizeof(uint32_t);
         specInfo.pData = specDatas.data();
         specInfo.pMapEntries = specMapEntries.data();
-        specInfo.mapEntryCount = specMapEntries.size();
+        specInfo.mapEntryCount = static_cast<uint32_t>(specMapEntries.size());
 
         VkComputePipelineCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -73,8 +74,9 @@ namespace rhi::impl::vulkan
             createInfo.stage.pSpecializationInfo = &specInfo;
         }
 
-        Device* device = checked_cast<Device>(mDevice.Get());
-        VkResult err = vkCreateComputePipelines(device->GetHandle(), nullptr, 1, &createInfo, nullptr, &mHandle);
+        Device* device = checked_cast<Device>(mDevice);
+        VkPipelineCache vkPipelineCache = cache != nullptr ? checked_cast<PipelineCache>(cache)->GetHandle() : nullptr;
+        VkResult err = vkCreateComputePipelines(device->GetHandle(), vkPipelineCache, 1, &createInfo, nullptr, &mHandle);
         CHECK_VK_RESULT_FALSE(err, "CreateComputePipelines");
 
         SetDebugName(device, mHandle, "ComputePipeline", GetName());
@@ -86,4 +88,4 @@ namespace rhi::impl::vulkan
     {
         return mHandle;
     }
-}
+} // namespace rhi::impl::vulkan

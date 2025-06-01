@@ -1,16 +1,16 @@
 #include "QueueBase.h"
-#include "DeviceBase.h"
 #include "BufferBase.h"
+#include "DeviceBase.h"
 #include "TextureBase.h"
-#include "common/Utils.h"
 #include "common/Error.h"
+#include "common/Utils.h"
 
 namespace rhi::impl
 {
-    QueueBase::QueueBase(DeviceBase* device, QueueType type) :
-        mDevice(device),
-        mQueueType(type),
-        mUploadAllocator(std::make_unique<UploadAllocator>(device))
+    QueueBase::QueueBase(DeviceBase* device, QueueType type)
+        : mDevice(device)
+        , mQueueType(type)
+        , mUploadAllocator(std::make_unique<UploadAllocator>(device, this))
     {}
 
     QueueBase::~QueueBase() = default;
@@ -75,7 +75,7 @@ namespace rhi::impl
                                   uint32_t transferCount)
     {
         return SubmitImpl(commands, commandListCount, transfers, transferCount);
-        //Tick();
+        // Tick();
     }
 
     void QueueBase::CheckAndUpdateCompletedSerial()
@@ -83,17 +83,14 @@ namespace rhi::impl
         uint64_t completedSerial = QueryCompletedSerial();
         uint64_t current = mCompletedSerial.load(std::memory_order_acquire);
         while (uint64_t(completedSerial) > current &&
-            !mCompletedSerial.compare_exchange_weak(current,
-                                                    uint64_t(completedSerial),
-                                                    std::memory_order_acq_rel))
-        {}
-
+               !mCompletedSerial.compare_exchange_weak(current, uint64_t(completedSerial), std::memory_order_acq_rel))
+        {
+        }
     }
 
     bool QueueBase::HasScheduledCommands() const
     {
-        return mLastSubmittedSerial.load(std::memory_order_acquire) >
-                mCompletedSerial.load(std::memory_order_acquire);
+        return mLastSubmittedSerial.load(std::memory_order_acquire) > mCompletedSerial.load(std::memory_order_acquire);
     }
 
     bool QueueBase::NeedsTick() const
@@ -101,11 +98,8 @@ namespace rhi::impl
         return HasScheduledCommands() || !mTasksInFlight.Empty();
     }
 
-    void QueueBase::CopyFromStagingToBuffer(BufferBase* src,
-                                            uint64_t srcOffset,
-                                            BufferBase* dst,
-                                            uint64_t dstOffset,
-                                            uint64_t size)
+    void QueueBase::CopyFromStagingToBuffer(
+            BufferBase* src, uint64_t srcOffset, BufferBase* dst, uint64_t dstOffset, uint64_t size)
     {
         CopyFromStagingToBufferImpl(src, srcOffset, dst, dstOffset, size);
         MarkRecordingContextIsUsed();
@@ -113,7 +107,7 @@ namespace rhi::impl
 
     void QueueBase::APIWriteBuffer(BufferBase* buffer, const void* data, uint64_t dataSize, uint64_t offset)
     {
-        //ASSERT(HasFlag(buffer->APIGetUsage(), BufferUsage::CopyDst));
+        // ASSERT(HasFlag(buffer->APIGetUsage(), BufferUsage::CopyDst));
         INVALID_IF(dataSize > buffer->APIGetSize() - offset || offset > buffer->APIGetSize(),
                    "Write range (bufferOffset: %u, size: %u) does not fit in Buffer(%s) size (%u).",
                    offset,
@@ -148,8 +142,8 @@ namespace rhi::impl
         uint32_t heightInBlocks = size.height / formatInfo.blockSize;
         // The number of bytes in the last row may be different because there is alignment padding in the memory layout
         // and the padding bytes are not used in the last row.
-        uint64_t bytesInLastRow = static_cast<uint64_t>(widthInBlocks) * static_cast<uint64_t>(formatInfo.
-            bytesPerBlock);
+        uint64_t bytesInLastRow =
+                static_cast<uint64_t>(widthInBlocks) * static_cast<uint64_t>(formatInfo.bytesPerBlock);
 
         if (size.depthOrArrayLayers == 0)
         {
@@ -160,8 +154,8 @@ namespace rhi::impl
         uint64_t requiredBytesInCopy = bytesPerImage * (uint64_t(size.depthOrArrayLayers) - 1);
         if (heightInBlocks > 0)
         {
-            uint64_t bytesInLastImage = static_cast<uint64_t>(alignedBytesPerRow) * (heightInBlocks - 1) +
-                    bytesInLastRow;
+            uint64_t bytesInLastImage =
+                    static_cast<uint64_t>(alignedBytesPerRow) * (heightInBlocks - 1) + bytesInLastRow;
             requiredBytesInCopy += bytesInLastImage;
         }
 
@@ -230,8 +224,8 @@ namespace rhi::impl
         ASSERT(dstTexture.size.width % GetFormatInfo(format).blockSize == 0);
         ASSERT(dstTexture.size.height % GetFormatInfo(format).blockSize == 0);
 
-        uint32_t alignedBytesPerRow = dstTexture.size.width / GetFormatInfo(format).blockSize * GetFormatInfo(format).
-                bytesPerBlock;
+        uint32_t alignedBytesPerRow =
+                dstTexture.size.width / GetFormatInfo(format).blockSize * GetFormatInfo(format).bytesPerBlock;
         uint32_t alignedRowsPerImage = dstTexture.size.height / GetFormatInfo(format).blockSize;
 
         uint64_t optimalOffsetAlignment = mDevice->GetOptimalBufferToTextureCopyOffsetAlignment();
@@ -241,14 +235,11 @@ namespace rhi::impl
         uint32_t optimalBytesPerRowAlignment = mDevice->GetOptimalBytesPerRowAlignment();
         uint32_t optimallyAlignedBytesPerRow = AlignUp(alignedBytesPerRow, optimalBytesPerRowAlignment);
 
-        uint64_t requiredBytesInCopy = ComputeRequiredBytesInCopy(dstTexture.texture->APIGetFormat(),
-                                                                  dstTexture.size,
-                                                                  optimallyAlignedBytesPerRow,
-                                                                  alignedRowsPerImage);
+        uint64_t requiredBytesInCopy = ComputeRequiredBytesInCopy(
+                dstTexture.texture->APIGetFormat(), dstTexture.size, optimallyAlignedBytesPerRow, alignedRowsPerImage);
 
-        UploadAllocation allocation = mUploadAllocator->Allocate(requiredBytesInCopy,
-                                                                 GetPendingSubmitSerial(),
-                                                                 offsetAlignment);
+        UploadAllocation allocation =
+                mUploadAllocator->Allocate(requiredBytesInCopy, GetPendingSubmitSerial(), offsetAlignment);
         ASSERT(allocation.mappedAddress != nullptr);
 
         const uint8_t* copySrc = static_cast<const uint8_t*>(data) + dataLayout.offset;
@@ -279,4 +270,4 @@ namespace rhi::impl
     {
         WaitForImpl(queue, submitSerial);
     }
-}
+} // namespace rhi::impl

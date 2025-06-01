@@ -18,7 +18,7 @@ namespace rhi::impl::vulkan
 
     private:
         explicit ShaderModule(Device* device, const ShaderModuleDesc& desc);
-        ~ShaderModule();
+        ~ShaderModule() override;
         bool Initialize(const ShaderModuleDesc& desc);
         void DestroyImpl() override;
 

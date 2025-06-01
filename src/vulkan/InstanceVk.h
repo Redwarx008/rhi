@@ -11,17 +11,18 @@ namespace rhi::impl::vulkan
     {
     public:
         static Ref<Instance> Create(const InstanceDesc& desc);
-        ~Instance();
 
         void APIEnumerateAdapters(AdapterBase** adapters, uint32_t* adapterCount) override;
         SurfaceBase* APICreateSurface(void* hwnd, void* hinstance) override;
         VkInstance GetHandle() const;
+
     private:
         Instance() = default;
+        ~Instance() override;
         bool Initialize(const InstanceDesc& desc);
         bool RegisterDebugUtils();
 
         VkInstance mHandle = VK_NULL_HANDLE;
         VkDebugUtilsMessengerEXT mDebugUtilsMessenger = VK_NULL_HANDLE;
     };
-}
+} // namespace rhi::impl::vulkan

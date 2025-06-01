@@ -10,4 +10,4 @@ namespace rhi::impl::vulkan
         PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT;
         PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT;
     };
-}
+} // namespace rhi::impl::vulkan

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "RHIStruct.h"
+#include "TextureBase.h"
 #include "common/Ref.hpp"
 #include "common/RefCounted.h"
-#include "TextureBase.h"
 
 namespace rhi::impl
 {
@@ -18,7 +18,7 @@ namespace rhi::impl
 
     protected:
         explicit SwapChainBase(DeviceBase* device, SurfaceBase* surface, const SurfaceConfiguration& config);
-        ~SwapChainBase();
+        ~SwapChainBase() override;
         DeviceBase* mDevice;
         SurfaceBase* mSurface;
 
@@ -27,4 +27,4 @@ namespace rhi::impl
         TextureFormat mFormat;
         PresentMode mPresentMode;
     };
-}
+} // namespace rhi::impl

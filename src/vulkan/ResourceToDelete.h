@@ -15,4 +15,4 @@ namespace rhi::impl::vulkan
         VkImage image;
         VmaAllocation allocation;
     };
-}
+} // namespace rhi::impl::vulkan

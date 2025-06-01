@@ -1,14 +1,14 @@
 #include "VkResourceDeleter.h"
+#include "../common/Error.h"
+#include "../common/Utils.h"
+#include "AdapterVk.h"
 #include "DeviceVk.h"
 #include "QueueVk.h"
-#include "AdapterVk.h"
-#include "../common/Utils.h"
-#include "../common/Error.h"
 
 namespace rhi::impl::vulkan
 {
-    VkResourceDeleter::VkResourceDeleter(Queue* queue) :
-        mQueue(queue)
+    VkResourceDeleter::VkResourceDeleter(Queue* queue)
+        : mQueue(queue)
     {}
 
     VkResourceDeleter::~VkResourceDeleter()
@@ -20,7 +20,7 @@ namespace rhi::impl::vulkan
         ASSERT(mImageViewsToDelete.Empty());
         ASSERT(mPipelinesToDelete.Empty());
         ASSERT(mPipelineLayoutsToDelete.Empty());
-        //assert(mQueryPoolsToDelete.Empty());
+        // assert(mQueryPoolsToDelete.Empty());
         ASSERT(mSamplersToDelete.Empty());
         ASSERT(mSemaphoresToDelete.Empty());
         ASSERT(mShaderModulesToDelete.Empty());
@@ -170,4 +170,4 @@ namespace rhi::impl::vulkan
     {
         mImageAllocationToDelete.Push(mQueue->GetPendingSubmitSerial(), imageAllocatio);
     }
-}
+} // namespace rhi::impl::vulkan

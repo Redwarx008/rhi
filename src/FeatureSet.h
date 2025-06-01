@@ -23,4 +23,4 @@ namespace rhi::impl
         static const uint32_t cFeatureCount = static_cast<uint32_t>(FeatureName::Count);
         std::bitset<cFeatureCount> mSet;
     };
-}
+} // namespace rhi::impl

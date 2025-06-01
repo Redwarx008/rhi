@@ -2,7 +2,7 @@
 
 #include <atomic>
 #include <cstdint>
-
+#include <cassert>
 namespace rhi::impl
 {
     class RefCounted
@@ -15,6 +15,7 @@ namespace rhi::impl
 
         void Release()
         {
+            assert(mRefCount != 0);
             // See the explanation in the Boost documentation:
             // https://www.boost.org/doc/libs/1_55_0/doc/html/atomic/usage_examples.html
             uint64_t previousRefCount = mRefCount.fetch_sub(1, std::memory_order_release);
