@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../ShaderModuleBase.h"
-#include "../common/Ref.hpp"
+#include "common/ShaderModuleBase.h"
+#include "common/Ref.hpp"
 
 #include <vector>
 #include <vulkan/vulkan.h>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../BindSetBase.h"
-#include "../common/Ref.hpp"
+#include "common/BindSetBase.h"
+#include "common/Ref.hpp"
 #include "DescriptorSetAllocation.h"
 
 #include <array>

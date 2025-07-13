@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../BindSetLayoutBase.h"
-#include "../common/Ref.hpp"
-#include "../common/MutexProtected.hpp"
+#include "common/BindSetLayoutBase.h"
+#include "common/Ref.hpp"
+#include "common/MutexProtected.hpp"
 #include "DescriptorSetAllocator.h"
 
 #include <vulkan/vulkan.h>

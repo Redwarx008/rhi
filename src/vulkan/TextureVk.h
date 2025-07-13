@@ -4,12 +4,11 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
-#include "../Subresource.h"
-#include "../SubresourceStorage.hpp"
-#include "../SyncScopeUsageTracker.h"
-#include "../TextureBase.h"
-#include "../common/Ref.hpp"
-#include "rhi/RHI.h"
+#include "common/Subresource.h"
+#include "common/SubresourceStorage.hpp"
+#include "common/SyncScopeUsageTracker.h"
+#include "common/TextureBase.h"
+#include "common/Ref.hpp"
 
 namespace rhi::impl::vulkan
 {

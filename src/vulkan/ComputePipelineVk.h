@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ComputePipelineBase.h"
+#include "common/ComputePipelineBase.h"
 #include <vulkan/vulkan.h>
 
 namespace rhi::impl::vulkan

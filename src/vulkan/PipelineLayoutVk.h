@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../PipelineLayoutBase.h"
-#include "../common/Ref.hpp"
+#include "common/PipelineLayoutBase.h"
+#include "common/Ref.hpp"
 
 #include <vulkan/vulkan.h>
 

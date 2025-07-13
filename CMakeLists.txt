@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.28)
 
 project(rhi VERSION 1.0.0)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Vulkan REQUIRED)
@@ -79,13 +79,19 @@ ELSE()
 	message(STATUS ${Vulkan_LIBRARY})
 ENDIF()
 
+
+# Clang 16's module support can be broken with extensions enabled
+if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL "16.0" )
+	set_target_properties( ${TARGET_NAME} PROPERTIES CXX_EXTENSIONS OFF )
+endif()
+
 add_subdirectory(third_party)
 
 set(interface_rhi 
 	"include/rhi/rhi.h"
-	"src/RHIStruct.h" "include/rhi/rhi_cpp.h" )
+	"src/common/RHIStruct.h" "include/rhi/rhi_cpp.h" )
 
-set(src_common
+set(src_utils
 	"src/common/Error.h"
 	"src/common/Utils.h"
 	"src/common/NoCopyable.h"
@@ -104,74 +110,73 @@ set(src_common
 	"src/common/BitSetUtils.h")
 
 set (src
-	"src/RHI.cpp"
-	"src/UploadAllocator.h"
-	"src/UploadAllocator.cpp"
-	"src/Commands.h"
-	"src/CommandEncoder.h"
-	"src/CommandEncoder.cpp"
-	"src/CommandAllocator.h"
-	"src/CommandAllocator.cpp"
-	"src/ResourceBase.h"
-	"src/ResourceBase.cpp"
-	"src/DeviceBase.h" 
-	"src/DeviceBase.cpp"
-	"src/SyncScopeUsageTracker.h"
-	"src/SubresourceStorage.hpp"
-	"src/FeatureSet.h" 
-	"src/Subresource.h" 
-	"src/SubResource.cpp"
-	"src/SyncScopeUsageTracker.cpp"
-	"src/BufferBase.h"
-	"src/BufferBase.cpp" 
-	"src/TextureBase.h"
-	"src/TextureBase.cpp" 
-	"src/InstanceBase.h" 
-	"src/InstanceBase.cpp" 
-	"src/AdapterBase.h" 
-	"src/AdapterBase.cpp"
-	"src/BindSetBase.h" 
-	 "src/BindSetLayoutBase.h"
-	 "src/BindSetLayoutBase.cpp"
-	 "src/BindSetBase.cpp" 
-	 "src/SamplerBase.h" 
-	 "src/SamplerBase.cpp" 
-	 "src/ShaderModuleBase.h" 
-	 "src/ShaderModuleBase.cpp" 
-	 "src/PipelineLayoutBase.h" 
-	 "src/PipelineLayoutBase.cpp" 
-	 "src/PipelineBase.h"
-	 "src/PipelineBase.cpp"
-	 "src/RenderPipelineBase.h"
-	 "src/RenderPipelineBase.cpp"
-	 "src/PerShaderStage.hpp" 
-	 "src/common/Cached.hpp"
-	 
-	 "src/PassResourceUsage.h"
-	 "src/EncodingContext.h" 
-	 "src/EncodingContext.cpp"
-	 "src/RenderPassEncoder.h"
-	 "src/RenderPassEncoder.cpp" 
-	 "src/CommandListBase.h" 
-	 "src/CommandListBase.cpp"
-	 "src/PassEncoder.h" 
-	 "src/PassEncoder.cpp" 
-	 "src/QueueBase.h" 
-	 "src/QueueBase.cpp" 
-	 "src/CallbackTaskManager.h" 
-	 "src/CallbackTaskManager.cpp" 
-	 "src/ComputePipelineBase.h"
-	 "src/ComputePipelineBase.cpp" 
-	 "src/SwapChainBase.h"
-	 "src/SwapChainBase.cpp"
-	 "src/SurfaceBase.h"
-	 "src/SurfaceBase.cpp"
-	 "src/ComputePassEncoder.h" 
-	 "src/ComputePassEncoder.cpp" 
-	 "src/PassResourceUsage.cpp" 
-	 "src/Commands.cpp" 
-	 "src/PipelineCacheBase.h" 
-	 "src/PipelineCacheBase.cpp" )
+	"src/common/RHI.cpp"
+	"src/common/UploadAllocator.h"
+	"src/common/UploadAllocator.cpp"
+	"src/common/Commands.h"
+	"src/common/CommandEncoder.h"
+	"src/common/CommandEncoder.cpp"
+	"src/common/CommandAllocator.h"
+	"src/common/CommandAllocator.cpp"
+	"src/common/ResourceBase.h"
+	"src/common/ResourceBase.cpp"
+	"src/common/DeviceBase.h" 
+	"src/common/DeviceBase.cpp"
+	"src/common/SyncScopeUsageTracker.h"
+	"src/common/SubresourceStorage.hpp"
+	"src/common/FeatureSet.h" 
+	"src/common/Subresource.h" 
+	"src/common/SubResource.cpp"
+	"src/common/SyncScopeUsageTracker.cpp"
+	"src/common/BufferBase.h"
+	"src/common/BufferBase.cpp" 
+	"src/common/TextureBase.h"
+	"src/common/TextureBase.cpp" 
+	"src/common/InstanceBase.h" 
+	"src/common/InstanceBase.cpp" 
+	"src/common/AdapterBase.h" 
+	"src/common/AdapterBase.cpp"
+	"src/common/BindSetBase.h" 
+	"src/common/BindSetLayoutBase.h"
+	"src/common/BindSetLayoutBase.cpp"
+	"src/common/BindSetBase.cpp" 
+	"src/common/SamplerBase.h" 
+	"src/common/SamplerBase.cpp" 
+	"src/common/ShaderModuleBase.h" 
+	"src/common/ShaderModuleBase.cpp" 
+	"src/common/PipelineLayoutBase.h" 
+	"src/common/PipelineLayoutBase.cpp" 
+	"src/common/PipelineBase.h"
+	"src/common/PipelineBase.cpp"
+	"src/common/RenderPipelineBase.h"
+	"src/common/RenderPipelineBase.cpp"
+	"src/common/PerShaderStage.hpp" 
+	"src/common/Cached.hpp"
+	"src/common/PassResourceUsage.h"
+	"src/common/EncodingContext.h" 
+	"src/common/EncodingContext.cpp"
+	"src/common/RenderPassEncoder.h"
+	"src/common/RenderPassEncoder.cpp" 
+	"src/common/CommandListBase.h" 
+	"src/common/CommandListBase.cpp"
+	"src/common/PassEncoder.h" 
+	"src/common/PassEncoder.cpp" 
+	"src/common/QueueBase.h" 
+	"src/common/QueueBase.cpp" 
+	"src/common/CallbackTaskManager.h" 
+	"src/common/CallbackTaskManager.cpp" 
+	"src/common/ComputePipelineBase.h"
+	"src/common/ComputePipelineBase.cpp" 
+	"src/common/SwapChainBase.h"
+	"src/common/SwapChainBase.cpp"
+	"src/common/SurfaceBase.h"
+	"src/common/SurfaceBase.cpp"
+	"src/common/ComputePassEncoder.h" 
+	"src/common/ComputePassEncoder.cpp" 
+	"src/common/PassResourceUsage.cpp" 
+	"src/common/Commands.cpp" 
+	"src/common/PipelineCacheBase.h" 
+	"src/common/PipelineCacheBase.cpp" )
 
 set(src_vk
 	"src/vulkan/VMA.cpp"
@@ -226,10 +231,21 @@ set(src_vk
 add_library(rhi "")
 
 target_sources(rhi	PRIVATE
-				${interface_rhi}
 				${src}
 				${src_common}
 				${src_vk} )
+
+target_sources(rhi PUBLIC
+        FILE_SET
+		CXX_MODULES
+        BASE_DIRS
+        ${PROJECT_SOURCE_DIR}
+        FILES
+        "src/rhi.ixx"
+  )
+
+
+target_include_directories(rhi PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_include_directories(rhi PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> )
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "../RHIStruct.h"
+#include "RHIStruct.h"
 
 namespace rhi::impl
 {

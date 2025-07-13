@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../RHIStruct.h"
-#include "../common/Ref.hpp"
-#include "../common/RefCounted.h"
-#include "../BufferBase.h"
+#include "common/RHIStruct.h"
+#include "common/Ref.hpp"
+#include "common/RefCounted.h"
+#include "common/BufferBase.h"
 
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>

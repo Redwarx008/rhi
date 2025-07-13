@@ -1,7 +1,7 @@
 #include "CommandListVk.h"
 
-#include "../Commands.h"
-#include "../PassResourceUsage.h"
+#include "common/Commands.h"
+#include "common/PassResourceUsage.h"
 #include "BindSetVk.h"
 #include "BufferVk.h"
 #include "CommandRecordContextVk.h"

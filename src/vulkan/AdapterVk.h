@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../AdapterBase.h"
+#include "common/AdapterBase.h"
 #include <vulkan/vulkan.h>
 
 namespace rhi::impl::vulkan

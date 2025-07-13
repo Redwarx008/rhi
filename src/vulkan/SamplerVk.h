@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../SamplerBase.h"
-#include "../common/Ref.hpp"
+#include "common/SamplerBase.h"
+#include "common/Ref.hpp"
 
 #include <vulkan/vulkan.h>
 

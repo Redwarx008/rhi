@@ -1,5 +1,5 @@
 #include "AdapterVk.h"
-#include "../common/Constants.h"
+#include "common/Constants.h"
 #include "DeviceVk.h"
 
 namespace rhi::impl::vulkan

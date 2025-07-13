@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../InstanceBase.h"
-#include "../common/Ref.hpp"
+#include "common/InstanceBase.h"
+#include "common/Ref.hpp"
 
 #include <vulkan/vulkan.h>
 

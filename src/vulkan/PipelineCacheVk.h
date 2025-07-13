@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include "../PipelineCacheBase.h"
-#include "../common/Ref.hpp"
+#include "common/PipelineCacheBase.h"
+#include "common/Ref.hpp"
 
 namespace rhi::impl::vulkan
 {

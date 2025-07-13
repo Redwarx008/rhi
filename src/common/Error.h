@@ -2,7 +2,7 @@
 
 #include <absl/strings/str_format.h>
 #include <iostream>
-#include "../RHIStruct.h"
+#include "common/RHIStruct.h"
 #include "Utils.h"
 
 namespace rhi::impl

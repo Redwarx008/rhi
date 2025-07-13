@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../common/Ref.hpp"
-#include "../CommandListBase.h"
+#include "common/Ref.hpp"
+#include "common/CommandListBase.h"
 
 namespace rhi::impl
 {

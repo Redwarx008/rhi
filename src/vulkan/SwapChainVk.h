@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../SwapchainBase.h"
+#include "common/SwapchainBase.h"
 
 #include <vector>
 #include <vulkan/vulkan.h>

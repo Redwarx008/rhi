@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include "../SurfaceBase.h"
+#include "common/SurfaceBase.h"
 
 namespace rhi::impl::vulkan
 {

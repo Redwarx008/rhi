@@ -2,8 +2,8 @@
 
 #include <string>
 #include <vulkan/vulkan.h>
-#include "../RHIStruct.h"
-#include "../Subresource.h"
+#include "common/RHIStruct.h"
+#include "common/Subresource.h"
 
 namespace rhi::impl::vulkan
 {

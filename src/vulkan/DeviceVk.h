@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../DeviceBase.h"
-#include "../common/Ref.hpp"
+#include "common/DeviceBase.h"
+#include "common/Ref.hpp"
 #include "CommandRecordContextVk.h"
 #include "VulkanEXTFunctions.h"
 

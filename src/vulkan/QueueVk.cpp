@@ -1,6 +1,6 @@
 #include "QueueVk.h"
-#include "../Subresource.h"
-#include "../common/Utils.h"
+#include "common/Subresource.h"
+#include "common/Utils.h"
 #include "BufferVk.h"
 #include "CommandListVk.h"
 #include "DescriptorSetAllocator.h"

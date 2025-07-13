@@ -1,0 +1,113 @@
+module;
+
+#include <rhi/rhi_cpp.h>
+
+export module rhi;
+
+export namespace rhi
+{
+	using rhi::MapMode;
+	using rhi::BufferMapAsyncStatus;
+	using rhi::BufferUsage;
+	using rhi::TextureDimension;
+	using rhi::TextureFormat;
+	using rhi::VertexFormat;
+	using rhi::IndexFormat;
+	using rhi::TextureUsage;
+	using rhi::TextureAspect;
+	using rhi::BlendFactor;
+	using rhi::BlendOp;
+	using rhi::ColorMask;
+	using rhi::SamplerAddressMode;
+	using rhi::FilterMode;
+	using rhi::BorderColor;
+	using rhi::BindingType;
+	using rhi::ShaderStage;
+	using rhi::FillMode;
+	using rhi::CullMode;
+	using rhi::FrontFace;
+	using rhi::CompareOp;
+	using rhi::StencilOp;
+	using rhi::PrimitiveType;
+	using rhi::VertexInputRate;
+	using rhi::QueueType;
+	using rhi::LoadOp;
+	using rhi::StoreOp;
+	using rhi::LoggingSeverity;
+	using rhi::FeatureName;
+	using rhi::BackendType;
+	using rhi::AdapterType;
+	using rhi::ShareMode;
+	using rhi::PresentMode;
+	using rhi::SurfaceAcquireNextTextureStatus;
+	using rhi::BufferMapCallback;
+	using rhi::LoggingCallback;
+
+	using rhi::Adapter;
+	using rhi::BindSet;
+	using rhi::BindSetLayout;
+	using rhi::Buffer;
+	using rhi::CommandList;
+	using rhi::CommandEncoder;
+	using rhi::ComputePassEncoder;
+	using rhi::ComputePipeline;
+	using rhi::Device;
+	using rhi::Instance;
+	using rhi::PipelineLayout;
+	using rhi::PipelineCache;
+	//using rhi::QuerySet;
+	using rhi::Queue;
+	using rhi::RenderPassEncoder;
+	using rhi::RenderPipeline;
+	using rhi::Sampler;
+	using rhi::ShaderModule;
+	using rhi::Surface;
+	using rhi::Texture;
+	using rhi::TextureView;
+
+	using rhi::DeviceDesc;
+	using rhi::BindSetDesc;
+	using rhi::BindSetLayoutDesc;
+	using rhi::BufferDesc;
+	using rhi::ComputePipelineDesc;
+	using rhi::DeviceDesc;
+	using rhi::InstanceDesc;
+	using rhi::PipelineLayoutDesc;
+	using rhi::PipelineLayoutDesc2;
+	using rhi::PipelineCacheDesc;
+	using rhi::RenderPassDesc;
+	using rhi::RenderPipelineDesc;
+	using rhi::SamplerDesc;
+	using rhi::ShaderModuleDesc;
+	using rhi::SurfaceConfiguration;
+	using rhi::TextureDesc;
+	using rhi::TextureViewDesc;
+	using rhi::Origin3D;
+	using rhi::Extent3D;
+	using rhi::Color;
+	using rhi::Viewport;
+	using rhi::Rect;
+	using rhi::TextureDataLayout;
+	using rhi::TextureSlice;
+	using rhi::SpecializationConstant;
+	using rhi::BindSetLayoutEntry;
+	using rhi::BindSetEntry;
+	using rhi::PushConstantRange;
+	using rhi::ShaderState;
+	using rhi::VertexInputAttribute;
+	using rhi::ColorAttachmentBlendState;
+	using rhi::BlendState;
+	using rhi::StencilOpState;
+	using rhi::DepthStencilState;
+	using rhi::RasterState;
+	using rhi::SampleState;
+	using rhi::ColorAttachment;
+	using rhi::DepthStencilAattachment;
+	using rhi::AdapterInfo;
+	using rhi::Limits;
+	using rhi::TextureSubresourceRange;
+	using rhi::TextureSubresources;
+	using rhi::ResourceTransfer;
+
+	using rhi::CreateInstance;
+}

@@ -2,8 +2,8 @@
 
 #include <absl/container/inlined_vector.h>
 #include <array>
-#include "../common/Constants.h"
-#include "../common/Error.h"
+#include "common/Constants.h"
+#include "common/Error.h"
 #include "BindSetLayoutVk.h"
 #include "BufferVk.h"
 #include "DeviceVk.h"

@@ -2,11 +2,11 @@
 
 #include "CommandRecordContextVk.h"
 #include "VkResourceDeleter.h"
-#include "../QueueBase.h"
-#include "../common/RefCounted.h"
-#include "../common/Ref.hpp"
-#include "../common/MutexProtected.hpp"
-#include "../common/SerialQueue.hpp"
+#include "common/QueueBase.h"
+#include "common/RefCounted.h"
+#include "common/Ref.hpp"
+#include "common/MutexProtected.hpp"
+#include "common/SerialQueue.hpp"
 
 #include <vulkan/vulkan.h>
 #include <vector>
