@@ -100,8 +100,7 @@ namespace rhi::impl::vulkan
         ASSERT(surface->GetHandle());
         // Get list of supported surface formats
         uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(
-                device->GetVkPhysicalDevice(), surface->GetHandle(), &formatCount, nullptr);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device->GetVkPhysicalDevice(), surface->GetHandle(), &formatCount, nullptr);
         ASSERT(formatCount > 0);
 
         std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
@@ -164,17 +163,12 @@ namespace rhi::impl::vulkan
             // If the surface size is undefined, the size is set to
             // the size of the images requested.
             swapchainExtent.width = std::clamp(mWidth, surfCaps.minImageExtent.width, surfCaps.maxImageExtent.width);
-            swapchainExtent.height =
-                    std::clamp(mHeight, surfCaps.minImageExtent.height, surfCaps.maxImageExtent.height);
+            swapchainExtent.height = std::clamp(mHeight, surfCaps.minImageExtent.height, surfCaps.maxImageExtent.height);
         }
         else
         {
             // If the surface size is defined, the swap chain size must match
             swapchainExtent = surfCaps.currentExtent;
-            if (swapchainExtent.width == 0 && swapchainExtent.height == 0)
-            {
-                return false;
-            }
         }
         mWidth = swapchainExtent.width;
         mHeight = swapchainExtent.height;
@@ -223,8 +217,7 @@ namespace rhi::impl::vulkan
         }
 
         // Determine the number of images
-        uint32_t desiredNumberOfSwapchainImages =
-                (std::max)(surfCaps.minImageCount, MinImageCountForPresentMode(presentMode));
+        uint32_t desiredNumberOfSwapchainImages = (std::max)(surfCaps.minImageCount, MinImageCountForPresentMode(presentMode));
         if ((surfCaps.maxImageCount > 0) && (desiredNumberOfSwapchainImages > surfCaps.maxImageCount))
         {
             desiredNumberOfSwapchainImages = surfCaps.maxImageCount;
@@ -403,23 +396,24 @@ namespace rhi::impl::vulkan
         err = vkAcquireNextImageKHR(device->GetHandle(), mHandle, UINT64_MAX, semaphore, nullptr, &mImageIndex);
         switch (err)
         {
+        case VK_SUBOPTIMAL_KHR:
         case VK_SUCCESS:
             {
                 status = SurfaceAcquireNextTextureStatus::Success;
                 break;
             }
-        case VK_SUBOPTIMAL_KHR:
-            {
-                status = SurfaceAcquireNextTextureStatus::Suboptimal;
-                if (isReentrant)
-                {
-                    status = SurfaceAcquireNextTextureStatus::SurfaceLost;
-                    break;
-                }
-                // Re-initialize the VkSwapchain and try getting the texture again.
-                Initialize(this);
-                return AcquireNextTextureImpl(true);
-            }
+        // case VK_SUBOPTIMAL_KHR:
+        //     {
+        //         status = SurfaceAcquireNextTextureStatus::Suboptimal;
+        //         if (isReentrant)
+        //         {
+        //             status = SurfaceAcquireNextTextureStatus::SurfaceLost;
+        //             break;
+        //         }
+        //         // Re-initialize the VkSwapchain and try getting the texture again.
+        //         Initialize(this);
+        //         return AcquireNextTextureImpl(true);
+        //     }
         case VK_ERROR_OUT_OF_DATE_KHR:
             {
                 status = SurfaceAcquireNextTextureStatus::Outdated;
@@ -472,8 +466,7 @@ namespace rhi::impl::vulkan
 
         VkSemaphore semaphore = mTextures[mImageIndex].renderingDoneSemaphore;
 
-        VkSemaphoreSubmitInfo& signalInfo =
-                queue->GetPendingRecordingContext()->signalSemaphoreSubmitInfos.emplace_back();
+        VkSemaphoreSubmitInfo& signalInfo = queue->GetPendingRecordingContext()->signalSemaphoreSubmitInfos.emplace_back();
         signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
         signalInfo.pNext = nullptr;
         signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
@@ -496,13 +489,18 @@ namespace rhi::impl::vulkan
         presentInfo.pImageIndices = &mImageIndex;
 
         VkResult err = vkQueuePresentKHR(queue->GetHandle(), &presentInfo);
-        if (err == VK_ERROR_OUT_OF_DATE_KHR)
+        switch (err)
         {
+        case VK_SUCCESS:
+        case VK_SUBOPTIMAL_KHR:
+            break;
+        case VK_ERROR_OUT_OF_DATE_KHR:
             Initialize(this);
-        }
-        else
-        {
-            CHECK_VK_RESULT(err, "QueuePresent");
+            break;
+        default:
+            {
+                CHECK_VK_RESULT(err, "QueuePresent");
+            }
         }
 
         mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mTextures.size();
