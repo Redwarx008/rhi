@@ -33,13 +33,9 @@ namespace rhi::impl::vulkan
 
         VkSwapchainKHR mHandle = VK_NULL_HANDLE;
 
-        struct SemaphoreAndFence
-        {
-            VkSemaphore semaphore;
-            VkFence fence;
-        };
+        std::vector<VkSemaphore> mAquireImageSemaphores;
 
-        std::vector<SemaphoreAndFence> mAquireImageSemaphoreAndFences;
+        std::vector<VkFence> mFrameDoneFences;
 
         uint32_t mCurrentFrameIndex = 0;
 

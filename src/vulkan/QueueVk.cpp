@@ -147,7 +147,7 @@ namespace rhi::impl::vulkan
         mRecordContext.commandBufferAndPool = poolAndBuffer;
     }
 
-    void Queue::SubmitPendingCommands()
+    void Queue::SubmitPendingCommands(VkFence frameDoneFence)
     {
         if (!mRecordContext.needsSubmit)
         {
@@ -179,7 +179,7 @@ namespace rhi::impl::vulkan
         submitInfo.waitSemaphoreInfoCount = static_cast<uint32_t>(mRecordContext.waitSemaphoreSubmitInfos.size());
         submitInfo.pWaitSemaphoreInfos = mRecordContext.waitSemaphoreSubmitInfos.data();
 
-        err = vkQueueSubmit2(mHandle, 1, &submitInfo, nullptr);
+        err = vkQueueSubmit2(mHandle, 1, &submitInfo, frameDoneFence);
         CHECK_VK_RESULT_RETURN(err, "vkQueueSubmit2");
 
         mLastSubmittedSerial.fetch_add(1u, std::memory_order_release);
