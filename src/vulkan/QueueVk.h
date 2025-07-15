@@ -30,7 +30,7 @@ namespace rhi::impl::vulkan
         VkQueue GetHandle() const;
         VkSemaphore GetTrackingSubmitSemaphore() const;
         void EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator);
-        void SubmitPendingCommands();
+        void SubmitPendingCommands(VkFence frameDoneFence = VK_NULL_HANDLE);
         void Destroy() override;
 
     private:

@@ -171,9 +171,14 @@ namespace rhi::impl::vulkan
         {
             // If the surface size is defined, the swap chain size must match
             swapchainExtent = surfCaps.currentExtent;
+            if (swapchainExtent.width == 0 && swapchainExtent.height == 0)
+            {
+                return false;
+            }
         }
         mWidth = swapchainExtent.width;
         mHeight = swapchainExtent.height;
+
         // Select a present mode for the swapchain
 
         VkPresentModeKHR presentMode;
@@ -300,9 +305,13 @@ namespace rhi::impl::vulkan
                 queue->GetDeleter()->DeleteWhenUnused(perTexture.renderingDoneSemaphore);
             }
 
-            for (auto& [semaphore, fence] : mAquireImageSemaphoreAndFences)
+            for (auto& semaphore : mAquireImageSemaphores)
             {
                 queue->GetDeleter()->DeleteWhenUnused(semaphore);
+            }
+
+            for (auto& fence : mFrameDoneFences)
+            {
                 queue->GetDeleter()->DeleteWhenUnused(fence);
             }
 
@@ -317,7 +326,8 @@ namespace rhi::impl::vulkan
         CHECK_VK_RESULT_FALSE(err, "GetSwapchainImages");
 
         mTextures.resize(imageCount);
-        mAquireImageSemaphoreAndFences.resize(imageCount);
+        mAquireImageSemaphores.resize(imageCount);
+        mFrameDoneFences.resize(imageCount);
         for (uint32_t i = 0; i < imageCount; ++i)
         {
             TextureDesc desc{};
@@ -331,12 +341,12 @@ namespace rhi::impl::vulkan
 
             VkSemaphoreCreateInfo semaphoreCI{};
             semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-            vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &mAquireImageSemaphoreAndFences[i].semaphore);
+            vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &mAquireImageSemaphores[i]);
             vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &mTextures[i].renderingDoneSemaphore);
             VkFenceCreateInfo fenceCI{};
             fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
             fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-            vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &mAquireImageSemaphoreAndFences[i].fence);
+            vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &mFrameDoneFences[i]);
         }
 
         return true;
@@ -347,9 +357,13 @@ namespace rhi::impl::vulkan
         Device* device = checked_cast<Device>(mDevice);
         Queue* queue = checked_cast<Queue>(device->GetQueue(QueueType::Graphics).Get());
 
-        for (auto& [semaphore, fence] : mAquireImageSemaphoreAndFences)
+        for (auto& semaphore : mAquireImageSemaphores)
         {
             queue->GetDeleter()->DeleteWhenUnused(semaphore);
+        }
+
+        for (auto& fence : mFrameDoneFences)
+        {
             queue->GetDeleter()->DeleteWhenUnused(fence);
         }
 
@@ -378,15 +392,15 @@ namespace rhi::impl::vulkan
 
         SurfaceAcquireNextTextureStatus status{};
 
-        VkSemaphore semaphore = mAquireImageSemaphoreAndFences[mCurrentFrameIndex].semaphore;
-        VkFence fence = mAquireImageSemaphoreAndFences[mCurrentFrameIndex].fence;
+        VkSemaphore semaphore = mAquireImageSemaphores[mCurrentFrameIndex];
+        VkFence fence = mFrameDoneFences[mCurrentFrameIndex];
 
         VkResult err = vkWaitForFences(device->GetHandle(), 1, &fence, VK_TRUE, UINT64_MAX);
         CHECK_VK_RESULT(err, "vkWaitForFences");
         err = vkResetFences(device->GetHandle(), 1, &fence);
         CHECK_VK_RESULT(err, "vkResetFences");
 
-        err = vkAcquireNextImageKHR(device->GetHandle(), mHandle, UINT64_MAX, semaphore, fence, &mImageIndex);
+        err = vkAcquireNextImageKHR(device->GetHandle(), mHandle, UINT64_MAX, semaphore, nullptr, &mImageIndex);
         switch (err)
         {
         case VK_SUCCESS:
@@ -471,7 +485,7 @@ namespace rhi::impl::vulkan
         mTextures[mImageIndex].texture->TransitionUsageNow(
                 queue, cSwapChainImagePresentUsage, mTextures[mImageIndex].texture->GetAllSubresources());
 
-        queue->SubmitPendingCommands();
+        queue->SubmitPendingCommands(mFrameDoneFences[mCurrentFrameIndex]);
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

@@ -179,7 +179,7 @@ namespace rhi::impl::vulkan
                 const VkBool32 setting_validate_sync = VK_TRUE;
                 const VkBool32 setting_thread_safety = VK_TRUE;
                 const char* setting_debug_action[] = {"VK_DBG_LAYER_ACTION_LOG_MSG"};
-                const char* setting_report_flags[] = {"info", "warn", "perf", "error", "debug"};
+                const char* setting_report_flags[] = {"info", "warn", "perf", "error", "verbose"};
                 const VkBool32 setting_enable_message_limit = VK_TRUE;
                 const int32_t setting_duplicate_message_limit = 10;
 
@@ -215,7 +215,7 @@ namespace rhi::impl::vulkan
                                                        &setting_enable_message_limit},
                                                       {validationLayerName,
                                                        "duplicate_message_limit",
-                                                       VK_LAYER_SETTING_TYPE_INT32_EXT,
+                                                       VK_LAYER_SETTING_TYPE_UINT32_EXT,
                                                        1,
                                                        &setting_duplicate_message_limit}};
 
